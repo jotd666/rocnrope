@@ -1,0 +1,30 @@
+	.global		restore_vbr
+	.global		zero_vbr
+	.global		get_vbr
+	.global		flush_icache
+	
+get_vbr:
+	movec	vbr,d0
+	rte
+	
+zero_vbr:
+	movec	vbr,d0
+	move.l	d0,old_vbr
+	moveq	#0,d0
+	movec	D0,vbr
+	rte
+	
+restore_vbr:
+	move.l	old_vbr,d0
+	movec	D0,vbr
+	rte
+	
+old_vbr:
+	.long	0
+
+flush_icache:
+	MOVEC	CACR,D0		| gets current CACR register
+	BSET	#3,D0 		| ClearI
+	MOVEC	D0,CACR
+	rte
+	

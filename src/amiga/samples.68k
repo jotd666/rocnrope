@@ -1,0 +1,97 @@
+* 0xVER: samples.asm 1.0 (01.04.19)
+*
+* samples.asm
+* Source sample data
+* 
+*
+* Author: Jeroen Knoester
+* Version: 1.0
+* Revision: 20190401
+*
+* Assembled using VASM in Amiga-link mode.
+* TAB size = 4 spaces
+
+* Includes
+		.include "samples.inc"
+		
+
+* 8 bit samples
+		.align   4
+sample1:		.include	"zap.s"
+		.align   4
+.sample1_end:
+sample1_size		=	(.sample1_end-sample1)
+sample2:		.include	"laser.s"
+		.align   4
+.sample2_end:
+sample2_size		=	(.sample2_end-sample2)
+sample3:		.include	"power_up.s"
+		.align   4
+.sample3_end:
+sample3_size		=	(.sample3_end-sample3)
+sample4:		.include	"explosion.s"
+		.align   4
+.sample4_end:
+sample4_size		=	(.sample4_end-sample4)
+sample5:		.include	"alarm.s"
+		.align   4
+.sample5_end:
+sample5_size		=	(.sample5_end-sample5)
+sample6:		.include	"drums.s"
+		.align   4
+.sample6_end:
+sample6_size		=	(.sample6_end-sample6)
+sample7:		.include	"cat.s"
+		.align   4
+.sample7_end:
+sample7_size		=	(.sample7_end-sample7)
+sample8:		.include	"dog.s"
+		.align   4
+.sample8_end:
+sample8_size		=	(.sample8_end-sample8)
+
+* Total sample size
+sample_total_size	= .sample8_end-sample1
+
+		* Pointers to premixed samples
+sample1_mix:		.long	sample1
+sample2_mix:		.long	sample2
+sample3_mix:		.long	sample3
+sample4_mix:		.long	sample4
+sample5_mix:		.long	sample5
+sample6_mix:		.long	sample6
+sample7_mix:		.long	sample7
+sample8_mix:		.long	sample8
+
+		* Sample info lists pointers & sizes
+sample_info:
+			.short	sample_count			| Sample count
+si_strt:		.long	sample1,sample1_mix		| Pointer to sample & premix buffer
+			.long	sample1_size			| Size in bytes
+			.long	sample1_size/2			| Loop offset in bytes
+si_end:		.long	sample2,sample2_mix		| etc.
+			.long	sample2_size
+			.long	sample2_size/2
+			.long	sample3,sample3_mix
+			.long	sample3_size
+			.long	sample3_size/2
+			.long	sample4,sample4_mix
+			.long	sample4_size
+			.long	sample4_size/2
+			.long	sample5,sample5_mix
+			.long	sample5_size
+			.long	sample5_size/2
+			.long	sample6,sample6_mix
+			.long	sample6_size
+			.long	sample6_size/2
+			.long	sample7,sample7_mix
+			.long	sample7_size
+			.long	sample7_size/2
+			.long	sample8,sample8_mix
+			.long	sample8_size
+			.long	sample8_size/2
+si_SIZEOF	=		si_end-si_strt
+si_END		=		si_SIZEOF*sample_count
+si_STRT_o	=		si_strt-sample_info
+		
+* End of File
