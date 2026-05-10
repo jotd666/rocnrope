@@ -77,7 +77,7 @@ color_ram_4800 = $4800
 605B: 8E 79 28       LDX    #$5100
 605E: 9F 92          STX    $1A
 6060: 8E 42 F6       LDX    #jump_table_6074
-6063: AD B4          JSR    [A,X]		; [indirect_jump]
+6063: AD B4          JSR    [A,X]		; [indirect_jump] [nb_entries=16]
 6065: 4F             CLRA
 6066: B7 02 AA       STA    $8082
 6069: 9E 92          LDX    $1A
@@ -419,45 +419,8 @@ color_ram_4800 = $4800
 639E: C6 89          LDB    #$01
 63A0: F7 A2 82       STB    watchdog_8000
 63A3: 20 D9          BRA    $63A0
-63A5: 00 93          NEG    $11
-63A7: 9F 38          STX    $10
-63A9: 38 98          XANDCC #$10
-63AB: 98 37          EORA   $1F
-63AD: 0D AC          TST    $24
-63AF: 97 30          STA    $12
-63B1: 38 92          XANDCC #$10
-63B3: 83 32 32       SUBD   #$1010
-63B6: 9D A7          JSR    $25
-63B8: 0C 37          INC    $1F
-63BA: 9A 92          ORA    $1A
-63BC: 38 2A          XANDCC #$02
-63BE: 98 98          EORA   $10
-63C0: 3D             MUL
-63C1: 07 A6          ASR    $24
-63C3: A4 00          ANDA   $2,Y
-63C5: 33 9F          LEAU   -$3,X
-63C7: 92 38          SBCA   $10
-63C9: 38 97          XANDCC #$1F
-63CB: AD 0C          JSR    $4,Y
-63CD: 0F AA          CLR    $22
-63CF: 99 3F          ADCA   $1D
-63D1: 32 83          LEAS   $1,X
-63D3: 92 3D          SBCA   $1F
-63D5: 07 A6          ASR    $24
-63D7: A5 0A          BITA   $2,Y
-63D9: 39             RTS
-63DA: 95 98          BITA   $10
-63DC: 2A 38          BPL    $63EE
-63DE: 97 AD          STA    $25
-63E0: 06 69          ROR    $4B
-63E2: C8 E0          EORB   #$62
-63E4: 26 23          BNE    $63E7
-63E6: 8D 8E          BSR    $63F4
-63E8: 2C 50          BGE    $6462
-63EA: 80 89          SUBA   #$01
-63EC: 23 5D          BLS    $6463
-63EE: 9B 97          ADDA   $1F
-63F0: 21 43          BRN    $6453
+
+
 63F2: 8E CA 22       LDX    #color_ram_4800
 63F5: CC 8C 83       LDD    #$0E01
 63F8: A7 A8          STA    ,X+
@@ -499,7 +462,7 @@ color_ram_4800 = $4800
 644B: A7 A8          STA    ,X+
 644D: 0A F9          DEC    $71
 644F: 26 D4          BNE    $6447
-6451: 3C 6D          CWAI   #$EF
+6451: 3C 6D          CWAI   #$EF		; sync with irq to clear "H" from screen
 6453: 0A 52          DEC    $70
 6455: 26 68          BNE    $6441
 6457: C6 28          LDB    #$00
@@ -541,7 +504,7 @@ color_ram_4800 = $4800
 64AF: 30 AA 02       LEAX   $20,X
 64B2: 20 6F          BRA    $64A1
 64B4: 39             RTS
-64B5: 13             SYNC
+
 
 64BE: 58             ASLB
 64BF: 25 06          BCS    $64E5
@@ -899,7 +862,7 @@ color_ram_4800 = $4800
 69F4: 96 55          LDA    $77
 69F6: 81 9E          CMPA   #$1C
 69F8: 10 26 77 3A    LBNE   $69AE
-69FC: 3C C7          CWAI   #$EF
+69FC: 3C C7          CWAI   #$EF		; sync with irq to make background appear
 69FE: 0F FF          CLR    $77
 6A00: 0C 54          INC    $76
 6A02: 96 F4          LDA    $76
@@ -1045,18 +1008,7 @@ color_ram_4800 = $4800
 6E14: 0A 52          DEC    $70
 6E16: 26 4F          BNE    $6DE5
 6E18: 39             RTS
-6E19: 79 E8 C5       ROL    $604D
-6E1C: 85 29          BITA   #$01
-6E1E: D9 E0          ADCB   $68
-6E20: 6F 89          CLR    D,Y
-6E22: 80 D3          SUBA   #$51
-6E24: 52             XNCB
-6E25: 6F 2B 81 79    CLR    $0351,Y
-6E29: 50             NEGB
-6E2A: C5 2F          BITB   #$A7
-6E2C: 2C 79          BGE    $6E7F
-6E2E: 08 C5          ASL    $4D
-6E30: 87 2A          XSTA   #$08
+
 6E32: CE D2 BB       LDU    #$5099
 6E35: 8E CC 3F       LDX    #$4EBD
 6E38: 10 BE CC E7    LDY    $446F
@@ -1067,6 +1019,7 @@ color_ram_4800 = $4800
 6E47: BE 6C 47       LDX    $446F
 6E4A: C6 8B          LDB    #$03
 6E4C: 16 D2 D8       LBRA   $689F
+
 6E4F: 0D 74          TST    $56
 6E51: 26 99          BNE    $6E6E
 6E53: C6 27          LDB    #$05
@@ -1299,7 +1252,7 @@ color_ram_4800 = $4800
 70B4: 96 20          LDA    $02
 70B6: 48             ASLA
 70B7: 8E 58 EA       LDX    #jump_table_70c2
-70BA: AD 1E          JSR    [A,X]        ; [indirect_jump]
+70BA: AD 1E          JSR    [A,X]        ; [indirect_jump] [nb_entries=5]
 70BC: 86 29          LDA    #$01
 70BE: B7 08 A5       STA    mainlatch_8087
 70C1: 3B             RTI
@@ -1308,14 +1261,7 @@ color_ram_4800 = $4800
 70C9: 4F             CLRA
 70CA: FD F0 34       STD    $781C
 70CD: 20 86          BRA    $70DD
-70CF: C8 1F          EORB   #$3D
-70D1: A9 96          ADCA   -$C,X
-70D3: C1 D6          CMPB   #$F4
-70D5: 62 DD          XNC    -$1,U
-70D7: 82 DC          SBCA   #$F4
-70D9: 69 FD          ROL    -$B,S
-70DB: CC 28 96       LDD    #$00BE
-70DE: CF D6 66       XSTU   #$5E44
+
 70E1: DD 80          STD    $02
 70E3: DC 67          LDD    $45
 70E5: FD C6 80       STD    $4402
@@ -1603,7 +1549,7 @@ color_ram_4800 = $4800
 7333: 96 27          LDA    $05
 7335: 48             ASLA
 7336: 8E F1 62       LDX    #jump_table_734a
-7339: AD 1E          JSR    [A,X]        ; [indirect_jump]
+7339: AD 1E          JSR    [A,X]        ; [indirect_jump] [nb_entries=5]
 733B: 0D 0B          TST    $23
 733D: 26 8C          BNE    $7343
 733F: 0D 73          TST    $51
@@ -1612,10 +1558,7 @@ color_ram_4800 = $4800
 7345: 0F 8A          CLR    $08
 7347: 0C 2A          INC    $02
 7349: 39             RTS
-734A: FB DC 5B       ADDB   $5473
-734D: 77 FB 6E       ASR    $73E6
-7350: 56             RORB
-7351: 71 F6 D8       NEG    $745A
+
 7354: 4F             CLRA
 7355: 5F             CLRB
 7356: DD C2          STD    $40
@@ -1626,15 +1569,15 @@ color_ram_4800 = $4800
 735F: 96 2A          LDA    $08
 7361: 48             ASLA
 7362: 10 8E 51 4A    LDY    #jump_table_7368
-7366: 6E 34          JMP    [A,Y]	; [indirect_jump]
+7366: 6E 34          JMP    [A,Y]	; [indirect_jump] [nb_entries=2]
 
-736A: FB F1 CC       ADDB   $79E4
-736D: 28 98          BVC    $737F
+736C: CC 28 98       LDD    #$0010
 736F: BD 42 2A       JSR    $6008
 7372: 86 83          LDA    #$01
 7374: 97 94          STA    $B6
 7376: 0C 8A          INC    $08
 7378: 39             RTS
+
 7379: 0D 3E          TST    $B6
 737B: 26 40          BNE    $73E5
 737D: CC 8B 89       LDD    #$0301
@@ -1677,7 +1620,7 @@ color_ram_4800 = $4800
 73E6: 96 8A          LDA    $08
 73E8: 48             ASLA
 73E9: 10 8E FB C7    LDY    #jump_table_73ef
-73ED: 6E 3E          JMP    [A,Y]        ; [indirect_jump]
+73ED: 6E 3E          JMP    [A,Y]        ; [indirect_jump] [nb_entries=2]
 73EF: FB D1 56       ADDB   $F374
 73F2: 86 0A          LDA    #$88
 73F4: 26 26          BNE    $73FA
@@ -1730,7 +1673,7 @@ color_ram_4800 = $4800
 7468: 96 2D          LDA    $05
 746A: 48             ASLA
 746B: 8E 5C E9       LDX    #jump_table_74c1
-746E: AD 1E          JSR    [A,X]        ; [indirect_jump]
+746E: AD 1E          JSR    [A,X]        ; [indirect_jump] [nb_entries=4]
 7470: 96 13          LDA    $31
 7472: 85 8A          BITA   #$08
 7474: 26 19          BNE    $74B1
@@ -1775,13 +1718,8 @@ color_ram_4800 = $4800
 74C9: 96 80          LDA    $08
 74CB: 48             ASLA
 74CC: 10 8E FC 5A    LDY    #jump_table_74d2
-74D0: 6E 94          JMP    [A,Y]        ; [indirect_jump]
-74D2: F6 54 57       LDB    $D675
-74D5: 27 0D          BEQ    $7466
-74D7: 34 26          PSHS   DP,D
-74D9: 02 86          XNC    $0E
-74DB: 89 B7          ADCA   #$9F
-74DD: A8 08          EORA   ,X+
+74D0: 6E 94          JMP    [A,Y]        ; [indirect_jump] [nb_entries=2]
+
 74DF: 8E 62 62       LDX    #$4040
 74E2: CC 82 22       LDD    #$0000
 74E5: ED 03          STD    ,X++
@@ -1842,7 +1780,7 @@ color_ram_4800 = $4800
 7567: 96 2D          LDA    $05
 7569: 48             ASLA
 756A: 10 8E 5D 58    LDY    #jump_table_7570
-756E: 6E 3E          JMP    [A,Y]        ; [indirect_jump]
+756E: 6E 3E          JMP    [A,Y]        ; [indirect_jump] [nb_entries=4]
 
 7578: 96 2D          LDA    $05
 757A: 48             ASLA
@@ -1854,20 +1792,20 @@ color_ram_4800 = $4800
 
 759D: 20 48          BRA    $755F
 759F: 10 8E 57 27    LDY    #jump_table_75A5
-75A3: 6E 94          JMP    [A,Y]        ; [indirect_jump]
+75A3: 6E 94          JMP    [A,Y]        ; [indirect_jump] [nb_entries=5]
 
 75B2: 10 8E 57 9A    LDY    #jump_table_75b8
-75B6: 6E 34          JMP    [A,Y]        ; [indirect_jump]
+75B6: 6E 34          JMP    [A,Y]        ; [indirect_jump] [nb_entries=3]
 
 75BE: 96 83          LDA    $0B
 75C0: 48             ASLA
 75C1: 10 8E F7 E5    LDY    #jump_table_75C7
-75C5: 6E 34          JMP    [A,Y]        ; [indirect_jump]
+75C5: 6E 34          JMP    [A,Y]        ; [indirect_jump] [nb_entries=3]
 
 75CD: 96 86          LDA    $0E
 75CF: 48             ASLA
 75D0: 10 8E F7 54    LDY    #jump_table_75d6
-75D4: 6E 94          JMP    [A,Y]        ; [indirect_jump]
+75D4: 6E 94          JMP    [A,Y]        ; [indirect_jump] [nb_entries=3]
 
 75E3: 82 32          SBCA   #$10
 75E5: BD E2 8A       JSR    $6008
@@ -1896,6 +1834,7 @@ color_ram_4800 = $4800
 7616: 7E E2 20       JMP    $6008
 7619: 0C 83          INC    $0B
 761B: 39             RTS
+
 761C: CC 2A 89       LDD    #$0201
 761F: BD 42 2A       JSR    $6008
 7622: 0F A2          CLR    $20
@@ -1951,6 +1890,7 @@ color_ram_4800 = $4800
 768F: 7E 42 2A       JMP    $6008
 7692: 0C 89          INC    $0B
 7694: 39             RTS
+
 7695: CC 80 83       LDD    #$0201
 7698: BD 48 80       JSR    $6008
 769B: 86 29          LDA    #$01
@@ -1966,11 +1906,10 @@ color_ram_4800 = $4800
 76B0: 96 29          LDA    $0B
 76B2: 48             ASLA
 76B3: 10 8E 54 3B    LDY    #jump_table_76B9
-76B7: 6E 9E          JMP    [A,Y]			; [indirect_jump]
-76B9: 5E             XCLRB
-76BA: 35 FE          PULS   D,X,Y,U
-76BC: E6 0A          LDB    $2,Y
-76BE: 8F 26 2E       XSTX   #$AE0C
+76B7: 6E 9E          JMP    [A,Y]			; [indirect_jump] [nb_entries=2]
+
+76BD: 0A 8F          DEC    $07
+76BF: 26 2E          BNE    $76CD
 76C1: CC 8A 82       LDD    #$0800
 76C4: BD 42 8A       JSR    $6008
 76C7: 86 29          LDA    #$01
@@ -2093,12 +2032,8 @@ color_ram_4800 = $4800
 77C8: 96 20          LDA    $08
 77CA: 48             ASLA
 77CB: 10 8E 5F 59    LDY    #jump_table_77d1
-77CF: 6E 94          JMP    [A,Y]        ; [indirect_jump]
-77D1: 55             LSRB
-77D2: 68 FA          ASL    -$8,S
-77D4: A6 5B          LDA    -$7,S
-77D6: DA F8          ORB    $7A
-77D8: 48             ASLA
+77CF: 6E 94          JMP    [A,Y]        ; [indirect_jump] [nb_entries=4]
+
 77D9: 96 80          LDA    $08
 77DB: 48             ASLA
 77DC: 10 8E FF 6A    LDY    #jump_table_77e2
@@ -2233,6 +2168,7 @@ color_ram_4800 = $4800
 790A: 86 89          LDA    #$01
 790C: 97 2F          STA    $07
 790E: 39             RTS
+
 790F: CC 22 22       LDD    #$0000
 7912: BD E2 2A       JSR    $6008
 7915: 86 83          LDA    #$01
@@ -2266,7 +2202,7 @@ color_ram_4800 = $4800
 7958: 96 23          LDA    $0B
 795A: 48             ASLA
 795B: 10 8E 51 E9    LDY    #jump_table_7961
-795F: 6E 94          JMP    [A,Y]        ; [indirect_jump]
+795F: 6E 94          JMP    [A,Y]        ; [indirect_jump] [nb_entries=5]
 
 796A: 8E 0D 9E       LDX    #$85B6
 796D: 26 8A          BNE    $7971
@@ -2436,8 +2372,7 @@ color_ram_4800 = $4800
 7AC4: 29 48          BVS    $7B30
 7AC6: 10 8E 52 E4    LDY    #jump_table_7acc
 7ACA: 6E 3E          JMP    [A,Y]        ; [indirect_jump]
-7ACC: 52             XNCB
-7ACD: F8 F2 5B       EORB   $7AD3
+
 7AD0: 0C 29          INC    $0B
 7AD2: 39             RTS
 7AD3: 86 20          LDA    #$02
@@ -2765,14 +2700,7 @@ color_ram_4800 = $4800
 7DAD: A7 85          STA    $D,X
 7DAF: 6C 27          INC    $5,X
 7DB1: 7E F9 9C       JMP    $7B1E
-7DB4: 33 30          LEAU   -$E,X
-7DB6: 91 96          CMPA   $14
-7DB8: 3C 3C          CWAI   #$14
-7DBA: 9C 9C          CMPX   $14
-7DBC: 3C 86          CWAI   #$AE
-7DBE: 9C A7          CMPX   $2F
-7DC0: 2F 1F          BLE    $7DFF
-7DC2: A2 83          SBCA   $1,X
+
 7DC4: 75 22 54       LSR    >$00D6
 7DC7: 54             LSRB
 7DC8: E7 A0 95       STB    $1D,X
@@ -3632,12 +3560,7 @@ color_ram_4800 = $4800
 8529: 48             ASLA
 852A: 6E 3E          JMP    [A,Y]        ; [indirect_jump]
 852C: 39             RTS
-852D: AD BB          JSR    -$D,Y
-852F: 0D 0E          TST    $2C
-8531: A7 6E 8E       STA    $8540,PCR
-8534: 76 22 A6       ROR    >$0024
-8537: 86 80          LDA    #$A8
-8539: 3E             XRES
+
 853A: 81 4E          CMPA   #$C6
 853C: 22 04          BHI    $856A
 853E: A6 8D          LDA    $5,X
@@ -3741,32 +3664,7 @@ color_ram_4800 = $4800
 861C: A7 A0 98       STA    $10,X
 861F: 6C AA 3D       INC    $1F,X
 8622: 39             RTS
-8623: 82 23          SBCA   #$01
-8625: 20 80          BRA    $8629
-8627: 82 D7          SBCA   #$FF
-8629: D6 77          LDB    $FF
-862B: 88 28          EORA   #$00
-862D: 29 8A          BVS    $8631
-862F: 8B 22          ADDA   #$00
-8631: DD 7C          STD    $FE
-8633: 7D 22 32       TST    >$0010
-8636: 93 90          SUBD   $12
-8638: 3B             RTI
-8639: 3C 9D          CWAI   #$15
-863B: 9E 3F          LDX    $17
-863D: 30 91          LEAX   -$7,X
-863F: 92 39          SBCA   $1B
-8641: 3E             XRES
-8642: 9F 9C          STX    $1E
-8644: 3D             MUL
-8645: 02 A2          XNC    $20
-8647: A2 08          SBCA   $0,Y
-8649: 09 A9          ROL    $21
-864B: A9 09          ADCA   $1,Y
-864D: 0A AA          DEC    $22
-864F: AA 00          ORA    $2,Y
-8651: 01 A1          NEG    $23
-8653: A1 01          CMPA   $3,Y
+
 8655: 6D 0A 92       TST    $10,X
 8658: 27 3A          BEQ    $866C
 865A: 6A 00 38       DEC    $10,X
@@ -3822,18 +3720,7 @@ color_ram_4800 = $4800
 871C: A7 26          STA    $E,X
 871E: 7E E8 35       JMP    $6017
 
-8752: 82 82          SBCA   #$00
-8754: 2B E2          BMI    $8716
-8756: 7D 7D AF       TST    $FF87
-8759: 7C 81 C8       INC    $0940
-875C: D7 D7          STB    $FF
-875E: 0F D2          CLR    $5A
-8760: 2B 22          BMI    $8762
-8762: 7D 7D A5       TST    $FF87
-8765: 42             XNCA
-8766: 8B 02          ADDA   #$80
-8768: D7 D7          STB    $FF
-876A: 0F EE          CLR    $66
+
 876C: 10 8E 0F F3    LDY    #$877B
 8770: 96 62          LDA    $40
 8772: 84 8D          ANDA   #$0F
@@ -3908,11 +3795,9 @@ color_ram_4800 = $4800
 880C: CC E6 00       LDD    #$CE88
 880F: 97 58          STA    $7A
 8811: 10 8E 0A 35    LDY    #jump_table_8817
-8815: 6E 37          JMP    [B,Y]        ; [indirect_jump]
-8817: 0A 37          DEC    $1F
-8819: A2 FD          SBCA   -$B,S
-881B: 02 A9          XNC    $81
-881D: A2 05 EC 26    SBCA   $EC25,PCR
+8815: 6E 37          JMP    [B,Y]        ; [indirect_jump] [nb_entries=4]
+
+881F: EC 26          LDD    $4,X
 8821: D0 1F          SUBB   $9D
 8823: CB 20          ADDB   #$02
 8825: C1 86          CMPB   #$04
@@ -4928,12 +4813,7 @@ color_ram_4800 = $4800
 90F5: 48             ASLA
 90F6: 10 8E B8 D4    LDY    #jump_table_90fc
 90FA: 6E 3E          JMP    [A,Y]        ; [indirect_jump]
-90FC: B9 2E 19       ADCA   $0691
-90FF: A8 B3          EORA   [,X++]
-9101: 1B             NOP
-9102: 13             SYNC
-9103: A2 B3          SBCA   [,X++]
-9105: 56             RORB
+
 9106: A6 80          LDA    $2,X
 9108: 48             ASLA
 9109: 10 8E 46 CE    LDY    #$CEE6
@@ -5000,16 +4880,8 @@ color_ram_4800 = $4800
 9196: 10 8E B9 B4    LDY    #jump_table_919c
 919A: 6E 3E          JMP    [A,Y]        ; [indirect_jump]
 
-91A6: 11 92 BB       SBCA   $93
-91A9: BF 6D 00       STX    $E588
-91AC: 31 26          LEAY   $E,X
-91AE: 8D BD          BSR    $91E5
-91B0: AD 8A 20       JSR    -$5E,Y
-91B3: 8F E6 AA       XSTX   #$C488
-91B6: 9C 58          CMPX   $DA
-91B8: 58             ASLB
-91B9: 58             ASLB
-91BA: 58             ASLB
+
+
 91BB: 10 8E 7B 88    LDY    #$5300
 91BF: 31 87          LEAY   B,Y
 91C1: E6 A7          LDB    $5,Y
@@ -5263,10 +5135,7 @@ color_ram_4800 = $4800
 93E7: 48             ASLA
 93E8: 10 8E 1B 66    LDY    #jump_table_93ee
 93EC: 6E 9E          JMP    [A,Y]        ; [indirect_jump]
-93EE: 1B             NOP
-93EF: 7C B6 04       INC    $9426
-93F2: 16 B3 34       LBRA   $C50B
-93F5: 32 10          LEAS   Illegal Postbyte
+
 93F7: 8E 79 E8       LDX    #$51C0
 93FA: BD 07 95       JSR    $8FBD
 93FD: 35 98          PULS   X
@@ -6189,6 +6058,7 @@ A68E: A1 20 C6       CMPA   -$1C,Y
 A691: 25 AA          BCS    $A6BB
 A693: ED 8A C6       STD    -$1C,Y
 A696: 39             RTS
+
 A697: 6D 09          TST    $1,Y
 A699: 26 99          BNE    $A6AC
 A69B: A6 0C          LDA    $4,Y
@@ -6206,19 +6076,7 @@ A6B3: A1 8A C6       CMPA   -$1C,Y
 A6B6: 22 81          BHI    $A6BB
 A6B8: ED 80 6C       STD    -$1C,Y
 A6BB: 39             RTS
-A6BC: 8E E4 88       LDX    #$CC00
-A6BF: 88 84          EORA   #$A6
-A6C1: F0 82 82       SUBB   >$0000
-A6C4: 84 FA          ANDA   #$D8
-A6C6: 82 82          SBCA   #$00
-A6C8: 8E F6 88       LDX    #$DE00
-A6CB: 88 38          EORA   #$10
-A6CD: E8 8B          EORB   $3,X
-A6CF: 77 84 EE       ASR    $A6CC
-A6D2: 92 C2          SBCA   $40
-A6D4: 21 DD          BRN    $A6D5
-A6D6: 24 50          BCC    $A6AA
-A6D8: 38 A8          XANDCC #$80
+
 A6DA: 8B 77          ADDA   #$FF
 A6DC: 8E F0 98       LDX    #$D810
 A6DF: 88 21          EORA   #$03
@@ -6332,17 +6190,14 @@ A7C4: 26 2B          BNE    $A7CF
 A7C6: E6 81          LDB    $3,X
 A7C8: 58             ASLB
 A7C9: 10 8E 2F F8    LDY    #jump_table_a7d0
-A7CD: 6E 3D          JMP    [B,Y]        ; [indirect_jump]
+A7CD: 6E 3D          JMP    [B,Y]        ; [indirect_jump] [nb_entries=5]
 A7CF: 39             RTS
-A7D0: 85 F8          BITA   #$DA
-A7D2: 2A E1          BPL    $A837
-A7D4: 85 ED          BITA   #$CF
-A7D6: 25 4D          BCS    $A7A7
-A7D8: 8F E7 A6       XSTX   #$CF2E
-A7DB: 8D 8B          BSR    $A780
-A7DD: 20 97          BRA    $A7FE
-A7DF: E8 96          EORB   [,Y]
-A7E1: BD 8B 8A       JSR    $0908
+
+A7DA: A6 8D          LDA    $5,X
+A7DC: 8B 20          ADDA   #$08
+A7DE: 97 E8          STA    $60
+A7E0: 96 BD          LDA    $9F
+A7E2: 8B 8A          ADDA   #$08
 A7E4: 90 42          SUBA   $60
 A7E6: 8B 86          ADDA   #$04
 A7E8: 81 20          CMPA   #$08
@@ -6919,8 +6774,7 @@ ACBA: 84 78          ANDA   #$F0
 ACBC: 8A 27          ORA    #$0F
 ACBE: A7 A6          STA    $E,Y
 ACC0: 39             RTS
-ACC1: 62 C3          XNC    $1,U
-ACC3: C0 61          SUBB   #$43
+
 ACC5: A6 06          LDA    ,X
 ACC7: 81 2A          CMPA   #$02
 ACC9: 26 A4          BNE    $ACF7
@@ -7421,57 +7275,8 @@ B13A: 39             RTS
 B13B: C2 99          SBCB   #$B1
 B13D: 4A             DECA
 B13E: 39             RTS
-B13F: F2 93 B0       SBCB   $B192
-B142: 33 10          LEAU   Illegal Postbyte
-B144: 93 40          SUBD   $62
-B146: 33 F8          LEAU   -$6,S
-B148: 99 BA          ADCA   $92
-B14A: 89 08          ADCA   #$80
-B14C: F8 29 18       EORB   $0190
-B14F: 58             ASLB
-B150: 23 5E          BLS    $B1CE
-B152: 52             XNCB
-B153: 83 BA F2       SUBD   #$98D0
-B156: 83 F2 F8       SUBD   #$70D0
-B159: 29 FC          BVS    $B1CF
-B15B: 58             ASLB
-B15C: 29 44          BVS    $B1CA
-B15E: 58             ASLB
-B15F: 89 AA          ADCA   #$88
-B161: F2 83 C2       SBCB   $0140
-B164: F2 23 D7       SBCB   $0155
-B167: 52             XNCB
-B168: 29 E8          BVS    $B12A
-B16A: 58             ASLB
-B16B: 89 6C          ADCA   #$44
-B16D: F8 89 F8       EORB   $0170
-B170: F2 23 02       SBCB   $0180
-B173: 52             XNCB
-B174: 23 82          BLS    $B116
-B176: 52             XNCB
-B177: 83 98 F8       SUBD   #$B0D0
-B17A: 89 CE          ADCA   #$46
-B17C: F8 29 D0       EORB   $0158
-B17F: 58             ASLB
-B180: 23 84          BLS    $B128
-B182: 52             XNCB
-B183: 83 9A F2       SUBD   #$B8D0
-B186: 83 F2 F8       SUBD   #$70D0
-B189: 29 08          BVS    $B10B
-B18B: 58             ASLB
-B18C: 29 48          BVS    $B1EE
-B18E: 58             ASLB
-B18F: 89 1A          ADCA   #$38
-B191: F2 83 D7       SBCB   $0155
-B194: F2 23 0C       SBCB   $018E
-B197: 52             XNCB
-B198: 29 8D          BVS    $B13F
-B19A: 58             ASLB
-B19B: 89 58          ADCA   #$70
-B19D: F8 89 E8       EORB   $0160
-B1A0: F2 22 33       SBCB   >$00B1
-B1A3: C8 CC          EORB   #$EE
-B1A5: 20 C2          BRA    $B1E7
+
+
 B1A7: A7 0B          STA    $3,Y
 B1A9: E7 20 98       STB    $10,Y
 B1AC: 8D 4D          BSR    $B213
@@ -7529,144 +7334,7 @@ B218: 4F             CLRA
 B219: D6 C9          LDB    $41
 B21B: E6 E3          LDB    D,U
 B21D: 39             RTS
-B21E: 77 88 23       ASR    >$0001
-B221: 22 7D          BHI    $B222
-B223: 82 3E          SBCA   #$1C
-B225: 22 82          BHI    $B227
-B227: 7D 28 2A       TST    >$0002
-B22A: 88 77          EORA   #$FF
-B22C: 28 35          BVC    $B24B
-B22E: 88 8A          EORA   #$02
-B230: DD 22          STD    $00
-B232: 81 82          CMPA   #$00
-B234: DD 22          STD    $00
-B236: 9C 82          CMPX   $00
-B238: 2A D7          BPL    $B239
-B23A: 88 8C          EORA   #$04
-B23C: 28 D7          BVC    $B23D
-B23E: 88 97          EORA   #$1F
-B240: 22 22          BHI    $B242
-B242: 7D 82 27       TST    >$0005
-B245: 22 7D          BHI    $B246
-B247: 82 08          SBCA   #$20
-B249: 28 8A          BVC    $B24D
-B24B: 77 28 2E       ASR    >$0006
-B24E: 88 77          EORA   #$FF
-B250: 22 03          BHI    $B273
-B252: 82 82          SBCA   #$00
-B254: DD 22          STD    $00
-B256: 85 82          BITA   #$00
-B258: D7 28          STB    $00
-B25A: AA 88          ORA    $0,X
-B25C: 28 D7          BVC    $B25D
-B25E: 88 80          EORA   #$08
-B260: 22 DD          BHI    $B261
-B262: 82 A1          SBCA   #$23
-B264: 22 22          BHI    $B266
-B266: 7D 82 21       TST    >$0009
-B269: 28 77          BVC    $B26A
-B26B: 88 0C          EORA   #$24
-B26D: 28 8A          BVC    $B271
-B26F: 77 22 23       ASR    >$0001
-B272: 82 7D          SBCA   #$FF
-B274: 22 07          BHI    $B29B
-B276: 82 80          SBCA   #$02
-B278: D7 28          STB    $00
-B27A: 89 88          ADCA   #$00
-B27C: D7 28          STB    $00
-B27E: AE 88          LDX    $0,X
-B280: 22 DD          BHI    $B281
-B282: 82 83          SBCA   #$01
-B284: 22 DD          BHI    $B285
-B286: 82 A5          SBCA   #$27
-B288: 28 28          BVC    $B28A
-B28A: 77 88 2C       ASR    >$0004
-B28D: 28 77          BVC    $B28E
-B28F: 88 0A          EORA   #$28
-B291: 22 80          BHI    $B295
-B293: 7D 22 32       TST    >$0010
-B296: 82 7D          SBCA   #$FF
-B298: 28 0A          BVC    $B2BC
-B29A: 88 8A          EORA   #$02
-B29C: D7 28          STB    $00
-B29E: 9C 88          CMPX   $00
-B2A0: DD 22          STD    $00
-B2A2: A6 82          LDA    $0,X
-B2A4: 20 DD          BRA    $B2A5
-B2A6: 82 9A          SBCA   #$18
-B2A8: 28 D7          BVC    $B2A9
-B2AA: 88 A8          EORA   #$20
-B2AC: 28 28          BVC    $B2AE
-B2AE: 77 88 2A       ASR    >$0008
-B2B1: 22 7D          BHI    $B2B2
-B2B3: 82 2A          SBCA   #$08
-B2B5: 22 82          BHI    $B2B7
-B2B7: 7D 28 20       TST    >$0008
-B2BA: 88 77          EORA   #$FF
-B2BC: 28 21          BVC    $B2C7
-B2BE: 88 8A          EORA   #$02
-B2C0: DD 22          STD    $00
-B2C2: 8B 82          ADDA   #$00
-B2C4: DD 22          STD    $00
-B2C6: 88 82          EORA   #$00
-B2C8: 2A D7          BPL    $B2C9
-B2CA: 88 81          EORA   #$09
-B2CC: 28 D7          BVC    $B2CD
-B2CE: 88 82          EORA   #$0A
-B2D0: 22 22          BHI    $B2D2
-B2D2: 7D 82 2A       TST    >$0008
-B2D5: 22 7D          BHI    $B2D6
-B2D7: 82 24          SBCA   #$0C
-B2D9: 28 8A          BVC    $B2DD
-B2DB: 77 28 21       ASR    >$0009
-B2DE: 88 77          EORA   #$FF
-B2E0: 22 2E          BHI    $B2EE
-B2E2: 02 82          XNC    $00
-B2E4: DD 22          STD    $00
-B2E6: 88 82          EORA   #$00
-B2E8: D7 28          STB    $00
-B2EA: 84 40          ANDA   #$C8
-B2EC: 28 D7          BVC    $B2ED
-B2EE: 88 83          EORA   #$0B
-B2F0: 22 DD          BHI    $B2F1
-B2F2: 82 88          SBCA   #$0A
-B2F4: 22 22          BHI    $B2F6
-B2F6: 7D 82 24       TST    >$000C
-B2F9: 28 77          BVC    $B2FA
-B2FB: 88 24          EORA   #$0C
-B2FD: A8 8A          EORA   $2,X
-B2FF: 77 22 2D       ASR    >$000F
-B302: 82 7D          SBCA   #$FF
-B304: 22 28          BHI    $B310
-B306: E2 80          SBCB   $2,X
-B308: D7 28          STB    $00
-B30A: 98 88          EORA   $00
-B30C: D7 28          STB    $00
-B30E: 84 C8          ANDA   #$40
-B310: 22 DD          BHI    $B311
-B312: 82 90          SBCA   #$12
-B314: 22 DD          BHI    $B315
-B316: 82 8E          SBCA   #$0C
-B318: 08 28          ASL    $00
-B31A: 77 88 39       ASR    >$0011
-B31D: 28 77          BVC    $B31E
-B31F: 88 2E          EORA   #$0C
-B321: A2 80          SBCA   $2,X
-B323: 7D 22 31       TST    >$0013
-B326: 82 7D          SBCA   #$FF
-B328: 28 25          BVC    $B337
-B32A: 08 8A          ASL    $02
-B32C: D7 28          STB    $00
-B32E: 82 88          SBCA   #$00
-B330: DD 22          STD    $00
-B332: 8E B6 20       LDX    #$3402
-B335: DD 82          STD    $00
-B337: 88 28          EORA   #$00
-B339: D7 88          STB    $00
-B33B: 85 08          BITA   #$20
-B33D: 28 0A          BVC    $B2C1
-B33F: 03 26          COM    $04
-B341: 6E 96          JMP    -$C,X
+
 B343: 08 97          ASL    $B5
 B345: A9 96          ADCA   -$C,X
 B347: 19             DAA
@@ -7839,136 +7507,7 @@ B4A7: EC 8E          LDD    A,Y
 B4A9: A7 87          STA    $F,X
 B4AB: E7 24          STB    $C,X
 B4AD: 39             RTS
-B4AE: 3C 3E          CWAI   #$B6
-B4B0: 96 D4          LDA    $F6
-B4B2: 37 B4          PULU   D,X,Y
-B4B4: 97 54          STA    $76
-B4B6: 81 87          CMPA   #$05
-B4B8: 29 2E          BVS    $B4C0
-B4BA: 88 8A          EORA   #$02
-B4BC: 29 22          BVS    $B4C8
-B4BE: 8B 8A          ADDA   #$02
-B4C0: 23 23          BLS    $B4C3
-B4C2: 81 8E          CMPA   #$0C
-B4C4: 22 21          BHI    $B4C9
-B4C6: 81 80          CMPA   #$02
-B4C8: 29 29          BVS    $B4CB
-B4CA: 8B 8B          ADDA   #$03
-B4CC: 29 2C          BVS    $B4D2
-B4CE: 89 89          ADCA   #$01
-B4D0: 22 23          BHI    $B4D3
-B4D2: 81 8D          CMPA   #$0F
-B4D4: 22 23          BHI    $B4D7
-B4D6: 81 A2          CMPA   #$20
-B4D8: 29 38          BVS    $B4EA
-B4DA: 88 8D          EORA   #$05
-B4DC: 29 22          BVS    $B4E8
-B4DE: 8A 8A          ORA    #$02
-B4E0: 23 02          BLS    $B502
-B4E2: 81 AE          CMPA   #$2C
-B4E4: 23 2A          BLS    $B4EE
-B4E6: 81 80          CMPA   #$02
-B4E8: 29 29          BVS    $B4EB
-B4EA: 89 8B          ADCA   #$03
-B4EC: 2B 2C          BMI    $B4F2
-B4EE: 89 89          ADCA   #$01
-B4F0: 21 23          BRN    $B4F3
-B4F2: 81 8D          CMPA   #$0F
-B4F4: 22 23          BHI    $B4F7
-B4F6: 81 87          CMPA   #$05
-B4F8: 29 2E          BVS    $B500
-B4FA: 88 8A          EORA   #$02
-B4FC: 29 22          BVS    $B508
-B4FE: 8B 8A          ADDA   #$02
-B500: 23 23          BLS    $B503
-B502: 81 8E          CMPA   #$0C
-B504: 22 21          BHI    $B509
-B506: 81 80          CMPA   #$02
-B508: 29 29          BVS    $B50B
-B50A: 8B 8B          ADDA   #$03
-B50C: 29 2C          BVS    $B512
-B50E: 89 89          ADCA   #$01
-B510: 22 23          BHI    $B513
-B512: 81 8D          CMPA   #$0F
-B514: 22 23          BHI    $B517
-B516: 81 87          CMPA   #$05
-B518: 29 2E          BVS    $B520
-B51A: 88 8A          EORA   #$02
-B51C: 29 22          BVS    $B528
-B51E: 8B 8A          ADDA   #$02
-B520: 23 23          BLS    $B523
-B522: 81 8E          CMPA   #$0C
-B524: 22 21          BHI    $B529
-B526: 81 80          CMPA   #$02
-B528: 29 29          BVS    $B52B
-B52A: 8B 8B          ADDA   #$03
-B52C: 29 2C          BVS    $B532
-B52E: 89 89          ADCA   #$01
-B530: 22 23          BHI    $B533
-B532: 81 8D          CMPA   #$0F
-B534: 22 23          BHI    $B537
-B536: 81 87          CMPA   #$05
-B538: 29 2E          BVS    $B540
-B53A: 88 8A          EORA   #$02
-B53C: 29 22          BVS    $B548
-B53E: 8B 8A          ADDA   #$02
-B540: 23 23          BLS    $B543
-B542: 81 8E          CMPA   #$0C
-B544: 22 21          BHI    $B549
-B546: 81 80          CMPA   #$02
-B548: 29 29          BVS    $B54B
-B54A: 8B 8B          ADDA   #$03
-B54C: 29 2C          BVS    $B552
-B54E: 89 89          ADCA   #$01
-B550: 22 23          BHI    $B553
-B552: 81 8D          CMPA   #$0F
-B554: 22 23          BHI    $B557
-B556: 81 87          CMPA   #$05
-B558: 29 2E          BVS    $B560
-B55A: 88 8A          EORA   #$02
-B55C: 29 22          BVS    $B568
-B55E: 8B 8A          ADDA   #$02
-B560: 23 23          BLS    $B563
-B562: 81 8E          CMPA   #$0C
-B564: 22 21          BHI    $B569
-B566: 81 80          CMPA   #$02
-B568: 29 29          BVS    $B56B
-B56A: 8B 8B          ADDA   #$03
-B56C: 29 2C          BVS    $B572
-B56E: 89 89          ADCA   #$01
-B570: 22 23          BHI    $B573
-B572: 81 8D          CMPA   #$0F
-B574: 22 23          BHI    $B577
-B576: 81 87          CMPA   #$05
-B578: 29 2E          BVS    $B580
-B57A: 88 8A          EORA   #$02
-B57C: 29 22          BVS    $B588
-B57E: 8B 8A          ADDA   #$02
-B580: 23 23          BLS    $B583
-B582: 81 8E          CMPA   #$0C
-B584: 22 21          BHI    $B589
-B586: 81 80          CMPA   #$02
-B588: 29 29          BVS    $B58B
-B58A: 8B 8B          ADDA   #$03
-B58C: 29 2C          BVS    $B592
-B58E: 89 89          ADCA   #$01
-B590: 22 23          BHI    $B593
-B592: 81 8D          CMPA   #$0F
-B594: 22 23          BHI    $B597
-B596: 81 87          CMPA   #$05
-B598: 29 2E          BVS    $B5A0
-B59A: 88 8A          EORA   #$02
-B59C: 29 22          BVS    $B5A8
-B59E: 8B 8A          ADDA   #$02
-B5A0: 23 23          BLS    $B5A3
-B5A2: 81 8E          CMPA   #$0C
-B5A4: 22 21          BHI    $B5A9
-B5A6: 81 80          CMPA   #$02
-B5A8: 29 29          BVS    $B5AB
-B5AA: 8B 8B          ADDA   #$03
-B5AC: 29 2C          BVS    $B5B2
-B5AE: 89 89          ADCA   #$01
-B5B0: 22 23          BHI    $B5B3
+
 B5B2: 81 8D          CMPA   #$0F
 B5B4: 22 23          BHI    $B5B7
 B5B6: 8D 94          BSR    $B5CE
@@ -7979,9 +7518,7 @@ B5BF: 95 6D          BITA   $4F
 B5C1: 26 E1          BNE    $B626
 B5C3: 8D 40          BSR    $B627
 B5C5: 20 9F          BRA    $B5E4
-B5C7: 83 29 29       SUBD   #$0101
-B5CA: 8B 8F          ADDA   #$07
-B5CC: 37 37          PULU   CC,D,DP,X
+
 B5CE: 8E DA 22       LDX    #$5200
 B5D1: CC 84 84       LDD    #$0606
 B5D4: DD 42          STD    $60
@@ -8004,7 +7541,7 @@ B5F6: 6D 80          TST    $2,X
 B5F8: 26 2C          BNE    $B5FE
 B5FA: DC 18          LDD    $90
 B5FC: 20 2A          BRA    $B600
-B5FE: DC 1A          LDD    $92
+
 B600: ED 2A          STD    $8,X
 B602: 96 40          LDA    $C2
 B604: D6 0D          LDB    $2F
@@ -8014,7 +7551,7 @@ B60A: 24 8E          BCC    $B612
 B60C: D6 EA          LDB    $C2
 B60E: 44             LSRA
 B60F: 54             LSRB
-B610: 02 20          XNC    $02
+B610: 02 20          XNC    $02		; [breakpoint]
 B612: D6 40          LDB    $C2
 B614: AB 2A          ADDA   $8,X
 B616: EB 8B          ADDB   $9,X
@@ -8292,13 +7829,9 @@ D540: 39             RTS
 D541: 96 93          LDA    $11
 D543: 48             ASLA
 D544: 10 8E 57 C8    LDY    #jump_table_d54a
-D548: 6E 9E          JMP    [A,Y]        ; [indirect_jump]
-D54A: 5D             TSTB
-D54B: D8 FD          EORB   $D5
-D54D: 56             RORB
-D54E: 5E             XCLRB
-D54F: A2 CC          SBCA   W,S
-D551: 22 82          BHI    $D553
+D548: 6E 9E          JMP    [A,Y]        ; [indirect_jump] [nb_entries=3]
+
+D550: CC 22 82       LDD    #$0000
 D553: BD 42 2A       JSR    $6008
 D556: 86 83          LDA    #$01
 D558: 97 9E          STA    $B6
@@ -8622,28 +8155,14 @@ DB21: 96 93          LDA    $11
 DB23: 48             ASLA
 DB24: 8E F9 AB       LDX    #jump_table_db29
 DB27: 6E BE          JMP    [A,X]        ; [indirect_jump]
-DB29: F3 BF 53       ADDD   $37DB
-DB2C: 8F F3 4F       XSTX   #$DBC7
-DB2F: 54             LSRB
-DB30: 21 FE          BRN    $DB0E
-DB32: 25 5E          BCS    $DB10
-DB34: 92 FF          SBCA   $DD
-DB36: DD 8E          STD    $0C
-DB38: 79 C8 C6       ROL    $E04E
-DB3B: 9A BD          ORA    $95
-DB3D: FF 39 BD       STU    $B135
-DB40: 59             ROLB
-DB41: D7 BD          STB    $3F
+
 DB43: 55             LSRB
 DB44: 83 96 43       SUBD   #$B4C1
 DB47: 84 2B          ANDA   #$03
 DB49: 48             ASLA
 DB4A: 8E 53 67       LDX    #jump_table_db4f
 DB4D: 6E 1E          JMP    [A,X]        ; [indirect_jump]
-DB4F: 53             COMB
-DB50: 77 F9 DC       ASR    $DB5E
-DB53: 59             ROLB
-DB54: 45             LSRA
+
 DB55: 8E CD BB       LDX    #$4F39
 DB58: CE 55 88       LDU    #$7D00
 DB5B: 7E F3 45       JMP    $DB6D
@@ -8852,17 +8371,11 @@ DD69: 39             RTS
 DD6A: 96 99          LDA    $11
 DD6C: 48             ASLA
 DD6D: 8E 55 FA       LDX    #jump_table_dd72
-DD70: 6E B4          JMP    [A,X]        ; [indirect_jump]
-DD72: 5F             CLRB
-DD73: FC FF FE       LDD    $DDDC
-DD76: 5C             INCB
-DD77: 13             SYNC
-DD78: F6 9E 56       LDB    $B6DE
-DD7B: 66 F7 91 BD    ROR    [$B935]
-DD7F: F3 D7 BD       ADDD   $F59F
-DD82: 55             LSRB
-DD83: 23 C6          BLS    $DD69
-DD85: 3A             ABX
+DD70: 6E B4          JMP    [A,X]        ; [indirect_jump] [nb_entries=6]
+
+DD7E: BD F3 D7       JSR    $7BF5
+DD81: BD 55 23       JSR    $D7A1
+DD84: C6 3A          LDB    #$18
 DD86: BD 55 86       JSR    $D7AE
 DD89: 7F D2 8B       CLR    $5A03
 DD8C: 8E 65 34       LDX    #$4DBC
@@ -9010,6 +8523,7 @@ DEE5: BD 55 92       JSR    $D710
 DEE8: 7F 72 87       CLR    $5A0F
 DEEB: 0C 39          INC    $11
 DEED: 39             RTS
+
 DEEE: 0D 3E          TST    $B6
 DEF0: 26 6C          BNE    $DF40
 DEF2: BD 55 0B       JSR    $D729
@@ -9085,6 +8599,7 @@ DFB1: 97 34          STA    $B6
 DFB3: BD F5 83       JSR    $D7A1
 DFB6: 0C 93          INC    $11
 DFB8: 39             RTS
+
 DFB9: 0D 3E          TST    $B6
 DFBB: 26 2E          BNE    $DFC3
 DFBD: 0C 80          INC    $08
@@ -9139,40 +8654,20 @@ jump_table_7570:
 	dc.w	$7776	; $7572
 	dc.w	$77c8	; $7574
 	dc.w	$7aa9	; $7576
-	dc.w	$be05	; $7578
-	dc.w	$c098	; $757a
-	dc.w	$a675	; $757c
-	dc.w	$81e6	; $757e
-	dc.w	$b675	; $7580
-	dc.w	$9c77	; $7582
-	dc.w	$7677	; $7584
-	dc.w	$d97a	; $7586
-	dc.w	$b6be	; $7588
+
 jump_table_7581:
 	dc.w	$759c	; $7581
 	dc.w	$7776	; $7583
 	dc.w	$77d9	; $7585
 	dc.w	$7ab6	; $7587
-	dc.w	$be08	; $7589
-	dc.w	$c038	; $758b
-	dc.w	$a675	; $758d
-	dc.w	$924c	; $758f
-	dc.w	$b675	; $7591
-	dc.w	$af76	; $7593
-	dc.w	$b077	; $7595
+
 jump_table_7592:
 	dc.w	$75af	; $7592
 	dc.w	$76b0	; $7594
 	dc.w	$7715	; $7596
 	dc.w	$772d	; $7598
 	dc.w	$7768	; $759a
-	dc.w	$be08	; $759c
-	dc.w	$c098	; $759e
-	dc.w	$ac75	; $75a0
-	dc.w	$a5ec	; $75a2
-	dc.w	$b675	; $75a4
-	dc.w	$be76	; $75a6
-	dc.w	$b077	; $75a8
+
 jump_table_75a5:
 	dc.w	$75be	; $75a5
 	dc.w	$76b0	; $75a7
@@ -9187,14 +8682,8 @@ jump_table_75c7:
 	dc.w	$763e	; $75c7
 	dc.w	$7674	; $75c9
 	dc.w	$7695	; $75cb
-	dc.w	$be0e	; $75cd
-	dc.w	$c032	; $75cf
-	dc.w	$ac75	; $75d1
-	dc.w	$d64c	; $75d3
-	dc.w	$b675	; $75d5
-	dc.w	$dc75	; $75d7
-	dc.w	$ef75	; $75d9
-	dc.w	$f6e4	; $75db
+
+
 jump_table_75d6:
 	dc.w	$75dc	; $75d6
 	dc.w	$75ef	; $75d8
@@ -9211,13 +8700,7 @@ jump_table_77d1:
 	dc.w	$7884	; $77d3
 	dc.w	$7958	; $77d5
 	dc.w	$7a60	; $77d7
-	dc.w	$be08	; $77d9
-	dc.w	$c038	; $77db
-	dc.w	$a677	; $77dd
-	dc.w	$e24c	; $77df
-	dc.w	$b677	; $77e1
-	dc.w	$ea78	; $77e3
-	dc.w	$f079	; $77e5
+
 jump_table_77e2:
 	dc.w	$77ea	; $77e2
 	dc.w	$78f0	; $77e4
