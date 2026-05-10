@@ -19,6 +19,7 @@
 ;	map(0xfff2, 0xfffd).ram().share(m_vectors);
 
 
+mainlatch_8081 = $8081
 mainlatch_8087 = $8087
 watchdog_8000 = $8000
 system_3080 = $3080
@@ -252,12 +253,12 @@ color_ram_4800 = $4800
 61E0: 4F             CLRA
 61E1: B7 02 00       STA    $8082
 61E4: B7 A3 82       STA    audio_8100
-61E7: B7 A8 A9       STA    $8081
+61E7: B7 A8 A9       STA    mainlatch_8081
 61EA: 12             NOP
 61EB: 12             NOP
 61EC: 12             NOP
 61ED: 4C             INCA
-61EE: B7 08 A3       STA    $8081
+61EE: B7 08 A3       STA    mainlatch_8081
 61F1: B7 02 05       STA    mainlatch_8087
 61F4: 1C CD          ANDCC  #$EF
 61F6: 6E 0F D6 43    JMP    $6065,PCR
@@ -1248,7 +1249,7 @@ color_ram_4800 = $4800
 70A9: 8D A9          BSR    $70CC
 70AB: BD 5A 62       JSR    $724A
 70AE: BD FA 4D       JSR    $726F
-70B1: BD F0 7E       JSR    $72FC
+70B1: BD F0 7E       JSR    process_audio_queue_72fc
 70B4: 96 20          LDA    $02
 70B6: 48             ASLA
 70B7: 8E 58 EA       LDX    #jump_table_70c2
@@ -1256,11 +1257,8 @@ color_ram_4800 = $4800
 70BC: 86 29          LDA    #$01
 70BE: B7 08 A5       STA    mainlatch_8087
 70C1: 3B             RTI
-70C2: F1 A3 51       CMPB   $2173
-70C5: 11 F6 EA 5D    LDB    $6875
-70C9: 4F             CLRA
-70CA: FD F0 34       STD    $781C
-70CD: 20 86          BRA    $70DD
+
+
 
 70E1: DD 80          STD    $02
 70E3: DC 67          LDD    $45
@@ -1426,6 +1424,7 @@ color_ram_4800 = $4800
 7244: DC C0          LDD    $E2
 7246: 36 84          PSHU   D
 7248: 35 A0          PULS   DP,PC
+
 724A: 96 BF          LDA    $37
 724C: 97 10          STA    $38
 724E: 96 BC          LDA    $34
@@ -1516,6 +1515,8 @@ color_ram_4800 = $4800
 72F7: 97 0B          STA    $23
 72F9: 0F A2          CLR    $2A
 72FB: 39             RTS
+
+process_audio_queue_72fc:
 72FC: 9E 36          LDX    $1E
 72FE: 9C 94          CMPX   $1C
 7300: 26 23          BNE    $7303
@@ -1523,7 +1524,7 @@ color_ram_4800 = $4800
 7303: A6 A2          LDA    ,X+
 7305: B7 03 82       STA    audio_8100
 7308: 4F             CLRA
-7309: B7 08 09       STA    $8081
+7309: B7 08 09       STA    mainlatch_8081
 730C: 12             NOP
 730D: 12             NOP
 730E: 12             NOP
@@ -1531,7 +1532,7 @@ color_ram_4800 = $4800
 7310: 12             NOP
 7311: 12             NOP
 7312: 4C             INCA
-7313: B7 A2 A3       STA    $8081
+7313: B7 A2 A3       STA    mainlatch_8081
 7316: 8C D3 77       CMPX   #$515F
 7319: 23 8B          BLS    $731E
 731B: 8E 79 68       LDX    #$5140
