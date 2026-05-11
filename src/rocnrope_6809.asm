@@ -31,9 +31,10 @@ dsw3_3100 = $3100
 interrupt_vector_8182 = $8182
 color_ram_4800 = $4800
 
+start_6000:
 6000: 4F             CLRA
 6001: B7 02 05       STA    mainlatch_8087
-6004: 6E AF 80 9C    JMP    $6226,PCR
+6004: 6E AF 80 9C    JMP    self_tests_6226,PCR
 6008: 9E 30          LDX    $18
 600A: ED 09          STD    ,X++
 600C: 8C 79 B7       CMPX   #$513F
@@ -263,6 +264,7 @@ color_ram_4800 = $4800
 61F4: 1C CD          ANDCC  #$EF
 61F6: 6E 0F D6 43    JMP    $6065,PCR
 
+self_tests_6226:
 6226: 8E C5 28       LDX    #$4700                                       
 6229: 4F             CLRA
 622A: 5F             CLRB
@@ -283,24 +285,29 @@ color_ram_4800 = $4800
 624A: ED CA          STD    $2,U
 624C: CC 29 AB       LDD    #$0123
 624F: ED 66          STD    $4,U
-6251: 32 0F 82 21    LEAS   $6258,PCR
-6255: 7E E0 62       JMP    $62E0
+6251: 32 0F 82 21    LEAS   l_6258,PCR
+6255: 7E E0 62       JMP    l_62E0
+l_6258:
 6258: CC 6D EF       LDD    #$4567
 625B: ED 6C          STD    $4,U
-625D: 32 05 88 21    LEAS   $6264,PCR
-6261: 7E E0 62       JMP    $62E0
+625D: 32 05 88 21    LEAS   l_6264,PCR
+6261: 7E E0 62       JMP    l_62E0
+l_6264:
 6264: CC AB 29       LDD    #$89AB
 6267: ED 6C          STD    $4,U
-6269: 32 05 88 2B    LEAS   $6270,PCR
-626D: 7E EA 68       JMP    $62E0
+6269: 32 05 88 2B    LEAS   l_6270,PCR
+626D: 7E EA 68       JMP    l_62E0
+l_6270:
 6270: CC EF 6D       LDD    #$CDEF
 6273: ED 66          STD    $4,U
-6275: 32 0F 82 2B    LEAS   $627C,PCR
-6279: 7E EA 68       JMP    $62E0
+6275: 32 0F 82 2B    LEAS   l_627C,PCR
+6279: 7E EA 68       JMP    l_62E0
+l_627C:
 627C: CC 7D 22       LDD    #$55AA
 627F: ED 66          STD    $4,U
-6281: 32 0F 82 21    LEAS   $6288,PCR
-6285: 7E E0 62       JMP    $62E0
+6281: 32 0F 82 21    LEAS   l_6288,PCR
+6285: 7E E0 62       JMP    l_62E0
+l_6288:
 6288: CE 78 88       LDU    #$5000
 628B: 8E 68 28       LDX    #$4000
 628E: AF 4C          STX    ,U
@@ -308,29 +315,37 @@ color_ram_4800 = $4800
 6293: ED 60          STD    $2,U
 6295: CC 83 A1       LDD    #$0123
 6298: ED 6C          STD    $4,U
-629A: 32 05 28 2B    LEAS   $62A1,PCR
-629E: 7E EA C2       JMP    $62E0
+629A: 32 05 28 2B    LEAS   l_62A1,PCR
+629E: 7E EA C2       JMP    l_62E0
+l_62A1:
 62A1: CC C7 E5       LDD    #$4567
 62A4: ED 66          STD    $4,U
-62A6: 32 0F 28 2B    LEAS   $62AD,PCR
-62AA: 7E EA C8       JMP    $62E0
+62A6: 32 0F 28 2B    LEAS   l_62AD,PCR
+62AA: 7E EA C8       JMP    l_62E0
+l_62AD:
 62AD: CC 01 23       LDD    #$89AB
 62B0: ED 66          STD    $4,U
-62B2: 32 0F 22 21    LEAS   $62B9,PCR
-62B6: 7E E0 C8       JMP    $62E0
+62B2: 32 0F 22 21    LEAS   l_62B9,PCR
+62B6: 7E E0 C8       JMP    l_62E0
+l_62B9:
 62B9: CC 45 67       LDD    #$CDEF
 62BC: ED 6C          STD    $4,U
-62BE: 32 05 22 21    LEAS   $62C5,PCR
-62C2: 7E E0 C2       JMP    $62E0
+62BE: 32 05 22 21    LEAS   l_62C5,PCR
+62C2: 7E E0 C2       JMP    l_62E0
+l_62C5:
 62C5: CC D7 28       LDD    #$55AA
 62C8: ED 6C          STD    $4,U
-62CA: 32 05 28 2B    LEAS   $62D1,PCR
-62CE: 7E EA C2       JMP    $62E0
+62CA: 32 05 28 2B    LEAS   l_62D1,PCR
+62CE: 7E EA C2       JMP    l_62E0
+l_62D1:
 62D1: CC 28 D7       LDD    #$AA55
 62D4: ED 66          STD    $4,U
-62D6: 32 0F 28 2B    LEAS   $62DD,PCR
-62DA: 7E EA C8       JMP    $62E0
+62D6: 32 0F 28 2B    LEAS   l_62DD,PCR
+62DA: 7E EA C8       JMP    l_62E0
+; self tests are done
+l_62DD:
 62DD: 16 89 9A       LBRA   $63F2
+l_62E0:
 62E0: AE E6          LDX    ,U
 62E2: 10 AE 60       LDY    $2,U
 62E5: EC C6          LDD    $4,U
@@ -549,31 +564,7 @@ color_ram_4800 = $4800
 6513: 9F 90          STX    $B2
 6515: DF 32          STU    $B0
 6517: 39             RTS
-6518: 4D             TSTA
-6519: 10 ED CD       STD    $5,U
-651C: 4D             TSTA
-651D: 7A ED D7       DEC    $655F
-6520: 47             ASRA
-6521: 4F             CLRA
-6522: E7 FD          STB    -$1,S
-6524: 47             ASRA
-6525: B6 E7 21       LDA    $65A3
-6528: 4D             TSTA
-6529: 9E ED          LDX    $65
-652B: 35 4E          PULS   D,Y,U
-652D: 30 EE          LEAX   $6,S
-652F: A6 44          LDA    $6,S
-6531: 16 E4 CB       LBRA   $CB7D
 
-65EF: F6 D5 DE       LDB    $F7FC
-65F2: 7C 86 24       INC    $0406
-65F5: 2E 8C          BGT    $6605
-65F7: 96 3E          LDA    $16
-65F9: 08 AA          ASL    $22
-65FB: A0 20          SUBA   $8,X
-65FD: 22 AC          BHI    $6623
-65FF: AE 0D          LDX    $F,Y
-6601: 6E 56          JMP    [,U]        ; [indirect_jump]
 
 6718: 0D 0A          TST    $22
 671A: 27 E8          BEQ    $677C
@@ -723,6 +714,7 @@ color_ram_4800 = $4800
 683B: D6 85          LDB    $AD
 683D: BD EF F5       JSR    $677D
 6840: 39             RTS
+
 6841: 32 FF          LEAS   -$3,S
 6843: 4F             CLRA
 6844: C1 46          CMPB   #$64
@@ -743,9 +735,10 @@ color_ram_4800 = $4800
 685F: 20 D5          BRA    $6858
 6861: A7 E3          STA    $1,S
 6863: E7 40          STB    $2,S
-6865: 6E 26          JMP    ,Y
-6867: 31 A5 28 8A    LEAY   $686D,PCR
+6865: 6E 26          JMP    ,Y		; can only jump to 686D!
+6867: 31 A5 28 8A    LEAY   l_686D,PCR
 686B: 20 FC          BRA    $6841
+l_686D:
 686D: 96 25          LDA    $AD
 686F: A7 AB DE 82    STA    -$0400,X
 6873: A7 AB DE A2    STA    -$03E0,X
