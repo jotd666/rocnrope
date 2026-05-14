@@ -135,7 +135,7 @@ with open(source_dir / "conv.s") as f:
         if address == 0x6226:
             # remove self-test code
             for j in range(i,len(lines)):
-                if lines[j].startswith('l_62DD'):
+                if lines[j].startswith('l_63f2'):
                     break
                 lines[j] = ""
             line = ""

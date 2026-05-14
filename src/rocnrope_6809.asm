@@ -1779,10 +1779,10 @@ process_audio_queue_72fc:
 7578: 96 2D          LDA    $05
 757A: 48             ASLA
 757B: 10 8E 5D 09    LDY    #jump_table_7581
-757F: 6E 94          JMP    [A,Y]        ; [indirect_jump]
+757F: 6E 94          JMP    [A,Y]        ; [indirect_jump] [nb_entries=4]
 
 758C: 10 8E FD 1A    LDY    #jump_table_7592
-7590: 6E 94          JMP    [A,Y]        ; [indirect_jump]
+7590: 6E 94          JMP    [A,Y]        ; [indirect_jump] [nb_entries=5]
 
 759D: 20 48          BRA    $755F
 759F: 10 8E 57 27    LDY    #jump_table_75A5
@@ -1847,7 +1847,7 @@ process_audio_queue_72fc:
 763E: 96 86          LDA    $0E
 7640: 48             ASLA
 7641: 10 8E F4 65    LDY    #jump_table_7647
-7645: 6E 34          JMP    [A,Y]        ; [indirect_jump]
+7645: 6E 34          JMP    [A,Y]        ; [indirect_jump] [nb_entries=3]
 7647: F4 65 5E       ANDB   $4D76
 764A: E0 FE          SUBB   -$A,S
 764C: 47             ASRA
@@ -2031,14 +2031,14 @@ process_audio_queue_72fc:
 77D9: 96 80          LDA    $08
 77DB: 48             ASLA
 77DC: 10 8E FF 6A    LDY    #jump_table_77e2
-77E0: 6E 94          JMP    [A,Y]        ; [indirect_jump]
+77E0: 6E 94          JMP    [A,Y]        ; [indirect_jump] [nb_entries=4]
 77E2: F5 68 5A       BITB   $EA78
 77E5: D2 FB          SBCB   $79
 77E7: DA 52          ORB    $7A
 77E9: BA 96 83       ORA    $1E0B
 77EC: 48             ASLA
 77ED: 10 8E FF D1    LDY    #jump_table_77F3
-77F1: 6E 34          JMP    [A,Y]        ; [indirect_jump]
+77F1: 6E 34          JMP    [A,Y]        ; [indirect_jump] [nb_entries=4]
 77F3: F5 D9 5A       BITB   $FB78
 77F6: B9 FA 7E       ADCA   $7856
 77F9: 50             NEGB
@@ -2355,17 +2355,17 @@ process_audio_queue_72fc:
 7AA9: 96 80          LDA    $08
 7AAB: 48             ASLA
 7AAC: 10 8E F2 3A    LDY    #jump_table_7ab2
-7AB0: 6E 94          JMP    [A,Y]        ; [indirect_jump]
-7AB2: F8 41 58       EORB   $C37A
-7AB5: C1 96          CMPB   #$14
-7AB7: 8A 48          ORA    #$60
+7AB0: 6E 94          JMP    [A,Y]        ; [indirect_jump] [nb_entries=2]
+
+7AB6: 96 8A          LDA    $08
+7AB8: 48             ASLA
 7AB9: 10 8E F2 97    LDY    #jump_table_7ABF
-7ABD: 6E 3E          JMP    [A,Y]        ; [indirect_jump]
-7ABF: F2 E1 58       SBCB   $C37A
-7AC2: 61 96          NEG    -$C,X
-7AC4: 29 48          BVS    $7B30
+7ABD: 6E 3E          JMP    [A,Y]        ; [indirect_jump] [nb_entries=2]
+
+7AC3: 96 29          LDA    $0B
+7AC5: 48             ASLA
 7AC6: 10 8E 52 E4    LDY    #jump_table_7acc
-7ACA: 6E 3E          JMP    [A,Y]        ; [indirect_jump]
+7ACA: 6E 3E          JMP    [A,Y]        ; [indirect_jump] [nb_entries=2]
 
 7AD0: 0C 29          INC    $0B
 7AD2: 39             RTS
@@ -2410,17 +2410,9 @@ process_audio_queue_72fc:
 7B28: 34 38          PSHS   X
 7B2A: 8E F3 18       LDX    #jump_table_7b30
 7B2D: 48             ASLA
-7B2E: 6E 1E          JMP    [A,X]        ; [indirect_jump]
-7B30: 59             ROLB
-7B31: 67 F9          ASR    -$5,S
-7B33: C9 59          ADCB   #$7B
-7B35: 60 F9          NEG    -$5,S
-7B37: C0 53          SUBB   #$7B
-7B39: 79 F3 CA       ROL    $7B42
-7B3C: 53             COMB
-7B3D: 7F F3 D9       CLR    $7B51
-7B40: 59             ROLB
-7B41: 75 35 12       LSR    $B790
+7B2E: 6E 1E          JMP    [A,X]        ; [indirect_jump] [nb_entries=9]
+
+7B42: 35 12          PULS   X,PC
 7B44: 39             RTS
 7B45: 35 92          PULS   X
 7B47: 86 2A          LDA    #$02
@@ -2428,6 +2420,7 @@ process_audio_queue_72fc:
 7B4B: 35 38          PULS   X
 7B4D: 86 8B          LDA    #$03
 7B4F: 20 6E          BRA    $7B9D
+
 7B51: 35 92          PULS   X
 7B53: 86 26          LDA    #$04
 7B55: 20 C4          BRA    $7B9D
@@ -2555,7 +2548,7 @@ process_audio_queue_72fc:
 7C57: A6 2B          LDA    $3,X
 7C59: 48             ASLA
 7C5A: 10 8E 54 49    LDY    #jump_table_7c61
-7C5E: 6E 3E          JMP    [A,Y]        ; [indirect_jump]
+7C5E: 6E 3E          JMP    [A,Y]        ; [indirect_jump] [nb_entries=4]
 7C60: 39             RTS
 
 7C69: 6F 00 9D       CLR    $15,X
@@ -3552,9 +3545,12 @@ process_audio_queue_72fc:
 8523: 10 8E A7 AF    LDY    #jump_table_852D
 8527: A6 2B          LDA    $3,X
 8529: 48             ASLA
-852A: 6E 3E          JMP    [A,Y]        ; [indirect_jump]
+852A: 6E 3E          JMP    [A,Y]        ; [indirect_jump] [nb_entries=3]
 852C: 39             RTS
 
+8533: 8E 76 22       LDX    #$5400
+8536: A6 86          LDA    $4,X
+8538: 80 3E          SUBA   #$16
 853A: 81 4E          CMPA   #$C6
 853C: 22 04          BHI    $856A
 853E: A6 8D          LDA    $5,X
@@ -3642,14 +3638,12 @@ process_audio_queue_72fc:
 85F7: A6 A0 37       LDA    $1F,X
 85FA: 48             ASLA
 85FB: 10 8E AE 82    LDY    #jump_table_860a
-85FF: AD 94          JSR    [A,Y]        ; [indirect_jump]
+85FF: AD 94          JSR    [A,Y]        ; [indirect_jump] [nb_entries=3]
 8601: 30 0A A2       LEAX   $20,X
 8604: 6A C6          DEC    ,S
 8606: 26 69          BNE    $85F3
 8608: 35 AA          PULS   A,PC
-860A: 0E 98          JMP    $10
-860C: AE 7D          LDX    -$B,U
-860E: 0E F8          JMP    $70
+
 8610: A6 27          LDA    $5,X
 8612: A7 0A 33       STA    $11,X
 8615: CE 04 B7       LDU    #$8635
@@ -3772,22 +3766,16 @@ process_audio_queue_72fc:
 87E5: E6 81          LDB    $3,X
 87E7: 10 8E AF 73    LDY    #jump_table_87fb
 87EB: 58             ASLB
-87EC: AD 9D          JSR    [B,Y]        ; [indirect_jump]
+87EC: AD 9D          JSR    [B,Y]        ; [indirect_jump] [nb_entries=10]
 87EE: AE E9          LDX    $1,S
 87F0: 30 AA A2       LEAX   $20,X
 87F3: AF 43          STX    $1,S
 87F5: 6A 66          DEC    ,S
 87F7: 26 C0          BNE    $87E1
 87F9: 35 1C          PULS   B,X,PC
-87FB: 00 25          NEG    $0D
-87FD: A2 11 03 5E    SBCA   [-$7484,X]
-8801: AE 5B 0F 60    LDX    [-$72BE,U]
-8805: AF 55          STX    [E,U]
-8807: 12             NOP
-8808: DA B9          ORB    $91
-880A: 1A 1B          ORCC   #$93
-880C: CC E6 00       LDD    #$CE88
-880F: 97 58          STA    $7A
+
+880D: E6 00 97       LDB    $1F,X
+8810: 58             ASLB
 8811: 10 8E 0A 35    LDY    #jump_table_8817
 8815: 6E 37          JMP    [B,Y]        ; [indirect_jump] [nb_entries=4]
 
@@ -4179,10 +4167,8 @@ process_audio_queue_72fc:
 8B7C: A6 A0 97       LDA    $1F,X
 8B7F: 48             ASLA
 8B80: 10 8E 09 04    LDY    #jump_table_8b86
-8B84: 6E 94          JMP    [A,Y]        ; [indirect_jump]
-8B86: 09 0E          ROL    $8C
-8B88: A3 E6          SUBD   W,U
-8B8A: 04 D4          LSR    $5C
+8B84: 6E 94          JMP    [A,Y]        ; [indirect_jump] [nb_entries=3]
+
 8B8C: A6 27          LDA    $F,X
 8B8E: E6 8A          LDB    $2,X
 8B90: 58             ASLB
@@ -4327,11 +4313,8 @@ process_audio_queue_72fc:
 8CD9: A6 00 97       LDA    $1F,X
 8CDC: 48             ASLA
 8CDD: 10 8E 04 C1    LDY    #jump_table_8ce3
-8CE1: 6E 34          JMP    [A,Y]        ; [indirect_jump]
-8CE3: 0E C9          JMP    $EB
-8CE5: AE 78          LDX    [F,S]
-8CE7: 0F 2E          CLR    $06
-8CE9: A5 92          BITA   -$6,X
+8CE1: 6E 34          JMP    [A,Y]        ; [indirect_jump] [nb_entries=4]
+
 8CEB: 86 27          LDA    #$0F
 8CED: 97 E8          STA    $60
 8CEF: 8D 6A          BSR    $8D39
@@ -4382,7 +4365,7 @@ process_audio_queue_72fc:
 8D4F: A6 AA 3D       LDA    $1F,X
 8D52: 48             ASLA
 8D53: 10 8E AF F2    LDY    #jump_table_8d70
-8D57: 6E 9E          JMP    [A,Y]        ; [indirect_jump]
+8D57: 6E 9E          JMP    [A,Y]        ; [indirect_jump] [nb_entries=2]
 8D59: A6 87          LDA    $F,X
 8D5B: 10 8E E6 2C    LDY    #$CEA4
 8D5F: E6 20          LDB    $2,X
@@ -4439,15 +4422,8 @@ process_audio_queue_72fc:
 8DD7: A6 A0 37       LDA    $1F,X
 8DDA: 48             ASLA
 8DDB: 10 8E A5 69    LDY    #jump_table_8de1
-8DDF: 6E 94          JMP    [A,Y]        ; [indirect_jump]
-8DE1: AC AB          CMPX   $9,Y
-8DE3: 0C 64          INC    $46
-8DE5: AF 73          STX    [,S++]
-8DE7: 0C 01          INC    $29
-8DE9: A6 CE          LDA    $6,U
-8DEB: 06 7A          ROR    $52
-8DED: A6 3E          LDA    [A,Y]
-8DEF: 06 F9          ROR    $DB
+8DDF: 6E 94          JMP    [A,Y]        ; [indirect_jump] [nb_entries=8]
+
 8DF1: 6D 0A 92       TST    $10,X
 8DF4: 27 26          BEQ    $8DFA
 8DF6: 6A 0A 38       DEC    $10,X
@@ -4806,7 +4782,7 @@ process_audio_queue_72fc:
 90F2: A6 0A 3D       LDA    $1F,X
 90F5: 48             ASLA
 90F6: 10 8E B8 D4    LDY    #jump_table_90fc
-90FA: 6E 3E          JMP    [A,Y]        ; [indirect_jump]
+90FA: 6E 3E          JMP    [A,Y]        ; [indirect_jump] [nb_entries=5]
 
 9106: A6 80          LDA    $2,X
 9108: 48             ASLA
@@ -4872,10 +4848,17 @@ process_audio_queue_72fc:
 9192: A6 0A 3D       LDA    $1F,X
 9195: 48             ASLA
 9196: 10 8E B9 B4    LDY    #jump_table_919c
-919A: 6E 3E          JMP    [A,Y]        ; [indirect_jump]
+919A: 6E 3E          JMP    [A,Y]        ; [indirect_jump] [nb_entries=7]
 
-
-
+91AA: 6D 00 31       TST    $19,X
+91AD: 26 8D          BNE    $91B4
+91AF: BD AD 8A       JSR    $8FA8
+91B2: 20 8F          BRA    $91C1
+91B4: E6 AA 9C       LDB    $1E,X
+91B7: 58             ASLB
+91B8: 58             ASLB
+91B9: 58             ASLB
+91BA: 58             ASLB
 91BB: 10 8E 7B 88    LDY    #$5300
 91BF: 31 87          LEAY   B,Y
 91C1: E6 A7          LDB    $5,Y
@@ -5128,9 +5111,10 @@ process_audio_queue_72fc:
 93E4: A6 AA 9D       LDA    $1F,X
 93E7: 48             ASLA
 93E8: 10 8E 1B 66    LDY    #jump_table_93ee
-93EC: 6E 9E          JMP    [A,Y]        ; [indirect_jump]
+93EC: 6E 9E          JMP    [A,Y]        ; [indirect_jump] [nb_entries=3]
 
-93F7: 8E 79 E8       LDX    #$51C0
+93F4: 34 32          PSHS   X
+93F6: 10 8E 79 E8    LDY    #$51C0
 93FA: BD 07 95       JSR    $8FBD
 93FD: 35 98          PULS   X
 93FF: DC 42          LDD    $60
@@ -5173,17 +5157,13 @@ process_audio_queue_72fc:
 9456: 10 8E BC 40    LDY    #jump_table_9468
 945A: A6 8B          LDA    $3,X
 945C: 48             ASLA
-945D: AD 3E          JSR    [A,Y]        ; [indirect_jump]
+945D: AD 3E          JSR    [A,Y]        ; [indirect_jump] [nb_entries=6]
 945F: 30 AA 02       LEAX   $20,X
 9462: 8C D1 BD       CMPX   #$539F
 9465: 25 69          BCS    $9452
 9467: 39             RTS
-9468: BC 5C 1C       CMPX   $7494
-946B: 58             ASLB
-946C: BD 81 1C       JSR    $A994
-946F: 58             ASLB
-9470: B6 F2 17       LDA    $D095
-9473: A3 BD B7 53    SUBD   [$95D1]
+
+9474: BD B7 53       JSR    $95D1
 9477: BD 48 3F       JSR    $6017
 947A: EC 00 3C       LDD    $14,X
 947D: 81 98          CMPA   #$10
@@ -5609,7 +5589,7 @@ process_audio_queue_72fc:
 98A2: A6 4A 02       LDA    $20,U
 98A5: 48             ASLA
 98A6: 8E 18 D5       LDX    #jump_table_9afd
-98A9: 6E 1E          JMP    [A,X]        ; [indirect_jump]
+98A9: 6E 1E          JMP    [A,X]        ; [indirect_jump] [nb_entries=12]
 98AB: A6 6E          LDA    $6,U
 98AD: AB CF          ADDA   $7,U
 98AF: A7 64          STA    $6,U
@@ -5869,7 +5849,7 @@ A3FF: 39             RTS
 A400: A6 21          LDA    $3,X
 A402: 48             ASLA
 A403: 10 8E 86 8B    LDY    #jump_table_a409
-A407: 6E 9E          JMP    [A,Y]        ; [indirect_jump]
+A407: 6E 9E          JMP    [A,Y]        ; [indirect_jump] [nb_entries=4]
 
 A411: A6 8A          LDA    $8,X
 A413: AB 24          ADDA   $6,X
@@ -5888,10 +5868,9 @@ A42C: 7E 48 9F       JMP    $6017
 A42F: A6 AA 3D       LDA    $1F,X
 A432: 48             ASLA
 A433: 10 8E 86 BB    LDY    #jump_table_a439
-A437: 6E 9E          JMP    [A,Y]        ; [indirect_jump]
-A439: 8C B5 2C       CMPX   #$3DA4
-A43C: 79 10 8E       ROL    $3806
-A43F: 2D 78          BLT    $A49B
+A437: 6E 9E          JMP    [A,Y]        ; [indirect_jump] [nb_entries=2]
+
+A43D: 10 8E 2D 78    LDY    #$A55A                                      
 A441: 86 83          LDA    #$01
 A443: A7 2D          STA    $F,X
 A445: BD E2 BF       JSR    $603D
@@ -7759,24 +7738,17 @@ D4AB: 77 FC 8D       ASR    $D4A5
 D4AE: B7 D2 22       STA    $5A00
 D4B1: 48             ASLA
 D4B2: 8E 56 95       LDX    #jump_table_d4b7
-D4B5: 6E 14          JMP    [A,X]        ; [indirect_jump]
-D4B7: 56             RORB
-D4B8: 97 FD          STA    $D5
-D4BA: C9 53          ADCB   #$DB
-D4BC: 09 F5          ROL    $DD
-D4BE: E2 96          SBCB   -$2,X
-D4C0: 29 48          BVS    $D52C
-D4C2: 10 8E F6 EA    LDY    #jump_table_D4C8
-D4C6: 6E 34          JMP    [A,Y]        ; [indirect_jump]
-D4C8: FC FA 5D       LDD    $D2D5
-D4CB: 9C FD          CMPX   $D5
-D4CD: 0F 5D          CLR    $D5
-D4CF: A3 F7          SUBD   [B,U]
-D4D1: 0C 0F          INC    $8D
-D4D3: A2 0F          SBCA   $D,Y
-D4D5: 03 BD          COM    $3F
-D4D7: EC D0 CC       LDD    [-$1C,S]
-D4DA: 80 88          SUBA   #$00
+D4B5: 6E 14          JMP    [A,X]        ; [indirect_jump] [nb_entries=4]
+
+D4BF: 96 29          LDA    $0B
+D4C1: 48             ASLA
+D4C2: 10 8E F6 EA    LDY    #jump_table_d4c8
+D4C6: 6E 34          JMP    [A,Y]        ; [indirect_jump] [nb_entries=5]
+
+D4D2: 0F A2          CLR    $20
+D4D4: 0F 03          CLR    $21
+D4D6: BD EC D0       JSR    $6EF8
+D4D9: CC 80 88       LDD    #$0800
 D4DC: BD 48 80       JSR    $6008
 D4DF: 86 23          LDA    #$01
 D4E1: 97 34          STA    $B6
@@ -8148,14 +8120,18 @@ DB1F: 89 DD          ADCA   #$FF
 DB21: 96 93          LDA    $11
 DB23: 48             ASLA
 DB24: 8E F9 AB       LDX    #jump_table_db29
-DB27: 6E BE          JMP    [A,X]        ; [indirect_jump]
+DB27: 6E BE          JMP    [A,X]        ; [indirect_jump] [nb_entries=7]
 
-DB43: 55             LSRB
-DB44: 83 96 43       SUBD   #$B4C1
+DB37: 8E 79 C8       LDX    #$51E0
+DB3A: C6 9A          LDB    #$12
+DB3C: BD FF 39       JSR    $D7B1
+DB3F: BD 59 D7       JSR    $7BF5
+DB42: BD 55 83       JSR    $D7A1
+DB45: 96 43          LDA    $C1
 DB47: 84 2B          ANDA   #$03
 DB49: 48             ASLA
 DB4A: 8E 53 67       LDX    #jump_table_db4f
-DB4D: 6E 1E          JMP    [A,X]        ; [indirect_jump]
+DB4D: 6E 1E          JMP    [A,X]        ; [indirect_jump] [nb_entries=3]
 
 DB55: 8E CD BB       LDX    #$4F39
 DB58: CE 55 88       LDU    #$7D00

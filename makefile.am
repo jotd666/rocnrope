@@ -1,4 +1,4 @@
-PROGNAME = digdug2
+PROGNAME = rocnrope
 MAIN_AGA = ..\$(PROGNAME)_aga
 MAIN_OCS = ..\$(PROGNAME)_ocs
 AMIGA_SHELL = ..\$(PROGNAME)
