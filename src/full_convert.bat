@@ -8,9 +8,9 @@ rem add_reg_log.py -c 91F9  -s A764 -e A7E6 -p 1 jailbreak.68k
 rem add_reg_log.py -s 82DA -e 8326 -p 1 jailbreak.68k
 
 :skip_instrum
-m68k-amigaos-as --defsym __amiga__=1 rocnrope.68k 2>&1 | more
-rem m68k-amigaos-ld -o test_exe rocnrope.o   > undefs.txt 2>&1
-
+m68k-amigaos-as --defsym __amiga__=1 rocnrope.68k -o rocnrope.o 2>&1
+m68k-amigaos-ld -o test_exe rocnrope.o   > undefs.txt 2>&1
+extract_undefined_symbols.py --debug-script mamedbg undefs.txt > undefs_todo.txt
 
 pause
 

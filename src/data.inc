@@ -9,3 +9,4 @@ dsw2_3000 = 0x3000
 dsw3_3100 = 0x3100
 interrupt_vector_8182 = 0x8182
 color_ram_4800 = 0x4800
+video_ram_4c00 = 0x4c00
