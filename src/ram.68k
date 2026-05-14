@@ -33,9 +33,7 @@
 
 ram_buffer:
 	.ifeq	OPT_ALIGNED_MEMORY
-	.skip	0x4000		| stops at 0x3000
-rom_bank:
-	.skip	0x2000
+	.skip	0x6000
 rom_buffer:
 	.skip	0x10000-0x6000
 	.else

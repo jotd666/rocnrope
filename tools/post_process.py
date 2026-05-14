@@ -77,6 +77,14 @@ def process_jump_table(line):
 """
     return line
 
+def get_original_instruction(line):
+    toks = line.split("| [")
+    if len(toks)==1:
+        return ""
+    inst = toks[1][7:].split("]")[0]
+    return inst
+
+
 def remove_code(pattern,lines,i):
     if pattern in lines[i]:
         lines[i] = remove_instruction(lines,i)
@@ -105,7 +113,7 @@ input_dict = {
 #"sh_irqtrigger_w_1481":"",
 }
 
-store_to_video = re.compile("GET_ADDRESS\s+0x4[89ABCDEF]",flags=re.I)   # game_specific
+store_to_video = re.compile("GET_ADDRESS\s+(0x4[89ABCDEF]|video_ram_4)",flags=re.I)   # game_specific
 
 # various dirty but at least automatic patches applying on the converted code
 with open(source_dir / "conv.s") as f:
@@ -126,6 +134,27 @@ with open(source_dir / "conv.s") as f:
         address = get_line_address(line)
 
         line = process_jump_table(line)
+
+        # pre-add video_address tag if we find a store instruction to an explicit 3000-3FFF address
+        if store_to_video.search(line):
+            line = line.rstrip() + " [video_address]\n"
+
+
+        if "[video_address" in line:
+            # give me the original instruction
+            line = line.replace("_ADDRESS","_UNCHECKED_ADDRESS")
+            # if it's a write, insert a "VIDEO_DIRTY" macro after the write
+            for j in range(i+1,len(lines)):
+                next_line = lines[j]
+                if "[...]" not in next_line:
+                    break
+                if ",(a0)" in next_line or "clr" in next_line or "MOVE_W_FROM_REG" in next_line:
+                    if any(x in next_line for x in ["address_word","MOVE_W_FROM_REG"]):
+                        lines[j] = next_line+"\tVIDEO_WORD_DIRTY | [...]\n"
+                    else:
+                        lines[j] = next_line+"\tVIDEO_BYTE_DIRTY | [...]\n"
+                    break
+
         ###############################################
         # game_specific
 
@@ -147,9 +176,74 @@ with open(source_dir / "conv.s") as f:
 
         if "review pshu instruction" in line:
             line = remove_error(line)
+
+        # process target stack tags
+        if "[target_stack_" in line:
+            if "_alloc]" in line or "_free]" in line:
+                lines[i-2] = remove_error(lines[i-2])
+                lines[i-1] = remove_error(lines[i-1])
+            elif "_store]" in line or "_load]" in line or "_set]" in line:
+                lines[i-1] = remove_error(lines[i-1])
+            elif "_push]" in line:
+                # re-convert from scratch
+                original = get_original_instruction(line)
+                args = original.split()[1]
+                # there are only 3 cases here: a,b,x/b
+                comment = f"  | [${address:04x}: pshs {args}] [target_stack_push]"
+                if args in ["a","b"]:
+                    reg = "d0" if args=="a" else "d1"
+                    to_add = f"""\tsubq\t#1,d5{comment}
+\tGET_REG_ADDRESS    0,d5  | [...]
+\tmove.b\t{reg},(a0)    | [...]
+"""
+                else:
+                    # x/b
+                    to_add = f"""\tsubq\t#3,d5{comment}
+\tGET_REG_ADDRESS    0,d5    | [...]
+\tmove.b\td1,(a0)+    | [...]
+\trol.w\t#8,d2    | [...]
+\tmove.b\td2,(a0)+    | [...]
+\trol.w\t#8,d2     | [...]
+\tmove.b\td2,(a0)     | [...]
+"""
+                line = to_add
+            elif "_pull]" in line:
+                # re-convert from scratch
+                original = get_original_instruction(line)
+                args = original.split()[1]
+                # there are only 3 cases here: a,b,x/b
+                # and we don't need to restore the values, those were for parameter passing
+                comment = f"  | [${address:04x}: puls {args}] [target_stack_pull]"
+                if args in ["a","b"]:
+                    reg = "d0" if args=="a" else "d1"
+                    to_add = f"""\taddq\t#1,d5{comment}
+"""
+                else:
+                    # x/b
+                    to_add = f"""\taddq\t#3,d5{comment}
+"""
+                line = to_add
+        elif address==0xb610:
+            line = "\tILLEGAL\n"  # reached???
+
+        if "review stray bcc/bcs test" in line:
+            # try to process in a generic way
+            prev = lines[i-4]
+            if any(x in prev for x in ("sub.","add.","abcd")):
+                lines[i-4] += "\tPUSH_SR\n"
+                lines[i-2] += "\tPOP_SR\n"
+                line = remove_error(line)
+        elif "instruction rti" in line:
+            line = change_instruction("rts",lines,i)
+
+        # correct BCD scoring
+        elif address in [0X6732,0x6739]:
+            line = "\tPUSH_SR\n"+line
+        elif "addx mix" in line:
+            line = "\tPOP_SR\n"
+
         # end game_specific
         ###############################################
-
         lines[i] = line
 
 with open(source_dir / "data.inc","w") as fw:

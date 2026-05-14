@@ -1,3 +1,9 @@
+converter misses the optimization:
+	GET_ADDRESS	0x818a                     	| [$61b6: std    $818a]
+	move.w	d1,(a0) |  [...]
+	MAKE_D                                 	| [...]
+
+
 - set DSW difficulty lives, etc.
 - cheat add 10000 to score 
 - highscore load/save

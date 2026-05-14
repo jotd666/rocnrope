@@ -2,7 +2,6 @@
 		.global osd_write_high_scores
 		.global	load_highscores
 		.global	save_highscores
-		.global update_elevator_sound
 		.global osd_sound_start
 		.global osd_music_stop
 		.global music_tick
@@ -12,7 +11,7 @@
 * sound engine and also highscore management, common to all versions
 	
 	.include "lvo/dos_lvos.i"
-	.include "include.inc"
+	.include "rocnrope.inc"
 	.include "sounds.inc"
 
 SCORE_FILE_SIZE = 3+30*3   | wrong

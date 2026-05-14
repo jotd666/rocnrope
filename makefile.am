@@ -35,7 +35,8 @@ WHDASM = vasmm68k_mot -DDATETIME -I$(HDBASE)/amiga39_JFF_OS/include -I$(WHDBASE)
 AGA_OBJS = amiga_aga.o sounds.o amiga_shared.o $(PROGNAME)_020.o ram.o graphics_aga.o rom.o vbr.o ReadJoyPad.o ptplayer.o 
 OCS_OBJS = amiga_ocs.o sounds.o amiga_shared.o $(PROGNAME)_000.o ram.o graphics_ocs.o rom.o vbr.o ReadJoyPad.o ptplayer.o 
 
-all: $(AMIGA_SHELL) $(MAIN_AGA) $(MAIN_OCS) $(WHDLOADER_OCS) $(WHDLOADER_OCS_CHIP) $(WHDLOADER_AGA) $(WHDLOADER_AGA_CHIP) $(AMIGASRC)/aga/graphics.68k $(AMIGASRC)/sounds.68k
+#$(AMIGA_SHELL)$(MAIN_OCS) $(WHDLOADER_OCS)$(WHDLOADER_OCS_CHIP) 
+all:  $(MAIN_AGA)  $(WHDLOADER_AGA) $(WHDLOADER_AGA_CHIP) $(AMIGASRC)/aga/graphics.68k $(AMIGASRC)/sounds.68k
  
 $(AMIGA_SHELL): shell.o
 	$(GCC_BIN)/m68k-amigaos-ld $(OPT_RELEASE_LINK) -o $(AMIGA_SHELL) shell.o
@@ -46,14 +47,14 @@ clean:
 	
 shell.o: $(AMIGASRC)/shell.68k
 	$(ASM_000) -I$(AMIGASRC) -I$(AMIGASRC)/mit_includes $(AMIGASRC)/shell.68k -o shell.o
-$(AMIGASRC)/aga/graphics.68k: $(ASSETS)/convert_graphics_aga.py
-	cmd /c $(ASSETS)\convert_graphics_aga.py
+#$(AMIGASRC)/aga/graphics.68k: $(ASSETS)/convert_graphics_aga.py
+#	cmd /c $(ASSETS)\convert_graphics_aga.py
 $(AMIGASRC)/ocs/graphics.68k: $(ASSETS)/convert_graphics_ocs.py
 	cmd /c $(ASSETS)\convert_graphics_ocs.py
 
-$(AMIGASRC)/sounds.68k: $(ASSETS)/convert_sounds.py 
-	cmd /c $(ASSETS)\convert_sounds.py
-	del sound_entries.o sounds.o
+#$(AMIGASRC)/sounds.68k: $(ASSETS)/convert_sounds.py 
+#	cmd /c $(ASSETS)\convert_sounds.py
+#	del sound_entries.o sounds.o
 	
 $(MAIN_AGA): $(AGA_OBJS)
 	$(GCC_BIN)/m68k-amigaos-ld $(OPT_RELEASE_LINK) -o $(MAIN_AGA) $(AGA_OBJS)
@@ -64,13 +65,13 @@ ram.o: ram.68k options.inc
 	$(ASM) ram.68k -o ram.o
 rom.o: rom.68k
 	$(ASM) rom.68k -o rom.o
-$(PROGNAME)_020.o: $(PROGNAME).68k options.inc include.inc sounds.inc data.inc
+$(PROGNAME)_020.o: $(PROGNAME).68k options.inc rocnrope.inc sounds.inc data.inc
 	$(ASM_020) $(PROGNAME).68k -o $(PROGNAME)_020.o
-$(PROGNAME)_000.o: $(PROGNAME).68k options.inc include.inc sounds.inc data.inc
+$(PROGNAME)_000.o: $(PROGNAME).68k options.inc rocnrope.inc sounds.inc data.inc
 	$(ASM_000) $(PROGNAME).68k -o $(PROGNAME)_000.o
-amiga_aga.o: $(AMIGASRC)/amiga.68k options.inc include.inc data.inc $(AMIGASRC)/ReadJoyPad.i $(AMIGASRC)/aga/palette.68k $(AMIGASRC)/aga/graphics.68k $(AMIGASRC)/sound_entries.68k  $(AMIGASRC)/scroll_table_64.68k
+amiga_aga.o: $(AMIGASRC)/amiga.68k options.inc rocnrope.inc data.inc $(AMIGASRC)/ReadJoyPad.i $(AMIGASRC)/aga/palette.68k $(AMIGASRC)/aga/graphics.68k $(AMIGASRC)/sound_entries.68k 
 	$(ASM_020) -I$(AMIGASRC)/aga -I$(AMIGASRC) -I$(AMIGASRC)/mit_includes $(AMIGASRC)/amiga.68k -o amiga_aga.o
-amiga_ocs.o: $(AMIGASRC)/amiga.68k options.inc include.inc data.inc $(AMIGASRC)/ReadJoyPad.i $(AMIGASRC)/ocs/palette.68k $(AMIGASRC)/sound_entries.68k $(AMIGASRC)/scroll_table_16.68k
+amiga_ocs.o: $(AMIGASRC)/amiga.68k options.inc rocnrope.inc data.inc $(AMIGASRC)/ReadJoyPad.i $(AMIGASRC)/ocs/palette.68k $(AMIGASRC)/sound_entries.68k
 	$(ASM_000) -I$(AMIGASRC)/ocs -I$(AMIGASRC) -I$(AMIGASRC)/mit_includes $(AMIGASRC)/amiga.68k -o amiga_ocs.o
 amiga_shared.o: $(AMIGASRC)/amiga_shared.68k options.inc  data.inc $(AMIGASRC)/sound_entries.68k $(AMIGASRC)/ReadJoyPad.i
 	$(ASM) -I$(AMIGASRC) -I$(AMIGASRC)/mit_includes $(AMIGASRC)/amiga_shared.68k -o amiga_shared.o
