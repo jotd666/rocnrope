@@ -12,7 +12,7 @@ OPT_ALIGNED_MEMORY = 1
 * makes random routines return 0. Can lock up the game
 *OPT_FIX_RANDOM = 1
 
-RAM_START = 0x0000
+RAM_START = 0x4000
 ROM_START = 0x6000
 
 	.ifdef	RELEASE
