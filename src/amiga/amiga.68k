@@ -45,7 +45,7 @@ NB_SPRITE_CLUTS_POW = 4
 NB_SPRITE_CLUTS = 1<<NB_SPRITE_CLUTS_POW
 
 * 3 & 3: most performant
-BITPLANE_FMODE = 3			| works with 1, albeit slower
+BITPLANE_FMODE = 0			| works with 1, albeit slower
 SPRITE_FMODE = 3			| required!!
 
 BORDERBLANK = 1
@@ -54,12 +54,8 @@ COPPER_Y_START = 0x18
 BASE_BPLCON3_VALUE = (1<<12)+(BORDERBLANK<<5)  | dpf second playfield palette starts at color 16!
 BASE_BPLCON2_VALUE = 0x0024		| sprites above all playfields
 
-	.ifdef	NONAGA_VERSION
 SPRITE_X_CORRECTION = 0
-	.else
-SPRITE_X_CORRECTION = 32
-	.endif
-SPRITE_Y_CORRECTION = 0
+SPRITE_Y_CORRECTION = 7
 SPRITE_HEIGHT = 16
 SPRITE_WIDTH = 16
 HW_SPRITE_X_CORRECTION = 0
@@ -73,8 +69,8 @@ _custom = 0xDFF000
 
 SPRITE_START = 0x4000
 
-LAST_SPRITE = RAM_START+(NB_TARGET_SPRITES*TARGET_SPRITE_SIZEOF)-TARGET_SPRITE_SIZEOF
-FIRST_SPRITE = RAM_START
+LAST_SPRITE = SPRITE_START+(NB_TARGET_SPRITES*2)-2
+FIRST_SPRITE = SPRITE_START
 
 
 	.ifdef	RELEASE
@@ -132,16 +128,16 @@ VIDEO_ADDRESS = 0x4800
 
 NB_HOST_SPRITES = 8
 
-NB_TARGET_SPRITES = 0x30  
+NB_TARGET_SPRITES = 0x18  
 	
-TARGET_SPRITE_X = 2
-TARGET_SPRITE_Y = 3 
-TARGET_SPRITE_CODE = 0
-TARGET_SPRITE_ATTR = 1
-TARGET_SPRITE_SIZEOF = 4
+TARGET_SPRITE_X = 1
+TARGET_SPRITE_Y = 0x400 
+TARGET_SPRITE_CODE = 0x401
+TARGET_SPRITE_ATTR = 0
 
-FLIP_Y_BIT = 5
-MIRROR_X_BIT = 4
+
+FLIP_Y_BIT = 6
+MIRROR_X_BIT = 7
 
 	STRUCTURE	PREVIOUS_SPRITE,0
 	UWORD	PREV_X
@@ -761,7 +757,7 @@ demo_game:
 	clr.w	d0
 	move.l	d0,d1
 	add.l	#0x10000+RAM_START,d1
-	move.l	d1,ram_start_0000		| memory (0x1000-0xFFFF)
+	move.l	d1,ram_start_4000		| memory (0x4000-0xFFFF)
 	
 	* relocate rom tables just after shared RAM
 	* memory is contiguous (only 1 segment of memory RAM+ROM)
@@ -1165,7 +1161,7 @@ really_update_hw_sprites:
 	move.l	#sprite_control_words,d5
 1:
 	jbsr	update_one_hw_sprite
-	subq.w	#TARGET_SPRITE_SIZEOF,a0
+	subq.w	#2,a0
 	cmp.l	a2,a6
 	jeq		2f			| all sprites are used already: bail out
 	addq	#1,d7
@@ -1196,17 +1192,10 @@ really_update_hw_sprites:
 	tst.b	d1
 	jeq		2f
 
-	moveq	#0,d2
-	move.b	(TARGET_SPRITE_ATTR,a0),d2
-	btst	#7,d2
-	jeq		0f
-	sub.w	#0x100,d0		| "wrap"
-0:
-	add.w	#0x40,d0
-	jmi		2f	
 	.endm
 	
-	
+
+
 * < A0: target sprite memory
 * < A1: sprite ctrl word table (Y=16)
 * < A2: part copperlist where the sprites are
@@ -1215,9 +1204,9 @@ really_update_hw_sprites:
 * < D5: pointer on sprite positions in the copperlist
 * < D7: loop counter (used for flag index)
 update_one_hw_sprite:
-
 	* get code immediately. we want to know if it's a
 	* hardware sprite right away
+	
 	moveq	#0,d3
 	move.b	(TARGET_SPRITE_CODE,a0),d3
 
@@ -1231,12 +1220,10 @@ update_one_hw_sprite:
 	move.l	(a4,d3.w),d3
 	jeq		2f		| not defined or no HW sprite, pass to BOBs
 
-
 	COMPUTE_SPRITE_COORDS
 
 	move.l	d3,a5	| clut table
 
-	
 
 	
 	lea		sprite_drawn_table(pc),a3
@@ -1295,6 +1282,8 @@ update_one_hw_sprite:
 2:
 	
 	rts
+	
+
 really_update_sprites:
 update_bobs_and_hw_sprites:
 	
@@ -1376,17 +1365,15 @@ update_bobs_and_hw_sprites:
 	* draw current BOBs from 6809 sprite memory *
 	*********************************************
 
-
-	lea		sprite_groups(pc),a2
 	GET_MEMORY_START_AND_DP
     lea _custom,A5
-	lea		(SPRITE_START,a6),a0		| sprite start
+	lea		(LAST_SPRITE,a6),a0		| sprite start
 	lea		bob_table,a4
 	move.w	#NB_TARGET_SPRITES-1,d7
 	move.l	bob_previous_drawn_sprites(pc),a6
 1:
 	jbsr	update_one_bob
-	addq.w	#TARGET_SPRITE_SIZEOF,a0
+	subq.w	#2,a0
 	dbf		d7,1b
 2:
 	rts
@@ -1535,32 +1522,21 @@ copy_64:
 	
 	
 	.endif
-*void jailbrek_state::draw_sprites(bitmap_ind16 &bitmap, const rectangle &cliprect)
+
+*	void rocnrope_state::draw_sprites(bitmap_ind16 &bitmap, const rectangle &cliprect)
 *{
-*	for (int i = 0; i < m_spriteram.bytes(); i += 4)
+*	for (int offs = m_spriteram[0].bytes() - 2; offs >= 0; offs -= 2)
 *	{
-*		int const attr = m_spriteram[i + 1];    // attributes = ?tyxcccc
-*		int const code = m_spriteram[i] + ((attr & 0x40) << 2);
-*		int const color = attr & 0x0f;
-*		int flipx = attr & 0x10;
-*		int flipy = attr & 0x20;
-*		int sx = m_spriteram[i + 2] - ((attr & 0x80) << 1);
-*		int sy = m_spriteram[i + 3];
+*		int const color = m_spriteram[1][offs] & 0x0f;
 *
-*		if (flip_screen())
-*		{
-*			sx = 240 - sx;
-*			sy = 240 - sy;
-*			flipx = !flipx;
-*			flipy = !flipy;
-*		}
-*
-*		m_gfxdecode->gfx(1)->transmask(bitmap, cliprect, code, color, flipx, flipy,
-*			sx, sy,
-*			m_palette->transpen_mask(*m_gfxdecode->gfx(1), color, 0));
+*		m_gfxdecode->gfx(0)->transmask(bitmap, cliprect,
+*				m_spriteram[0][offs + 1],
+*				color,
+*				flip_x=m_spriteram[1][offs] & 0x40, flip_y=~m_spriteram[1][offs] & 0x80,
+*				240 - m_spriteram[0][offs], m_spriteram[1][offs + 1],
+*				m_palette->transpen_mask(*m_gfxdecode->gfx(0), color, 0));
 *	}
 *}
-
 * < A0: sprite array
 * < A2: sprite group table
 * < A4: bob table
@@ -1569,15 +1545,12 @@ copy_64:
 * must preserve all of those, plus D7
 
 update_one_bob:
-	rts
 	
-	* X = 0 and Y = 0: disabled
+	* X = 0 : disabled
 	
 	COMPUTE_SPRITE_COORDS
 
-	.ifdef	NONAGA_VERSION
-	add.w	current_scroll_values+16,D0
-	.endif
+
 	.ifne	SPRITE_Y_CORRECTION
 	add.w	#SPRITE_Y_CORRECTION,d1
 	.endif
@@ -1587,32 +1560,13 @@ update_one_bob:
 	
 	* get code immediately. A lot of sprites won't be displayed
 	* as they are grouped with others
+	moveq	#0,d2
 	moveq	#0,d3
+	move.b	(TARGET_SPRITE_ATTR,a0),d2
 	move.b	(TARGET_SPRITE_CODE,a0),d3
-	btst.b	#6,d2
-	jeq		111f
-	bset	#8,d3		| add 256
-111:
-
 	and.b	#0xF,d2		| CLUT
 	
-	* check if it is a grouped sprite in the table with 0x100 pre-computed entries
-	
-	tst.b	(a2,d3.w)
-	jeq		10f
-	jpl		50f
-	* right part: display only if mirrored
-	btst	#MIRROR_X_BIT,(TARGET_SPRITE_ATTR,a0)
-	jeq		2f			| not mirrored
-	* mirrored, right part: display but correct code
-	subq.w	#1,d3
-	jra		100f
-50:
-	btst	#MIRROR_X_BIT,(TARGET_SPRITE_ATTR,a0)
-	jne		2f			| mirrored: don't display
-	
-100:
-10:
+
 	* here D3 is code and D2 is clut
 	* log the usage
 	.ifne	OPT_ENABLE_LOGGING
@@ -1649,10 +1603,10 @@ update_one_bob:
 	move.b	(TARGET_SPRITE_ATTR,a0),d3
 	move.l	a0,-(a7)
 	move.l	d4,a0
-    * flip_x = D3 & 0x10
-    * flip_y = D3 & 0x20
+    * flip_x = D3 & 0x40
+    * flip_y = D3 & 0x80
 	btst	#MIRROR_X_BIT,d3
-	jeq		101f
+	jne		101f
 	* mirror (most sprites don't have that, it will just display
 	* the next frame if not generated, which can be off-putting!
 	add.w	#((NB_BOB_PLANES+1)*4+8),a0
@@ -1662,10 +1616,7 @@ update_one_bob:
 	move.l	(a7),a1
 	move.b	(TARGET_SPRITE_CODE,a1),d3
 	move.b	(TARGET_SPRITE_ATTR,a1),d2
-	btst.b	#6,d2
-	jeq		111f
-	bset	#8,d3		| add 256 for logging message
-111:
+
 	BREAKPOINT	"unexpected mirror bit set, tile code in d3"
 	jra		21f
 	.endif
@@ -1675,7 +1626,7 @@ update_one_bob:
 	move.w	(a0)+,d2		| Y-offset
 	addq	#2,a0
 	btst	#FLIP_Y_BIT,d3
-	jeq		101f
+	jne		101f
 	* flipped: correct Y start
 	neg.w	d2
 	sub.w	d4,d2
@@ -1703,12 +1654,12 @@ update_one_bob:
 	moveq	#0,d5			    | Y-offset
 
 	btst	#FLIP_Y_BIT,d3
-	jeq		101f
+	jne		101f
 	* flip
 	neg.w	d4
 101:
 	move.w	#NB_BOB_PLANES,d3
-	jbsr		blit_planes_any_internal_cookie_cut
+	jbsr	blit_planes_any_internal_cookie_cut
 0:
 	move.l	(a7)+,a0
 	rts
@@ -2420,8 +2371,8 @@ platform_init:
 	.else
     move.w #0x0610+BORDERBLANK,bplcon0(a5) | 8 bitplanes, dual playfield, borderblank
  	*         VVHH
-    move.w #0x99-0X18+0x48+(COPPER_Y_START<<8),diwstrt(a5)
-    move.w #0x79+0x3F+(COPPER_Y_START<<8)-0x1000,diwstop(a5)
+    move.w #0x91+(COPPER_Y_START<<8),diwstrt(a5)
+    move.w #0x71+(COPPER_Y_START<<8)+0x1000,diwstop(a5)
 	.endif
 	move.w	#BASE_BPLCON3_VALUE,bplcon3(a5)   | ecs needs borderblank
 	move.w	#BASE_BPLCON2_VALUE,bplcon2(a5)
@@ -2432,10 +2383,10 @@ platform_init:
 	* restrict borders: we don't see bobs on the borders!
 	* try to hide color 0 on the border (except on OCS)
 
-	.ifdef	NONAGA_VERSION
+	.ifeq	BITPLANE_FMODE
 	move.w	#BG_NB_BYTES_PER_ROW-40,d0
 	.else
-	move.w	#-8+FG_NB_BYTES_PER_ROW-40,d0
+	move.w	#-8+BG_NB_BYTES_PER_ROW-40,d0
     move.w #(SPRITE_FMODE<<2)+BITPLANE_FMODE,fmode(a5)	| 32 bit bitplane fetch, 64 bit wide sprites
 	move.w	#0,bplcon4(a5)			| use the same colors as bobs playfield
 	.endif
@@ -2514,9 +2465,7 @@ platform_init:
 
 * so memory is quadword-aligned (not trusting .align directives)
 align_for_fmode:
-	.ifdef	NONAGA_VERSION
-	* do nothing!
-	.else
+	.ifne	BITPLANE_FMODE
 	add.w	#0x8,a0
 	move.l	a0,d0
 	and.b	#0xF8,d0
@@ -2625,15 +2574,16 @@ compute_tile_xy:   | portrait
 
 	moveq	#0,d0
 	moveq	#0,d1
-	move.w	d7,d1
-	neg.w	d1
-	add.w	#0x20,d1
+	move.b	d7,d1
+	neg.b	d1
+	add.b	#0x20,d1
 	lsr.w	#5,d7		| this is X
 
 	and.w	#0x1F,d1	| this is Y
 	*addq.w	#2,d1
 
 	move.b	d7,d0		| this is X
+	and.b	#0x1F,d0
 	lsl.b	#3,d1		| Y times 8
 	rts
 
@@ -2712,7 +2662,6 @@ update_bg_tile:
 
 	bsr		compute_tile_xy
 
-
 	lea		character_table,a0
 	
 	* updating bitplanes
@@ -2789,7 +2738,7 @@ update_bg_tile:
 12:
 	move.l	d0,a2					| pointer on bitplanes
 	lea		mirror_jump_table(pc),a5
-	ror.b	#3,d1			        | modifiers on bits 5 and 6
+	ror.b	#4,d1			        | modifiers on bits 5 and 6
 	and.w	#3,d1
 	.ifndef	MC68020
 	add.w	d1,d1
@@ -2915,10 +2864,10 @@ mirror_flipped_tile:
 	
 
 mirror_jump_table:
-	.long	flipped_tile
-	.long	mirror_flipped_tile
-	.long	standard_tile
 	.long	mirror_tile
+	.long	standard_tile
+	.long	mirror_flipped_tile
+	.long	flipped_tile
 	
 mirror_bits:
 	.include "mirror_bits.68k"
@@ -3656,10 +3605,11 @@ bobs_bitplanes:
 tiles_bitplanes:
 	DECL_BITPLANES	0,NB_BOB_PLANES
 	.else
-bobs_bitplanes:
-	DECL_EVEN_BITPLANES	0,4
 tiles_bitplanes:
 	DECL_EVEN_BITPLANES	4,4
+	.word	0x01+((COPPER_Y_START+2)*256),0xFFFE
+bobs_bitplanes:
+	DECL_EVEN_BITPLANES	0,4
 	* set 0-scroll value for both plane sets
 	.endif
 	.word	bplcon1

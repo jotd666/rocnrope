@@ -1,3 +1,8 @@
+- letters mirrored without logic
+- "CREDIT" displays on the top instead of bottom
+- implement sprites
+- rip tunes
+
 converter misses the optimization:
 	GET_ADDRESS	0x818a                     	| [$61b6: std    $818a]
 	move.w	d1,(a0) |  [...]

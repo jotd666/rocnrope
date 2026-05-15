@@ -86,6 +86,8 @@ dump=False,name_dict=None,cluts=None,tile_number=0,is_bob=False):
 
                 img = Image.new("RGB",(width,height))
                 img.paste(tiles_1,(-i*width,-j*height))
+                if is_bob:
+                    img = ImageOps.flip(img)
 
                 # only consider colors of used tiles
                 palette.update(set(bitplanelib.palette_extract(img)))
@@ -103,27 +105,12 @@ dump=False,name_dict=None,cluts=None,tile_number=0,is_bob=False):
                     img.save(os.path.join(dump_subdir,f"{name}_{tile_number:02x}_{palette_index:02x}.png"))
             tile_number += 1
 
-    other_tile_failure = False
+
     if is_bob:
         # rework & dump grouped / non grouped sprites
         # rework tiles which are grouped
         for tile_number,wtile in enumerate(tileset_1):
 
-            if wtile and tile_number in group_sprite_pairs:
-                # change wtile, fetch code +0x100
-                other_tile_index = tile_number+1
-                other_tile = tileset_1[other_tile_index]
-                if not other_tile:
-                    print(f"warn: other tile index 0x{other_tile_index:02x} not found (palette ${palette_index:x})")
-                    other_tile_failure = True
-                new_tile = Image.new("RGB",(wtile.size[0]*2,wtile.size[1]))
-
-                new_tile.paste(wtile)
-                if other_tile:
-                    new_tile.paste(other_tile,(wtile.size[0],0))
-                tileset_1[tile_number] = new_tile
-                tileset_1[tile_number+1] = None  # discatd
-                wtile = new_tile
             if dump_it and wtile:
                 img = ImageOps.scale(wtile,5,resample=Image.Resampling.NEAREST)
                 if sprite_names:
@@ -134,7 +121,7 @@ dump=False,name_dict=None,cluts=None,tile_number=0,is_bob=False):
                 img.save(os.path.join(dump_subdir,f"{name}_{tile_number:02x}_{palette_index:02x}.png"))
 
 
-    return sorted(set(palette)),tileset_1,other_tile_failure
+    return sorted(set(palette)),tileset_1,False
 
 def add_hw_sprite(index,name,cluts=[0]):
     if isinstance(index,range):

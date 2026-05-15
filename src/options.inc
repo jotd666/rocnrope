@@ -41,7 +41,7 @@ next\@:
 	.ifeq	OPT_ALIGNED_MEMORY
 	lea		ram_buffer-RAM_START,a6
 	.else
-	move.l		ram_start_0000,a6
+	move.l		ram_start_4000,a6
 	
 	* adjust offset to avoid subbing at run-time
 	.ifne	RAM_START

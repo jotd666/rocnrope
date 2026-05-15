@@ -13,20 +13,10 @@
 	.include "lvo/dos_lvos.i"
 	.include "rocnrope.inc"
 	.include "sounds.inc"
-
+	.include "options.inc"
+	
 SCORE_FILE_SIZE = 3+30*3   | wrong
 
-.macro	GET_MEMORY_START_IN_A6
-	move.l	m6809_direct_page_pointer,a4
-	.ifdef	RELEASE
-	lea		ram_buffer,a6
-	.else
-	move.l		ram_start_0000,a6
-	
-	* adjust offset to avoid subbing at run-time
-	sub.w	#0x1000,a6
-	.endif
-	.endm
 		
 osd_read_high_scores:
 	movem.l	d0-d7/a0-a6,-(a7)
@@ -46,7 +36,7 @@ osd_read_high_scores:
 	beq.b	1f
 2:
 	* from DOS: just copy buffer
-	GET_MEMORY_START_IN_A6
+	GET_MEMORY_START_AND_DP
 	* first just copy buffer as contiguous 
 
 	lea		high_score_buffer(pc),a0
@@ -70,7 +60,7 @@ osd_write_high_scores:
 	tst.b	cheat_used		| don't save score if cheat on
 	bne.b	1f
 	.endif
-	GET_MEMORY_START_IN_A6
+	GET_MEMORY_START_AND_DP
 	* first just copy buffer as contiguous 
 
 	lea		high_score_buffer(pc),a1

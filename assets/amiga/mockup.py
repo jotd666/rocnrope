@@ -72,16 +72,16 @@ def process(the_dump,name_filter=None,hide_named_sprite=None):
 ##        int sx = m_spriteram[i + 2] - ((attr & 0x80) << 1);
 ##        int sy = m_spriteram[i + 3];
 
-    for i in range(0XBC,-4,-4):
-        attr = m_spriteram[i + 1]
-        code = m_spriteram[i] + ((attr & 0x40) << 2)
+    for i in range(0X2E,-2,-2):
+        attr = m_spriteram[i]
+        code = m_spriteram[i+0x401]
         color = attr & 0x0f
-        flipx = bool(attr & 0x10)
-        flipy = bool(attr & 0x20)
-        sx = m_spriteram[i + 2] - ((attr & 0x80) << 1)
-        sy = m_spriteram[i + 3]
+        flipy = bool(attr & 0x40)
+        flipx = not bool(attr & 0x80)
+        sy = m_spriteram[i+0x400]
+        sx = m_spriteram[i+1]
 
-        if sy:
+        if sx:
             im = tile_set[color][code]
 
             if flipy:
@@ -98,5 +98,5 @@ def process(the_dump,name_filter=None,hide_named_sprite=None):
     print(f"nb active: {nb_active}")
 
 
-process(r"C:\Users\Public\Documents\Amiga Files\WinUAE\sprite_ram_1000")
+process(r"K:\Emulation\MAME\sprites")
 

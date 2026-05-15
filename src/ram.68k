@@ -19,7 +19,7 @@
 	.global	rom_bank
 	.global	rom_buffer
 	.else
-	.global ram_start_0000
+	.global ram_start_4000
 	.global	dev_ram_buffer
 	.endif
 	
@@ -39,7 +39,7 @@ rom_buffer:
 	.else
 dev_ram_buffer:
 	.skip	0x20000
-ram_start_0000:
+ram_start_4000:
 	.long	0
 	.endif
 
