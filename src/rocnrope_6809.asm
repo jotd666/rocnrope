@@ -29,10 +29,16 @@ dsw1_3083 = $3083
 dsw2_3000 = $3000
 dsw3_3100 = $3100
 interrupt_vector_8182 = $8182
+interrupt_vector_8184 = $8184
+interrupt_vector_8186 = $8186
+interrupt_vector_8188 = $8188
+interrupt_vector_818a = $818a
+interrupt_vector_818c = $818c
+
 color_ram_4800 = $4800
 video_ram_4c00 = $4c00
 
-start_6000:
+start_6000:      ; [global]
 6000: 4F             CLRA
 6001: B7 02 05       STA    mainlatch_8087
 6004: 6E AF 80 9C    JMP    self_tests_6226,PCR
@@ -230,13 +236,15 @@ start_6000:
 61A2: C4 80          ANDB   #$02
 61A4: 44             LSRA
 61A5: D7 D9          STB    $5B
+* set interrupt vectors dynamically (reflects in ROM
+* at $FFF8... very strange)
 61A7: CC 58 88       LDD    #$70A0
 61AA: FD 09 AA       STD    interrupt_vector_8182
-61AD: FD 09 0C       STD    $8184
-61B0: FD A3 04       STD    $8186
-61B3: FD A3 AA       STD    $8188
-61B6: FD 03 A2       STD    $818A
-61B9: FD 09 04       STD    $818C
+61AD: FD 09 0C       STD    interrupt_vector_8184
+61B0: FD A3 04       STD    interrupt_vector_8186
+61B3: FD A3 AA       STD    interrupt_vector_8188
+61B6: FD 03 A2       STD    interrupt_vector_818a
+61B9: FD 09 04       STD    interrupt_vector_818c
 61BC: 10 8E E9 72    LDY    #$61FA
 61C0: 8E 73 E2       LDX    #$5160
 61C3: EC 86          LDD    ,Y
@@ -1243,6 +1251,8 @@ l_686d:
 7098: 10 AE 83       LDY    $B,X
 709B: A6 27          LDA    $F,X
 709D: 7E E8 B5       JMP    $603D
+
+irq_70a0:   ; [global]
 70A0: 4F             CLRA
 70A1: B7 02 05       STA    mainlatch_8087
 70A4: B7 A2 82       STA    watchdog_8000

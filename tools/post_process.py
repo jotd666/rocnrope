@@ -103,6 +103,7 @@ def subt(m):
     return rval
 
 equates = []
+global_symbols = []
 
 this_dir = pathlib.Path(__file__).absolute().parent
 
@@ -110,7 +111,15 @@ source_dir = this_dir / "../src"
 
 # game_specific: replace or remove I/O addresses
 input_dict = {
-#"sh_irqtrigger_w_1481":"",
+"audio_8100":"",
+"interrupt_vector_8182":"",
+"interrupt_vector_8184":"",
+"interrupt_vector_8186":"",
+"interrupt_vector_8188":"",
+"interrupt_vector_818a":"",
+"interrupt_vector_818c":"",
+
+
 }
 
 store_to_video = re.compile("GET_ADDRESS\s+(0x4[89ABCDEF]|video_ram_4)",flags=re.I)   # game_specific
@@ -244,15 +253,29 @@ with open(source_dir / "conv.s") as f:
 
         # end game_specific
         ###############################################
+        if "GET_ADDRESS" in line:
+            val = line.split()[1]
+            osd_call = input_dict.get(val)
+            if osd_call is not None:
+                if osd_call:
+                    line = change_instruction(f"jbsr\tosd_{osd_call}",lines,i)
+                else:
+                    line = remove_instruction(lines,i)
+                lines[i+1] = remove_instruction(lines,i+1)
+
+        if "[global]" in line:
+            label = line.split(":")[0]
+            global_symbols.append(label)
+
         lines[i] = line
 
 with open(source_dir / "data.inc","w") as fw:
     fw.writelines(equates)
 
 with open(source_dir / f"{gamename}.68k","w") as fw:
-    # game_specific: fill global symbols
+
     fw.write(f"""\t.include "data.inc"
-\t.global\tirq_xxxx
-\t.global\treset_yyyy
 """)
+    for g in global_symbols:
+        fw.write(f"\t.global\t{g}\n")
     fw.writelines(lines)

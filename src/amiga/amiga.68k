@@ -71,8 +71,7 @@ Y_MAX = 256
 _custom = 0xDFF000
 
 
-RAM_START = 0x0000
-ROM_START = 0x8000
+
 SCROLL_START = 0x2000
 SPRITE_START = 0x1000
 
@@ -513,11 +512,7 @@ _user:
 	BTST	#1,d0
 	sne		infinite_lives_flag
 	
-	* new "innovative" cheat mode that makes the game
-	* slightly easier, but not so easy either!
-	btst	#2,d0
-	sne		no_enemy_collision_flag
-0:
+
 1:
 	
 	moveq	#0,d0
@@ -808,14 +803,14 @@ demo_game:
 	GET_MEMORY_START_AND_DP
 	moveq	#0,d5		| set D5.L to 0
 	jbsr	cpu_init
-	jmp			reset_81a6					| pass control to the cpu core
+	jmp			start_6000					| pass control to the cpu core
 
 
 do_irq:
 	* set base for RAM
 	jbsr	cpu_init
 	GET_MEMORY_START_AND_DP
-	jra			irq_8a57					| pass control to the cpu core
+	jra			irq_70a0					| pass control to the cpu core
 	
 * just in case some hardware calls nmi
 _nmi:
@@ -823,54 +818,7 @@ _nmi:
 	move.w	#0x7FFF,_custom+intreq
 	rts
 	
-	.ifndef	OCS_VERSION
-handle_music_termination:
-	moveq	#0,d0
-	move.b	_mt_E8Trigger,d0
-	jeq		0f
-	* problem is that the trigger is set multiple times by
-	* the module player even if we clear it
-	* so we set a countdown when starting a module
-	*
-	* another yet unseen issue was that the stop command canceled
-	* the sounds that we played right afterwards! I replaced the F00
-	* command by an empty pattern and a loop on that.
-	
-	* ignore that on OCS, no speech samples for levels
-	tst.b	trigger_lock
-	jeq		1f
 
-	rts
-1:
-	st.b	trigger_lock
-	clr.b	_mt_E8Trigger
-	* E8 command just issued from module, handle it
-
-	move.l	a5,d1		| save a5
-	GET_MEMORY_START_AND_DP
-	moveq	#0,d0
-	move.b		(stage_number_97,a5),d0
-	subq	#1,d0		| starts at 1 now 0
-	jeq		1f			| first level: different sequence
-	divu	#5,d0
-	clr.w	d0
-	swap	d0		| remainder of divide by 5
-	* level 2 and above or level 1 after completing the game
-	add.b	#BROADWAY_8A_SND,d0
-2:
-	jbsr	osd_sound_start
-	move.l	d1,a5
-0:
-	rts
-
-1:
-	* prisoners escape intro music ended
-	move.l	#THE_WARDEN_HAS_BEEN_TAKEN_93_SND,d0
-	jbsr	osd_sound_start
-	move.l	#SIREN_02_SND,d0
-	jra		2b
-	rts
-	.endif
 	
 level3_interrupt:
     movem.l d0-d7/a0-a6,-(a7)
@@ -899,9 +847,6 @@ level3_interrupt:
 	bsr		toggle_pause
 0:
 	
-	.ifndef	OCS_VERSION
-	jbsr	handle_music_termination
-	.endif
 
 	
 	* ack vbl twice (040/pistorm bug)
@@ -974,35 +919,7 @@ level3_interrupt:
     movem.l (a7)+,d0-d7/a0-a6
     rte
 	
-osd_get_speech_status:
-	move.b	#0,d0
-	rts
-osd_set_speech_status:
-	rts
-	
-* < D0: 2: horizontal, 6: vertical
-osd_set_scroll_direction:
-	movem.l	d0/d1/a0,-(a7)
-	lea		update_bg_tile_horiz,a0
-	move.w	#BG_HORIZ_NB_BYTES_PER_ROW-40,d1
-	move.w	#0X1FE,copper_jump_2		| no jump, horizontal scroll
-	clr.b	vertical_scroll
-	
-	cmp.b	#6,d0
-	jne		0f
-	st.b	vertical_scroll
-	move.w	#BG_VERT_NB_BYTES_PER_ROW-40,d1
-	move.w	#copjmp2,copper_jump_2		| jump, vertical scroll
-	lea		update_bg_tile_vert,a0
-	clr.w	reset_bplcon1_1
-0:
-	move.l	a0,update_tile_function
-	.ifndef	NONAGA_VERSION
-	subq	#8,d1		| adjust for fmode=3
-	.endif
-    move.w d1,bpl2mod_copperlist_entry
-	movem.l	(a7)+,d0/d1/a0
-	rts
+
 	
 	.ifndef	RELEASE
 
@@ -1143,7 +1060,7 @@ is_game_playing:
 
 	movem.l	d0/a5,-(a7)
 	move.l	m6809_direct_page_pointer,a5
-	move.b	game_state_25(a5),d0
+	*move.b	game_state_25(a5),d0
 	jeq		0f
 	cmp.b	#1,d0
 0:
@@ -1153,14 +1070,14 @@ is_game_playing:
 skip_level:
 	movem.l	a6/a5,-(a7)
 	GET_MEMORY_START_AND_DP
-	move.b	#1,level_completed_flag_9f(a5)					| no more lives
+	*move.b	#1,level_completed_flag_9f(a5)					| no more lives
 	movem.l	(a7)+,a6/a5
 	rts
 
 lose_all_lives:
 	movem.l	a6/a5,-(a7)
 	GET_MEMORY_START_AND_DP
-	move.b	#1,nb_lives_current_player_9e(a5)					| no more lives
+	*move.b	#1,nb_lives_current_player_9e(a5)					| no more lives
 	movem.l	(a7)+,a6/a5
 	rts
 
@@ -1168,19 +1085,19 @@ add_10000_points:
 	movem.l	a5/a6,-(a7)
 	GET_MEMORY_START_AND_DP
 	movem.w	d0/d1/d7,-(a7)
-	move.b	player_score_1572+1(a6),d0
+	*move.b	player_score_1572+1(a6),d0
 	move.b	d0,d1
 	lsr.b	#4,d1
 	MOVEQ	#2,d7
 	subq	#1,d7	| clear X
 	abcd	d7,d1
 	jcc		0f
-	add.b	#1,player_score_1572(a6)		| buggy after 9 adds, doesn't matter
+	*add.b	#1,player_score_1572(a6)		| buggy after 9 adds, doesn't matter
 0:
 	lsl.b	#4,d1
 	and.b	#0xF,d0
 	or.b	d1,d0
-	move.b	d0,player_score_1572+1(a6)
+	*move.b	d0,player_score_1572+1(a6)
 	movem.w	(a7)+,d0/d1/d7
 	movem.l	(a7)+,a5/a6
 	rts
@@ -2368,12 +2285,6 @@ switch_screen_buffers:
 	move.l	a3,bob_previous_displayed_sprites
 	move.l	a2,bob_previous_drawn_sprites
 
-	* fetch 0-scroll value from table
-	* apply to both plane sets (tiles & bobs)
-	lea		scroll_table,a2
-	move.w	(a2),d0
-	move.w	d0,reset_bplcon1_1
-	move.w	d0,reset_bplcon1_2
 
 	rts
 	.endif
@@ -2511,7 +2422,6 @@ platform_init:
 	bne		0f
 	* disable extra mid-screen interrupt, as it would be too fast (NTSC)
 	move.w	#0x1FE,intreq_block_game
-	move.w	#0x1FE,intreq_block_game_vertical
 0:
 	.ifdef	NONAGA_VERSION
     move.w #0x200+(NB_BOB_PLANES<<12)+BORDERBLANK,bplcon0(a5) | 4/5 bitplanes
@@ -2543,15 +2453,6 @@ platform_init:
 
 	move.w	#0,bplcon1(a5)
 
-	moveq	#2,d0
-	jbsr	osd_set_scroll_direction
-	
-
-	lea		vertical_scroll_copperlist,a0
-	move.l	a0,d0
-	move.w	d0,copper_jump_low
-	swap	d0
-	move.w	d0,copper_jump_high
 
 	
 	lea		game_copperlist,a0
@@ -3787,8 +3688,7 @@ dip_switches_1:
 	.byte	0
 dip_switches_2:
 	.byte	0
-vertical_scroll:
-	.byte	0
+
 	
 mid_screen_interrupt_count:
 	.byte	0
@@ -3857,22 +3757,6 @@ screen_data_ptr_2:
 	.set	increment,40    | OCS/AGA: 4 planes total
 	.endif
 	
-scroll_row_copper_address_table:
-	.rept	NB_SCROLL_ROWS_PART_1
-	.long	scroll_rows_first_half+6+offset
-	.set	offset,offset+increment
-	.endr
-	.set	offset,0
-	.rept	NB_SCROLL_ROWS_PART_2
-	.long	scroll_rows_second_half+6+offset
-	.set	offset,offset+increment
-	.endr
-	.set	offset,0
-	.rept	NB_SCROLL_ROWS_PART_3
-	.long	scroll_rows_bottom+6+offset
-	.set	offset,offset+increment
-	.endr
-
 background_ptr:
 	.long	0
 playfield_drawn_screen_ptr:
@@ -4092,54 +3976,26 @@ sprite_control_words:
 	.endr
 sprite_control_words_end:
 	
-	.word	cop2lc
-copper_jump_high:
-	.word	0
-	.word	cop2lc+2
-copper_jump_low:
-	.word	0
-copper_jump_2:
-	.word	0x1FE,0
-
 
 	.set	y_start,COPPER_Y_START
-scroll_rows_first_half:
-	DEF_SCROLL_ROWS	NB_SCROLL_ROWS_PART_1
-	* not sure if it's really half screen but it doesn't matter
 intreq_block_game:
 	.word	 intreq,0x8014  | call copper interrupt in the middle of a frame, also flag so copper interrupt knows that we're going to call copper int
 
-scroll_rows_second_half:
-	DEF_SCROLL_ROWS	NB_SCROLL_ROWS_PART_2
-
  
-	.ifdef	NONAGA_VERSION
-	* make up for the lack of status tiles, in most levels
-	* mimics the road (but without scrolling)
-	.word	color
-road_color:
-	.word	0
-	.endif
+
 	
 	* pal limit
     .word  0xFFCF,0xFFFE       | PAL wait
 	.set	y_start,0
-scroll_rows_bottom:
-	DEF_SCROLL_ROWS	NB_SCROLL_ROWS_PART_3
-	.word	0x0801,0xFFFE
 
 	| no bobs from now on, get a LOT of drawing time
 	.word	 intreq,0x8010
 	.ifdef	NONAGA_VERSION
 	.word	color,0
-status_bitplanes:
-	DECL_BITPLANES	0,NB_BOB_PLANES
+*status_bitplanes:
+*	DECL_BITPLANES	0,NB_BOB_PLANES
 	.endif
 
-	.word	bplcon1
-	* set 0-scroll value value for both plane sets (pretty useless now)
-reset_bplcon1_2:
-	.word	0			| reset scrolling
 
 	* black color sprites
 	*DECL_COLORS	16,16
@@ -4148,22 +4004,6 @@ reset_bplcon1_2:
 	
      .long    -2					
 	.ascii	"ENDCPLST"
-
-
-vertical_scroll_copperlist:
-
-	* not sure if it's really half screen but it doesn't matter
-	.word	0x8001,0xFFFE
-intreq_block_game_vertical:
-	.word	 intreq,0x8014  | call copper interrupt in the middle of a frame, also flag so copper interrupt knows that we're going to call copper int
-
-    .word  0xFFCF,0xFFFE       | PAL wait
-	.word	0x1601,0xFFFE
-
-	| no bobs from now on, get a LOT of drawing time
-	.word	 intreq,0x8010
-     .long    -2					
-	
 
 	* aligning on 8 bytes so .align will work
 	* in the next datachip sections
