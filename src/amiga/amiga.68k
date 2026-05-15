@@ -2915,10 +2915,10 @@ mirror_flipped_tile:
 	
 
 mirror_jump_table:
-	.long	standard_tile
-	.long	mirror_tile
 	.long	flipped_tile
 	.long	mirror_flipped_tile
+	.long	standard_tile
+	.long	mirror_tile
 	
 mirror_bits:
 	.include "mirror_bits.68k"

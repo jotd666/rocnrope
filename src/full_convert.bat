@@ -1,5 +1,5 @@
-rem ..\assets\amiga\merge_used.py
-rem ..\assets\amiga\convert_graphics.py
+..\assets\amiga\merge_used.py
+..\assets\amiga\convert_graphics.py
 6809to68k.py -O -i mot -o mit --code conv.s  --date-check -I rocnrope.inc rocnrope_6809.asm
 ..\tools\post_process.py
 rem goto skip_instrum

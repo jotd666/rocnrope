@@ -111,8 +111,8 @@ start_6000:      ; [global]
 60A7: 27 2B          BEQ    $60AC
 60A9: 8E C6 57       LDX    #$4EDF
 60AC: 86 38          LDA    #$10
-60AE: A7 0C          STA    ,X
-60B0: A7 AA A2       STA    $20,X
+60AE: A7 0C          STA    ,X			; [video_address]
+60B0: A7 AA A2       STA    $20,X			; [video_address]
 60B3: 39             RTS
 60B4: 8E 6E DD       LDX    #$4C5F
 60B7: C6 29          LDB    #$01
@@ -120,9 +120,9 @@ start_6000:      ; [global]
 60BB: 27 2C          BEQ    $60C1
 60BD: 8E C6 57       LDX    #$4EDF
 60C0: 5C             INCB
-60C1: E7 06          STB    ,X
+60C1: E7 06          STB    ,X					; [video_address]
 60C3: C6 02          LDB    #$20
-60C5: E7 0A A2       STB    $20,X
+60C5: E7 0A A2       STB    $20,X						; [video_address]
 60C8: 39             RTS
 60C9: 39             RTS
 
@@ -816,7 +816,7 @@ l_686d:
 697D: 8E C0 C8       LDX    #$4840
 6980: C6 3E          LDB    #$1C
 6982: A6 22          LDA    ,Y+
-6984: A7 A2          STA    ,X+
+6984: A7 A2          STA    ,X+		; [video_address]
 6986: 5A             DECB
 6987: 26 D1          BNE    $6982
 6989: 30 8C          LEAX   $4,X
@@ -937,8 +937,8 @@ l_686d:
 6D67: 8E 64 74       LDX    #$4C5C
 6D6A: 86 98          LDA    #$10
 6D6C: C6 3C          LDB    #$14
-6D6E: A7 0C          STA    ,X
-6D70: A7 23          STA    $1,X
+6D6E: A7 0C          STA    ,X		; [video_address]
+6D70: A7 23          STA    $1,X	; [video_address]
 6D72: 30 0A 02       LEAX   $20,X
 6D75: 5A             DECB
 6D76: 26 74          BNE    $6D6E
@@ -971,8 +971,8 @@ l_686d:
 6DAA: EF 01 D4 28    STU    -$0400,X       ; [video_address_word]
 6DAE: 30 00 02       LEAX   $20,X
 6DB1: CC 74 75       LDD    #$F6F7
-6DB4: ED A6          STD    ,X
-6DB6: EF 0B D4 28    STU    -$0400,X
+6DB4: ED A6          STD    ,X           ; [video_address_word]
+6DB6: EF 0B D4 28    STU    -$0400,X     ; [video_address_word]
 6DBA: 30 00 08       LEAX   $20,X
 6DBD: 35 4C          PULS   B,U,PC
 6DBF: C6 20          LDB    #$02
@@ -6936,16 +6936,16 @@ AE31: 6D 06          TST    ,X
 AE33: 27 38          BEQ    $AE4F
 AE35: EE 80          LDU    $2,X
 AE37: 33 E1 D4 88    LEAU   -$0400,U
-AE3B: EC EC          LDD    ,U
+AE3B: EC EC          LDD    ,U			; [video_address_word]
 AE3D: 84 78          ANDA   #$F0
 AE3F: C4 D2          ANDB   #$F0
 AE41: 9A E3          ORA    $61
 AE43: DA 43          ORB    $61
-AE45: ED 43          STD    ,U++
-AE47: E6 EC          LDB    ,U
+AE45: ED 43          STD    ,U++		; [video_address_word]
+AE47: E6 EC          LDB    ,U			; [video_address]
 AE49: C4 78          ANDB   #$F0
 AE4B: DA 49          ORB    $61
-AE4D: E7 4C          STB    ,U
+AE4D: E7 4C          STB    ,U		; [video_address]
 AE4F: 39             RTS
 AE50: B6 66 ED       LDA    $446F
 AE53: 0D 03          TST    $21
@@ -6975,10 +6975,10 @@ AE84: 8D 21          BSR    $AE89
 AE86: 30 0A 35       LEAX   $1D,X
 AE89: 8D 8A          BSR    $AE8D
 AE8B: 8D 28          BSR    $AE8D
-AE8D: A6 0C          LDA    ,X
+AE8D: A6 0C          LDA    ,X		; [video_address]
 AE8F: 84 D2          ANDA   #$F0
 AE91: 9A E3          ORA    $61
-AE93: A7 A2          STA    ,X+
+AE93: A7 A2          STA    ,X+		; [video_address]
 AE95: 39             RTS
 
 AEB2: 8E D3 E2       LDX    #$51C0

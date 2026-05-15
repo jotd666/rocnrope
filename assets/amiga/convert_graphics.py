@@ -221,7 +221,7 @@ def read_tileset(img_set_list,palette,plane_orientation_flags,cache,is_bob,nb_pl
 def doit(mode):
     nb_colors = 16
 
-    xxx_src_dir = src_dir / ".."/ dirs[mode]
+    xxx_src_dir = src_dir / dirs[mode]
 
 
     sprite_cluts = {}
@@ -293,7 +293,7 @@ def doit(mode):
 
     tile_palette += (16-len(tile_palette)) * [(0x10,0x20,0x30)]
 
-    sprite_palette = set()
+    sprite_palette = {magenta}
     sprite_set_list = [[] for _ in range(NB_SPRITE_CLUTS)]
     hw_sprite_set_list = []
 
@@ -318,6 +318,7 @@ def doit(mode):
     if global_other_tile_failure:
         raise Exception("Some associated tiles weren't found")
 
+
     sprite_palette = sorted(sprite_palette)
     magi = sprite_palette.index(magenta)
     sprite_palette.pop(magi)
@@ -337,7 +338,7 @@ def doit(mode):
 
     full_palette = tile_palette+sprite_palette
 
-    if mode == OCS_MODE:
+    if mode == ECS_MODE:
         # merge
         full_palette = sorted(set(full_palette))
         nb_raw_colors = len(full_palette)
@@ -346,16 +347,10 @@ def doit(mode):
             full_list = sprite_set_list+tile_set_list
             # first, manual merge of colors, else automatic quantize makes a horrible result
             maroon = (153,85,34)
-            manual_replacement_dict = {(0,204,0):(0,153,0),  # merging greens
-            (0,34,170):(0,51,153), # merging blues
-            (0,0,255):(0,51,153),
-            (136,136,136):(153,153,153),  # merging close grays
-            (0,17,0):(17,0,17),  # very dark almost black, we have to leave it non-black because of bottom strip
+            manual_replacement_dict = {
             #(0,17,0):(0,0,51),
-            #(17,0,17):(0,0,51),
-            (170,102,0):maroon,
-            (153,0,0):maroon,
-            (103,0,0):maroon}
+            #(17,0,17):(0,0,51)
+            }
 
             # manual pre-processing to merge colors manually
             apply_color_replacement(full_list,manual_replacement_dict)
@@ -386,7 +381,7 @@ def doit(mode):
         sprite_table = read_tileset(sprite_set_list,full_palette,[True,False,True,False],cache=bob_plane_cache, is_bob=True, nb_planes=5 if mode==ECS_MODE else 4)
 
 
-    if mode != OCS_MODE:
+    if mode != ECS_MODE:
         # now that the sprites were decoded, put black as first color too (else for some priority reason
         # the background is magenta or whatever the color is)
         full_palette[16] = (0,0,0)
@@ -396,13 +391,7 @@ def doit(mode):
     with palette_file.open("w") as f:
         bitplanelib.palette_dump(full_palette,f,bitplanelib.PALETTE_FORMAT_ASMGNU)
 
-    gs_array = [0]*NB_SPRITES
-    for i in group_sprite_pairs:
-        gs_array[i] = 1
-        gs_array[i+1] = 0xFF
-    with open(os.path.join(src_dir,"sprite_groups.68k"),"w") as f:
-        f.write("* 1: do not display unless mirrored\n")
-        bitplanelib.dump_asm_bytes(gs_array,f,mit_format=True)
+
 
 
     with (xxx_src_dir / "graphics.68k").open("w") as f:
