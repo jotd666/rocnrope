@@ -45,17 +45,17 @@ NB_SPRITE_CLUTS_POW = 4
 NB_SPRITE_CLUTS = 1<<NB_SPRITE_CLUTS_POW
 
 * 3 & 3: most performant
-BITPLANE_FMODE = 0			| works with 1, albeit slower
+BITPLANE_FMODE = 3			| works with 1, albeit slower
 SPRITE_FMODE = 3			| required!!
 
 BORDERBLANK = 1
 
-COPPER_Y_START = 0x18
+COPPER_Y_START = 0x1C
 BASE_BPLCON3_VALUE = (1<<12)+(BORDERBLANK<<5)  | dpf second playfield palette starts at color 16!
 BASE_BPLCON2_VALUE = 0x0024		| sprites above all playfields
 
-SPRITE_X_CORRECTION = 0
-SPRITE_Y_CORRECTION = 7
+SPRITE_X_CORRECTION = 64
+SPRITE_Y_CORRECTION = -2
 SPRITE_HEIGHT = 16
 SPRITE_WIDTH = 16
 HW_SPRITE_X_CORRECTION = 0
@@ -131,7 +131,7 @@ NB_HOST_SPRITES = 8
 NB_TARGET_SPRITES = 0x18  
 	
 TARGET_SPRITE_X = 1
-TARGET_SPRITE_Y = 0x400 
+TARGET_SPRITE_Y = 0x400
 TARGET_SPRITE_CODE = 0x401
 TARGET_SPRITE_ATTR = 0
 
@@ -2569,18 +2569,18 @@ osd_video_dirty_out:
 * 4C40            4FA0
 
 * < D7: 0-0x400
-* > D0: 
+* > D0/D1: coords 
 compute_tile_xy:   | portrait
 
 	moveq	#0,d0
 	moveq	#0,d1
 	move.b	d7,d1
 	neg.b	d1
-	add.b	#0x20,d1
+	add.b	#0x1F,d1
 	lsr.w	#5,d7		| this is X
 
 	and.w	#0x1F,d1	| this is Y
-	*addq.w	#2,d1
+
 
 	move.b	d7,d0		| this is X
 	and.b	#0x1F,d0
@@ -2647,7 +2647,12 @@ update_bg_tile:
 	jeq		0f
 	bset	#8,d2			| add 0x100
 0:
-
+*	cmp.w	#0x40,d7
+*	jne		0f
+*	cmp.b	#0x6A,d0
+*	jne		0f
+*	BREAKPOINT	"bottom left"
+*0:
 	.ifne	OPT_ENABLE_LOGGING
 	lea		character_log_table,a0
 	movem.l	d2-d3,-(a7)
@@ -2665,7 +2670,7 @@ update_bg_tile:
 	lea		character_table,a0
 	
 	* updating bitplanes
-	move.l	#BG_SCREEN_PLANE_SIZE,d5
+	move.w	#BG_SCREEN_PLANE_SIZE,d5
 	move.w	#NB_TILE_PLANES-1,d4
 	.ifdef	NONAGA_VERSION
 	.ifeq	OPT_ENABLE_DOUBLE_BUFFERING
@@ -2738,7 +2743,7 @@ update_bg_tile:
 12:
 	move.l	d0,a2					| pointer on bitplanes
 	lea		mirror_jump_table(pc),a5
-	ror.b	#4,d1			        | modifiers on bits 5 and 6
+	ror.b	#5,d1			        | modifiers on bits 5 and 6
 	and.w	#3,d1
 	.ifndef	MC68020
 	add.w	d1,d1
@@ -2864,10 +2869,10 @@ mirror_flipped_tile:
 	
 
 mirror_jump_table:
-	.long	mirror_tile
 	.long	standard_tile
-	.long	mirror_flipped_tile
+	.long	mirror_tile
 	.long	flipped_tile
+	.long	mirror_flipped_tile
 	
 mirror_bits:
 	.include "mirror_bits.68k"
@@ -2991,7 +2996,7 @@ seed:
 	
 	
 osd_read_inputs_2:
-	moveq	#-1,d0
+	st.b	d0
 	movem.l	a0/d1,-(a7)
 	lea		keyboard_table(pc),a0
 
@@ -3043,7 +3048,7 @@ osd_read_system_inputs:
 	rts
 	
 osd_read_inputs_1:
-	moveq	#-1,d0
+	st.b	d0
 	movem.l	a0/d1,-(a7)
 
 
@@ -3114,13 +3119,7 @@ osd_read_inputs_1:
 	bclr	#BIT_FIRE2,d0
 
 0:
-	* 2P active with joypad only if joypad connected
-*	tst.b	controller_joypad_0
-*	jeq		0f
-*	move.l	_joypad_2_state(pc),d1
-*	jbsr	read_player_joypad_2P
-*0:
-
+	move.b	#0,0x110
 	movem.l	(a7)+,a0/d1
 	rts
 	

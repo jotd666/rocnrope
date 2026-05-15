@@ -34,6 +34,7 @@ interrupt_vector_8186 = $8186
 interrupt_vector_8188 = $8188
 interrupt_vector_818a = $818a
 interrupt_vector_818c = $818c
+players_controls_32 = $32
 
 color_ram_4800 = $4800
 video_ram_4c00 = $4c00
@@ -1451,7 +1452,7 @@ irq_70a0:   ; [global]
 7250: 97 15          STA    $37
 7252: 96 B3          LDA    $31
 7254: 97 16          STA    $34
-7256: 96 B0          LDA    $32
+7256: 96 B0          LDA    players_controls_32
 7258: 97 1D          STA    $35
 725A: 96 BB          LDA    $33
 725C: 97 1E          STA    $36
@@ -1462,7 +1463,7 @@ irq_70a0:   ; [global]
 7267: 43             COMA
 7268: F6 18 0A       LDB    port2_3082
 726B: 53             COMB
-726C: DD 1A          STD    $32
+726C: DD 1A          STD    players_controls_32
 726E: 39             RTS
 726F: 0D 04          TST    $26
 7271: 27 8C          BEQ    $7281
@@ -2036,7 +2037,7 @@ process_audio_queue_72fc:
 7799: 27 8C          BEQ    $779F
 779B: 0D 08          TST    $20
 779D: 26 8D          BNE    $77A4
-779F: 96 10          LDA    $32
+779F: 96 10          LDA    players_controls_32
 77A1: 97 B8          STA    $3A
 77A3: 39             RTS
 77A4: 96 11          LDA    $33
@@ -6716,13 +6717,13 @@ AC42: 10 A3 26       CMPD   $4,X
 AC45: 26 AE          BNE    $AC73
 AC47: 10 AE 2A       LDY    $2,X
 AC4A: EC 8E          LDD    $6,X
-AC4C: ED 8C          STD    ,Y
+AC4C: ED 8C          STD    ,Y 		; [video_address_word]
 AC4E: EC 80          LDD    $8,X
-AC50: A7 00          STA    $2,Y
+AC50: A7 00          STA    $2,Y 		; [video_address]
 AC52: 31 2B DE 22    LEAY   -$0400,Y
-AC56: E7 26          STB    ,Y
+AC56: E7 26          STB    ,Y		 		; [video_address]
 AC58: EC 22          LDD    $A,X
-AC5A: ED A9          STD    $1,Y
+AC5A: ED A9          STD    $1,Y	; [video_address_word]
 AC5C: 8D 3E          BSR    $AC74
 AC5E: 8D ED          BSR    $ACC5
 AC60: 86 23          LDA    #$01
@@ -7103,7 +7104,7 @@ AFBD: 26 8C          BNE    $AFC3
 AFBF: 10 8E C2 9C    LDY    #$E01E
 AFC3: 10 AF AA 90    STY    $12,X
 AFC7: 31 80 CA       LEAY   -$1E,Y
-AFCA: 10 AF A0 1A    STY    $32,X
+AFCA: 10 AF A0 1A    STY    players_controls_32,X
 AFCE: 10 AF AA 70    STY    $52,X
 AFD2: 10 AF AA 50    STY    $72,X
 AFD6: 10 AF A1 28 1A STY    $0092,X
@@ -7545,7 +7546,7 @@ B60A: 24 8E          BCC    $B612
 B60C: D6 EA          LDB    $C2
 B60E: 44             LSRA
 B60F: 54             LSRB
-B610: 02 20          XNC    $02		; [breakpoint]
+B610: 02 20          XNC    $02	; undocumented COM if carry else NEG
 B612: D6 40          LDB    $C2
 B614: AB 2A          ADDA   $8,X
 B616: EB 8B          ADDB   $9,X

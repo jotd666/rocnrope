@@ -13,5 +13,6 @@ interrupt_vector_8186 = 0x8186
 interrupt_vector_8188 = 0x8188
 interrupt_vector_818a = 0x818a
 interrupt_vector_818c = 0x818c
+players_controls_32 = 0x32
 color_ram_4800 = 0x4800
 video_ram_4c00 = 0x4c00

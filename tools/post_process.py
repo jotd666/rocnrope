@@ -239,8 +239,6 @@ with open(source_dir / "conv.s") as f:
                     to_add = f"""\taddq\t#3,d5{comment}
 """
                 line = to_add
-        elif address==0xb610:
-            line = "\tILLEGAL\n"  # reached???
 
         if "review stray bcc/bcs test" in line:
             # try to process in a generic way
@@ -264,8 +262,13 @@ with open(source_dir / "conv.s") as f:
             val = line.split()[1]
             osd_call = input_dict.get(val)
             if osd_call is not None:
+                orig = get_original_instruction(line).split()[0]
+                b_source = orig=="ldb"
+
                 if osd_call:
                     line = change_instruction(f"jbsr\tosd_{osd_call}",lines,i)
+                    if b_source:
+                        line = f"\texg\td0,d1\n{line}\texg\td0,d1\n"
                 else:
                     line = remove_instruction(lines,i)
                 lines[i+1] = remove_instruction(lines,i+1)
