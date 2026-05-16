@@ -1043,14 +1043,10 @@ osd_is_vblank_interrupt_enabled:
 * Z: set if not playing
 is_game_playing:
 
-	movem.l	d0/a5,-(a7)
+	movem.l	a5,-(a7)
 	move.l	m6809_direct_page_pointer,a5
-	moveq	#0,d0
-	*move.b	game_state_25(a5),d0
-	*jeq		0f
-	cmp.b	#1,d0
-0:
-	movem.l	(a7)+,d0/a5
+	tst.b	game_in_play_22(a5)   | 0 if not playing, 1 if playing
+	movem.l	(a7)+,a5
 	rts
 	
 skip_level:
@@ -1063,29 +1059,24 @@ skip_level:
 lose_all_lives:
 	movem.l	a6/a5,-(a7)
 	GET_MEMORY_START_AND_DP
-	*move.b	#1,nb_lives_current_player_9e(a5)					| no more lives
+	move.b	#0,lives_c0(a5)					| no more lives
+	move.b	#2,player_status_05(a5)         | kill player
 	movem.l	(a7)+,a6/a5
 	rts
 
 add_10000_points:
-	movem.l	a5/a6,-(a7)
+	movem.l	d0/d1/d7/a5/a6,-(a7)
 	GET_MEMORY_START_AND_DP
-	movem.w	d0/d1/d7,-(a7)
-	*move.b	player_score_1572+1(a6),d0
+	move.b	(end_score_50a6-6,a6),d0
 	move.b	d0,d1
 	lsr.b	#4,d1
 	MOVEQ	#2,d7
 	subq	#1,d7	| clear X
 	abcd	d7,d1
-	jcc		0f
-	*add.b	#1,player_score_1572(a6)		| buggy after 9 adds, doesn't matter
+	jcs		0f
+	add.b	#1,(end_score_50a6-6,a6)
 0:
-	lsl.b	#4,d1
-	and.b	#0xF,d0
-	or.b	d1,d0
-	*move.b	d0,player_score_1572+1(a6)
-	movem.w	(a7)+,d0/d1/d7
-	movem.l	(a7)+,a5/a6
+	movem.l	(a7)+,d0/d1/d7/a5/a6
 	rts
 
 	
@@ -2646,14 +2637,14 @@ update_bg_tile:
 	move.b	d1,d3			| CLUT & tile code & flags
 	bclr	#7,d3
 	jeq		0f
-	bset	#8,d2			| add 0x100
+	bset	#8,d2			| bit 7 set, add 0x100
 0:
-*	cmp.w	#0x40,d7
-*	jne		0f
-*	cmp.b	#0x6A,d0
-*	jne		0f
-*	BREAKPOINT	"bottom left"
-*0:
+	cmp.w	#0x127,d7
+	jne		0f
+	cmp.b	#0x54,d0
+	jne		0f
+	BREAKPOINT	"rung"
+0:
 	.ifne	OPT_ENABLE_LOGGING
 	lea		character_log_table,a0
 	movem.l	d2-d3,-(a7)
@@ -2721,6 +2712,7 @@ update_bg_tile:
 	jra		11f
 12:
 	.endif
+	moveq	#0,d1
 	move.l	d0,a2
 	move.b	d3,d1
 	and.w	#0xF,d3
@@ -2745,7 +2737,7 @@ update_bg_tile:
 	move.l	d0,a2					| pointer on bitplanes
 	lea		mirror_jump_table(pc),a5
 	ror.b	#5,d1			        | modifiers on bits 5 and 6
-	and.w	#3,d1
+	and.b	#3,d1
 	.ifndef	MC68020
 	add.w	d1,d1
 	add.w	d1,d1	
@@ -3210,6 +3202,13 @@ handle_keyboard:
 *	move.w	#0x0FF,_custom+color
 *0:
 *
+	* last life, if killed, direct game over
+	cmp.b	#0x45,d0	| ESC key: lose all lives & die
+	bne.b	0f
+	* last life, if killed, direct game over
+	jbsr		lose_all_lives
+0:
+
 10:
 	.ifndef	RELEASE
 
@@ -3231,13 +3230,6 @@ handle_keyboard:
 *	bne.b	0f
 *	move.w	#0x0FF,_custom+color
 *0:
-	* last life, if killed, direct game over
-	cmp.b	#0x57,d0	| F8 key: lose all lives
-	bne.b	0f
-	move.w	#0x0FF,_custom+color
-	* last life, if killed, direct game over
-	bsr		lose_all_lives
-0:
 	cmp.b	#0x58,d0	| F9 key crashes game (restarts whdload)
 	bne.b	0f
 	illegal
@@ -3659,7 +3651,7 @@ intreq_block_game:
     .word  0xFFCF,0xFFFE       | PAL wait
 	.set	y_start,0
 	.word	0x0801,0xFFFE
-	.word	0x1801,0xFFFE
+	.word	0x1A01,0xFFFE
 
 	| no bobs from now on, get a LOT of drawing time
 	.word	 intreq,0x8010

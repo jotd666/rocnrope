@@ -126,7 +126,7 @@ def ensure_empty(d):
     else:
         os.makedirs(d)
 
-alphanum_tile_codes = set(range(0,10)) | set(range(65-48,65+27-48))   # wrong
+alphanum_tile_codes = set(range(0,10)) # | set(range(65-48,65+27-48))
 
 if __name__ == "__main__":
     raise Exception("no main!")

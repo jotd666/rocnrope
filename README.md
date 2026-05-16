@@ -1,5 +1,5 @@
-"# Your Game" 
-remake of Jail Break for Amiga
+"# Roc'NRope" 
+port of Roc'NRope for Amiga
 
 Requires a 2-button joystick, or the keyboard
 

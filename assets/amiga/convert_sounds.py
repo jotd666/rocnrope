@@ -48,6 +48,7 @@ def convert(ocs):
     0x2B, # ???
     0x27, # end of level?
     0x28, # level 4 complete
+    0x29, # game over
     ]  # ATM no music
 
 
