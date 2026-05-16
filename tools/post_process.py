@@ -182,6 +182,9 @@ with open(source_dir / "conv.s") as f:
         ###############################################
         # game_specific
 
+        if address != 0x8423 and "move,player_status_05,d0" in line and "OP_W_ON_DP_ADDRESS" in line:
+            line = change_instruction("jbsr\tchange_player_status",lines,i)
+
         if address in {0x6451,0x69FC}:
             line = remove_instruction(lines,i)
 
@@ -271,6 +274,11 @@ with open(source_dir / "conv.s") as f:
             line = "\tPUSH_SR\n"+line
         elif "addx mix" in line:
             line = "\tPOP_SR\n"
+        elif address == 0x841A:
+            line = f"""\ttst.b\tinvincible_flag
+\tjne\tl_842c  | any height is OK
+{line}
+"""
 
         elif address == 0xAECD:
             line = f"""\ttst.b\tinvincible_flag
@@ -319,4 +327,16 @@ with open(source_dir / f"{gamename}.68k","w") as fw:
 """)
     for g in global_symbols:
         fw.write(f"\t.global\t{g}\n")
+
     fw.writelines(lines)
+    fw.write("""
+change_player_status:
+\tcmp.b\t#2,d0
+\tjne\t0f
+\ttst.b\tinvincible_flag
+\tjeq\t0f
+\trts
+0:
+\tOP_W_ON_DP_ADDRESS\tmove,player_status_05,d0
+\trts
+""")

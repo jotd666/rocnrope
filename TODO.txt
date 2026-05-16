@@ -1,6 +1,8 @@
 - demo version left bottom dino doesn't get angry and climbs at once: sequence disrupted
-- implement sprites
-
+- end of level: wrong sprite position for player clinging to bird
+- end of game: same??
+- level 3: glitches in wheels dump chars in MAME? flip/mirror issue?
+- cheat invincible: improve (fall, bird)
 
 converter misses the optimization:
 	GET_ADDRESS	0x818a                     	| [$61b6: std    $818a]

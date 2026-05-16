@@ -15,5 +15,6 @@ interrupt_vector_818a = 0x818a
 interrupt_vector_818c = 0x818c
 players_controls_32 = 0x32
 player_state_51c0 = 0x51c0
+player_status_05 = 0x5
 color_ram_4800 = 0x4800
 video_ram_4c00 = 0x4c00

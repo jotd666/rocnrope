@@ -1056,7 +1056,7 @@ is_game_playing:
 skip_level:
 	movem.l	a6/a5,-(a7)
 	GET_MEMORY_START_AND_DP
-	*move.b	#1,level_completed_flag_9f(a5)					| no more lives
+	move.b	#3,player_status_05(a5)
 	movem.l	(a7)+,a6/a5
 	rts
 

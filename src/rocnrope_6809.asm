@@ -36,6 +36,13 @@ interrupt_vector_818a = $818a
 interrupt_vector_818c = $818c
 players_controls_32 = $32
 player_state_51c0 = $51c0
+; player status in $5005:
+; 0: inactive
+; 1: normal
+; 2: dead
+; 3: level complete
+
+player_status_05 = $5
 
 color_ram_4800 = $4800
 video_ram_4c00 = $4c00
@@ -1562,14 +1569,14 @@ process_audio_queue_72fc:
 7320: 39             RTS
 7321: 86 83          LDA    #$01
 7323: B7 A2 A2       STA    $8080
-7326: 0F 87          CLR    $05
+7326: 0F 87          CLR    player_status_05
 7328: 0F 20          CLR    $08
 732A: 0F 83          CLR    $0B
 732C: 0F 26          CLR    $0E
 732E: 0F AA          CLR    $22
 7330: 0C 20          INC    $02
 7332: 39             RTS
-7333: 96 27          LDA    $05
+7333: 96 27          LDA    player_status_05
 7335: 48             ASLA
 7336: 8E F1 62       LDX    #jump_table_734a
 7339: AD 1E          JSR    [A,X]        ; [indirect_jump] [nb_entries=5]
@@ -1577,7 +1584,7 @@ process_audio_queue_72fc:
 733D: 26 8C          BNE    $7343
 733F: 0D 73          TST    $51
 7341: 27 84          BEQ    $7349
-7343: 0F 27          CLR    $05
+7343: 0F 27          CLR    player_status_05
 7345: 0F 8A          CLR    $08
 7347: 0C 2A          INC    $02
 7349: 39             RTS
@@ -1586,7 +1593,7 @@ process_audio_queue_72fc:
 7355: 5F             CLRB
 7356: DD C2          STD    $40
 7358: D7 6A          STB    $42
-735A: 0C 8D          INC    $05
+735A: 0C 8D          INC    player_status_05
 735C: 0F 20          CLR    $08
 735E: 39             RTS
 735F: 96 2A          LDA    $08
@@ -1635,7 +1642,7 @@ process_audio_queue_72fc:
 73D4: BD 42 8A       JSR    $6008
 73D7: CC 29 2F       LDD    #$0107
 73DA: BD E8 20       JSR    $6008
-73DD: 0C 8D          INC    $05
+73DD: 0C 8D          INC    player_status_05
 73DF: 0F 2A          CLR    $08
 73E1: 86 4A          LDA    #$C8
 73E3: 97 26          STA    $04
@@ -1679,12 +1686,12 @@ process_audio_queue_72fc:
 7447: BD 48 20       JSR    $6008
 744A: 86 40          LDA    #$C8
 744C: 97 2C          STA    $04
-744E: 0C 8D          INC    $05
+744E: 0C 8D          INC    player_status_05
 7450: 0F 2A          CLR    $08
 7452: 39             RTS
 7453: 0A 26          DEC    $04
 7455: 26 80          BNE    $7459
-7457: 0C 2D          INC    $05
+7457: 0C 2D          INC    player_status_05
 7459: 39             RTS
 745A: 0F C8          CLR    $40
 745C: 0F 69          CLR    $41
@@ -1693,7 +1700,7 @@ process_audio_queue_72fc:
 7462: 86 82          LDA    #$00
 7464: BD F6 2C       JSR    $D4AE
 7467: 39             RTS
-7468: 96 2D          LDA    $05
+7468: 96 2D          LDA    player_status_05
 746A: 48             ASLA
 746B: 8E 5C E9       LDX    #jump_table_74c1
 746E: AD 1E          JSR    [A,X]        ; [indirect_jump] [nb_entries=4]
@@ -1721,7 +1728,7 @@ process_audio_queue_72fc:
 749F: BD 42 2A       JSR    $6008
 74A2: 5C             INCB
 74A3: BD 42 2A       JSR    $6008
-74A6: 0F 87          CLR    $05
+74A6: 0F 87          CLR    player_status_05
 74A8: 0F 20          CLR    $08
 74AA: 0F 83          CLR    $0B
 74AC: 0F 26          CLR    $0E
@@ -1768,7 +1775,7 @@ process_audio_queue_72fc:
 750C: BD 48 80       JSR    $6008
 750F: 86 2A          LDA    #$08
 7511: 97 86          STA    $04
-7513: 0C 27          INC    $05
+7513: 0C 27          INC    player_status_05
 7515: 0F 8A          CLR    $08
 7517: 39             RTS
 7518: 0A 2C          DEC    $04
@@ -1782,9 +1789,9 @@ process_audio_queue_72fc:
 752C: BD 48 80       JSR    $6008
 752F: CC 2D 22       LDD    #$0F00
 7532: BD E2 2A       JSR    $6008
-7535: 0C 87          INC    $05
+7535: 0C 87          INC    player_status_05
 7537: 39             RTS
-7538: 0C 2D          INC    $05
+7538: 0C 2D          INC    player_status_05
 753A: CC 8B 29       LDD    #$0301
 753D: BD E8 80       JSR    $6008
 7540: CC 28 82       LDD    #$0A00
@@ -1802,14 +1809,14 @@ process_audio_queue_72fc:
 755E: 96 AB          LDA    $23
 7560: 91 76          CMPA   $54
 7562: 27 80          BEQ    $7566
-7564: 0A 27          DEC    $05
+7564: 0A 27          DEC    player_status_05
 7566: 39             RTS
-7567: 96 2D          LDA    $05
+7567: 96 2D          LDA    player_status_05
 7569: 48             ASLA
 756A: 10 8E 5D 58    LDY    #jump_table_7570
 756E: 6E 3E          JMP    [A,Y]        ; [indirect_jump] [nb_entries=4]
 
-7578: 96 2D          LDA    $05
+7578: 96 2D          LDA    player_status_05
 757A: 48             ASLA
 757B: 10 8E 5D 09    LDY    #jump_table_7581
 757F: 6E 94          JMP    [A,Y]        ; [indirect_jump] [nb_entries=4]
@@ -1981,7 +1988,7 @@ process_audio_queue_72fc:
 7717: 26 3B          BNE    $772C
 7719: BD F3 54       JSR    $7BDC
 771C: 0F 20          CLR    $08
-771E: 0C 8D          INC    $05
+771E: 0C 8D          INC    player_status_05
 7720: CC 20 8E       LDD    #$020C
 7723: BD 42 2A       JSR    $6008
 7726: CC 81 2B       LDD    #$0303
@@ -2137,7 +2144,7 @@ process_audio_queue_72fc:
 7886: 27 AC          BEQ    $78B6
 7888: 0D 09          TST    $21
 788A: 26 87          BNE    $789B
-788C: 0F 2D          CLR    $05
+788C: 0F 2D          CLR    player_status_05
 788E: 86 8B          LDA    #$03
 7890: 97 2A          STA    $08
 7892: 0F 89          CLR    $0B
@@ -2150,7 +2157,7 @@ process_audio_queue_72fc:
 78A0: BD 58 7D       JSR    $7AFF
 78A3: 86 26          LDA    #$04
 78A5: 97 80          STA    $02
-78A7: 0F 2D          CLR    $05
+78A7: 0F 2D          CLR    player_status_05
 78A9: 86 8B          LDA    #$03
 78AB: 97 20          STA    $08
 78AD: 0F 83          CLR    $0B
@@ -2187,7 +2194,7 @@ process_audio_queue_72fc:
 78F9: BD F2 77       JSR    $7AFF
 78FC: 86 2B          LDA    #$03
 78FE: 97 8A          STA    $02
-7900: 0F 27          CLR    $05
+7900: 0F 27          CLR    player_status_05
 7902: 86 81          LDA    #$03
 7904: 97 2A          STA    $08
 7906: 0F 89          CLR    $0B
@@ -2212,7 +2219,7 @@ process_audio_queue_72fc:
 7931: 0F 89          CLR    $0B
 7933: 0F 2C          CLR    $0E
 7935: 7E FE 9E       JMP    $7C1C
-7938: 0F 2D          CLR    $05
+7938: 0F 2D          CLR    player_status_05
 793A: 86 8B          LDA    #$03
 793C: 97 20          STA    $08
 793E: 0F 83          CLR    $0B
@@ -2355,7 +2362,7 @@ process_audio_queue_72fc:
 7A69: BD F2 77       JSR    $7AFF
 7A6C: 86 2C          LDA    #$04
 7A6E: 97 8A          STA    $02
-7A70: 0F 27          CLR    $05
+7A70: 0F 27          CLR    player_status_05
 7A72: 86 81          LDA    #$03
 7A74: 97 2A          STA    $08
 7A76: 0F 89          CLR    $0B
@@ -2369,7 +2376,7 @@ process_audio_queue_72fc:
 7A83: DD 2B          STD    $09
 7A85: DD 8E          STD    $0C
 7A87: 97 2A          STA    $02
-7A89: 97 8D          STA    $05
+7A89: 97 8D          STA    player_status_05
 7A8B: 97 20          STA    $08
 7A8D: 97 83          STA    $0B
 7A8F: 97 2C          STA    $0E
@@ -2379,7 +2386,7 @@ process_audio_queue_72fc:
 7A97: BD 52 D7       JSR    $7AFF
 7A9A: 86 8B          LDA    #$03
 7A9C: 97 2A          STA    $02
-7A9E: 0F 8D          CLR    $05
+7A9E: 0F 8D          CLR    player_status_05
 7AA0: 86 21          LDA    #$03
 7AA2: 97 8A          STA    $08
 7AA4: 0F 29          CLR    $0B
@@ -2418,7 +2425,7 @@ process_audio_queue_72fc:
 7AF1: 0C 42          INC    $C0
 7AF3: 0C E3          INC    $C1
 7AF5: BD ED A9       JSR    $6F2B
-7AF8: 0F 2D          CLR    $05
+7AF8: 0F 2D          CLR    player_status_05
 7AFA: 86 8B          LDA    #$03
 7AFC: 97 20          STA    $08
 7AFE: 39             RTS
@@ -3160,8 +3167,9 @@ process_audio_queue_72fc:
 8193: A6 AA 3C       LDA    $1E,X
 8196: 81 92          CMPA   #$10
 8198: 25 23          BCS    $81A5
+; dead from fall?
 819A: 86 8A          LDA    #$02
-819C: 97 2D          STA    $05
+819C: 97 2D          STA    player_status_05
 819E: 0F 80          CLR    $08
 81A0: 0F 29          CLR    $0B
 81A2: 0F 8C          CLR    $0E
@@ -3456,13 +3464,16 @@ process_audio_queue_72fc:
 840F: 80 32          SUBA   #$10
 8411: B7 D3 56       STA    $51D4
 8414: 20 0E          BRA    $8442
+; not recoverable!
 8416: 6D 87          TST    $5,X
 8418: 27 2F          BEQ    $8421
+; check fall height
 841A: A6 00 36       LDA    $1E,X
 841D: 81 98          CMPA   #$10
 841F: 23 29          BLS    $842C
+; dead from fall
 8421: 86 80          LDA    #$02
-8423: 97 27          STA    $05
+8423: 97 27          STA    player_status_05
 8425: 0F 8A          CLR    $08
 8427: 0F 23          CLR    $0B
 8429: 0F 86          CLR    $0E
@@ -3558,7 +3569,8 @@ process_audio_queue_72fc:
 84F8: BD 53 19       JSR    $7B91
 84FB: 86 2A          LDA    #$02
 84FD: 5F             CLRB
-84FE: 97 8D          STA    $05
+; dead
+84FE: 97 8D          STA    player_status_05
 8500: D7 2A          STB    $08
 8502: D7 89          STB    $0B
 8504: D7 2C          STB    $0E
@@ -6569,8 +6581,9 @@ AAFD: 26 99          BNE    $AB10
 AAFF: 34 02          PSHS   Y
 AB01: BD F9 13       JSR    $7B91
 AB04: 35 02          PULS   Y
+; player dead
 AB06: 86 80          LDA    #$02
-AB08: 97 2D          STA    $05
+AB08: 97 2D          STA    player_status_05
 AB0A: 0F 80          CLR    $08
 AB0C: 0F 23          CLR    $0B
 AB0E: 0F 86          CLR    $0E
@@ -6649,8 +6662,9 @@ ABB4: 22 30          BHI    $ABC8
 ABB6: 34 A2          PSHS   Y
 ABB8: BD 53 1D       JSR    $7B95
 ABBB: 35 08          PULS   Y
+; player dead
 ABBD: 86 8A          LDA    #$02
-ABBF: 97 27          STA    $05
+ABBF: 97 27          STA    player_status_05
 ABC1: 0F 8A          CLR    $08
 ABC3: 0F 29          CLR    $0B
 ABC5: 0F 8C          CLR    $0E
@@ -6672,8 +6686,9 @@ ABE3: 8B 20          ADDA   #$02
 ABE5: 81 96          CMPA   #$14
 ABE7: 22 26          BHI    $ABF7
 ABE9: 8D 9D          BSR    $AC00
+; level completed
 ABEB: 86 2B          LDA    #$03
-ABED: 97 8D          STA    $05
+ABED: 97 8D          STA    player_status_05
 ABEF: 86 22          LDA    #$00
 ABF1: 97 8A          STA    $08
 ABF3: 97 29          STA    $0B
@@ -6876,8 +6891,9 @@ ADA4: E0 8A 99       SUBB   $1B,Y
 ADA7: D1 48          CMPB   $60
 ADA9: 25 85          BCS    $ADB8
 ADAB: BD 53 B9       JSR    $7B91
+; player dead
 ADAE: 86 8A          LDA    #$02
-ADB0: 97 27          STA    $05
+ADB0: 97 27          STA    player_status_05
 ADB2: 0F 8A          CLR    $08
 ADB4: 0F 29          CLR    $0B
 ADB6: 0F 8C          CLR    $0E
@@ -7152,7 +7168,7 @@ B03E: CC 77 DD       LDD    #$FFFF
 B041: DD 1E          STD    $9C
 B043: DD BC          STD    $9E
 B045: 39             RTS
-B046: 96 87          LDA    $05
+B046: 96 87          LDA    player_status_05
 B048: 81 2A          CMPA   #$02
 B04A: 27 82          BEQ    $B056
 B04C: 8E 79 68       LDX    #$51E0
@@ -7362,8 +7378,9 @@ B375: 0D 1B          TST    $99
 B377: 26 3D          BNE    $B38E
 B379: DC 12          LDD    $9A
 B37B: 26 39          BNE    $B38E
+; player dead
 B37D: 86 8A          LDA    #$02
-B37F: 97 27          STA    $05
+B37F: 97 27          STA    player_status_05
 B381: 4F             CLRA
 B382: 97 8A          STA    $08
 B384: 97 29          STA    $0B
@@ -7792,19 +7809,20 @@ D513: 39             RTS
 D514: 0D 94          TST    $B6
 D516: 26 AA          BNE    $D540
 D518: BD 5F FE       JSR    $7776
-D51B: 96 2D          LDA    $05
+D51B: 96 2D          LDA    player_status_05
 D51D: 81 8A          CMPA   #$02
 D51F: 26 3D          BNE    $D540
 D521: 97 89          STA    $0B
+; when??
 D523: 86 26          LDA    #$04
-D525: 97 87          STA    $05
+D525: 97 87          STA    player_status_05
 D527: BD 50 2B       JSR    $7803
 D52A: 39             RTS
 D52B: 7E 50 13       JMP    $783B
 D52E: BD F0 7D       JSR    $785F
 D531: 0A 88          DEC    $0A
 D533: 26 29          BNE    $D540
-D535: 0F 87          CLR    $05
+D535: 0F 87          CLR    player_status_05
 D537: 0F 20          CLR    $08
 D539: 0F 83          CLR    $0B
 D53B: 0F 26          CLR    $0E
