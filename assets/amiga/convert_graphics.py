@@ -352,7 +352,8 @@ def doit(mode):
     # pad just in case we don't have 16+16 colors (but we have)
     full_palette += (nb_colors-len(full_palette)) * [(0x10,0x20,0x30)]
 
-
+    nbc = len(set(full_palette))
+    print(f"total number of unique colors {nbc}")
 
     tile_plane_cache = {}
     # 16 first colors, or 16 full colors (for OCS)

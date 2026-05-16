@@ -159,17 +159,22 @@ with open(source_dir / "conv.s") as f:
             line = line.rstrip() + " [video_address]\n"
 
 
-        if "[video_address" in line:
+        if "[unchecked_address" in line:
+            # give me the original instruction
+            line = line.replace("_ADDRESS","_UNCHECKED_ADDRESS")
+        elif "[video_address" in line:
             # give me the original instruction
             line = line.replace("_ADDRESS","_UNCHECKED_ADDRESS")
             # if it's a write, insert a "VIDEO_DIRTY" macro after the write
             for j in range(i+1,len(lines)):
                 next_line = lines[j]
+
                 if "[...]" not in next_line:
                     break
                 if ",(a0)" in next_line or "clr" in next_line or "MOVE_W_FROM_REG" in next_line:
                     if any(x in next_line for x in ["address_word","MOVE_W_FROM_REG"]):
                         lines[j] = next_line+"\tVIDEO_WORD_DIRTY | [...]\n"
+
                     else:
                         lines[j] = next_line+"\tVIDEO_BYTE_DIRTY | [...]\n"
                     break
@@ -188,6 +193,14 @@ with open(source_dir / "conv.s") as f:
                 lines[j] = ""
             line = ""
 
+        elif address == 0X6F10:
+            line = """\tmove.b\tstart_level,d0
+\tjeq\t0f
+\tGET_ADDRESS\t0x50C1
+\tmove.b\td0,(a0)+
+\tmove.b\td0,(a0)
+0:
+"""
         elif address == 0x6865:
             line = change_instruction("jra\tl_686d",lines,i)
         elif address == 0x6867:

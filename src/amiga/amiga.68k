@@ -88,7 +88,7 @@ OPT_ENABLE_PROFILING = 0
 OPT_IGNORE_ZERO_BITPLANE = 0
 	.ifdef	NONAGA_VERSION
 NO68020 = 1
-OPT_ENABLE_DOUBLE_BUFFERING = 1   | TEMP
+OPT_ENABLE_DOUBLE_BUFFERING = 1
 	.else
 OPT_ENABLE_DOUBLE_BUFFERING = 1
 	.endif
@@ -3658,6 +3658,8 @@ intreq_block_game:
 	* pal limit
     .word  0xFFCF,0xFFFE       | PAL wait
 	.set	y_start,0
+	.word	0x0801,0xFFFE
+	.word	0x1801,0xFFFE
 
 	| no bobs from now on, get a LOT of drawing time
 	.word	 intreq,0x8010

@@ -1401,50 +1401,50 @@ irq_70a0:   ; [global]
 71E0: 10 9E 5C       LDY    $DE
 71E3: 9E FE          LDX    $DC
 71E5: DC 58          LDD    $DA
-71E7: 36 1E          PSHU   Y,X,D
+71E7: 36 1E          PSHU   Y,X,D	; [video_address_word]
 71E9: 10 9E 50       LDY    $D8
 71EC: 9E FE          LDX    $D6
 71EE: DC 5C          LDD    $D4
-71F0: 36 14          PSHU   Y,X,D
+71F0: 36 14          PSHU   Y,X,D	; [video_address_word]
 71F2: 9E 50          LDX    $D2
 71F4: DC F2          LDD    $D0
-71F6: 36 96          PSHU   X,B
+71F6: 36 96          PSHU   X,B			; [video_address_word]
 71F8: 33 E0 67       LEAU   -$11,U
-71FB: 36 2A          PSHU   A
+71FB: 36 2A          PSHU   A		; [video_address]
 71FD: 10 9E 46       LDY    $CE
 7200: 9E EE          LDX    $CC
 7202: DC 48          LDD    $CA
-7204: 36 14          PSHU   Y,X,D
+7204: 36 14          PSHU   Y,X,D		; [video_address_word]
 7206: 10 9E E0       LDY    $C8
 7209: 9E 4E          LDX    $C6
 720B: DC EC          LDD    $C4
-720D: 36 BE          PSHU   Y,X,D
+720D: 36 BE          PSHU   Y,X,D		; [video_address_word]
 720F: DC E0          LDD    $C2
-7211: 36 84          PSHU   D
+7211: 36 84          PSHU   D		; [video_address_word]
 7213: DE C2          LDU    $E0
 7215: 10 9E 7C       LDY    $FE
 7218: 9E D4          LDX    $FC
 721A: DC 72          LDD    $FA
-721C: 36 1E          PSHU   Y,X,D
+721C: 36 1E          PSHU   Y,X,D	; [video_address_word]
 721E: 10 9E DA       LDY    $F8
 7221: 9E 74          LDX    $F6
 7223: DC D6          LDD    $F4
-7225: 36 B4          PSHU   Y,X,D
+7225: 36 B4          PSHU   Y,X,D	; [video_address_word]
 7227: 9E DA          LDX    $F2
 7229: DC 78          LDD    $F0
-722B: 36 3C          PSHU   X,B
+722B: 36 3C          PSHU   X,B		; [video_address_word]
 722D: 33 40 67       LEAU   -$11,U
-7230: 36 20          PSHU   A
+7230: 36 20          PSHU   A		; [video_address]
 7232: 10 9E CC       LDY    $EE
 7235: 9E 6E          LDX    $EC
 7237: DC C2          LDD    $EA
-7239: 36 BE          PSHU   Y,X,D
+7239: 36 BE          PSHU   Y,X,D		; [video_address_word]
 723B: 10 9E C0       LDY    $E8
 723E: 9E 6E          LDX    $E6
 7240: DC C6          LDD    $E4
-7242: 36 B4          PSHU   Y,X,D
+7242: 36 B4          PSHU   Y,X,D	; [video_address_word]
 7244: DC C0          LDD    $E2
-7246: 36 84          PSHU   D
+7246: 36 84          PSHU   D		; [video_address_word]
 7248: 35 A0          PULS   DP,PC
 
 724A: 96 BF          LDA    $37
@@ -5489,7 +5489,7 @@ process_audio_queue_72fc:
 977F: D7 42          STB    $60
 9781: 86 8B          LDA    #$09
 9783: E6 82          LDB    ,Y+
-9785: E7 42          STB    ,U+
+9785: E7 42          STB    ,U+		; [video_address]
 9787: 4A             DECA
 9788: 26 D1          BNE    $9783
 978A: 33 40 3F       LEAU   $17,U
@@ -5502,7 +5502,7 @@ process_audio_queue_72fc:
 979B: D7 48          STB    $60
 979D: 86 81          LDA    #$09
 979F: E6 82          LDB    ,Y+
-97A1: E7 42          STB    ,U+
+97A1: E7 42          STB    ,U+		; [video_address]
 97A3: 4A             DECA
 97A4: 26 DB          BNE    $979F
 97A6: 33 4A 3F       LEAU   $17,U
@@ -5724,7 +5724,7 @@ process_audio_queue_72fc:
 99A4: 30 A7          LEAX   B,X
 99A6: 86 86          LDA    #$04
 99A8: E6 A8          LDB    ,X+
-99AA: E7 2C          STB    ,Y
+99AA: E7 2C          STB    ,Y		; [video_address]
 99AC: 31 80 A8       LEAY   $20,Y
 99AF: 4A             DECA
 99B0: 26 D4          BNE    $99A8
@@ -5765,7 +5765,7 @@ process_audio_queue_72fc:
 99FF: 10 AE EA A0    LDY    $22,U
 9A03: 86 B5          LDA    #$97
 9A05: C6 86          LDB    #$04
-9A07: A7 8C          STA    ,Y
+9A07: A7 8C          STA    ,Y		; [video_address]
 9A09: 5A             DECB
 9A0A: 27 8D          BEQ    $9A11
 9A0C: 31 80 A8       LEAY   $20,Y
@@ -5825,7 +5825,7 @@ process_audio_queue_72fc:
 9A92: 86 81          LDA    #$03
 9A94: 97 42          STA    $60
 9A96: A6 02          LDA    ,X+
-9A98: A7 88          STA    ,Y+
+9A98: A7 88          STA    ,Y+		; [video_address]
 9A9A: 0A E8          DEC    $60
 9A9C: 26 D0          BNE    $9A96
 9A9E: 31 20 3F       LEAY   $1D,Y
@@ -5834,14 +5834,14 @@ process_audio_queue_72fc:
 9AA5: 30 9F          LEAX   -$3,X
 9AA7: C6 2B          LDB    #$03
 9AA9: A6 08          LDA    ,X+
-9AAB: A7 88          STA    ,Y+
+9AAB: A7 88          STA    ,Y+		; [video_address]
 9AAD: 5A             DECB
 9AAE: 26 71          BNE    $9AA9
 9AB0: 30 38          LEAX   -$6,X
 9AB2: 31 2A 3F       LEAY   $1D,Y
 9AB5: C6 81          LDB    #$03
 9AB7: A6 A8          LDA    ,X+
-9AB9: A7 28          STA    ,Y+
+9AB9: A7 28          STA    ,Y+		; [video_address]
 9ABB: 5A             DECB
 9ABC: 26 D1          BNE    $9AB7
 9ABE: 39             RTS
@@ -5856,7 +5856,7 @@ process_audio_queue_72fc:
 9AD3: 30 A7          LEAX   B,X
 9AD5: C6 86          LDB    #$04
 9AD7: A6 A8          LDA    ,X+
-9AD9: A7 2C          STA    ,Y
+9AD9: A7 2C          STA    ,Y		; [video_address]
 9ADB: 31 80 08       LEAY   $20,Y
 9ADE: 5A             DECB
 9ADF: 26 D4          BNE    $9AD7
@@ -8377,12 +8377,12 @@ DDB0: 10 8E CB 5B    LDY    #$49D9
 DDB4: 86 4F          LDA    #$6D
 DDB6: 5F             CLRB
 DDB7: F7 72 24       STB    $5A0C
-DDBA: A7 08          STA    ,X+
-DDBC: A7 A8          STA    ,X+
-DDBE: A7 08          STA    ,X+
-DDC0: E7 82          STB    ,Y+
-DDC2: E7 22          STB    ,Y+
-DDC4: E7 82          STB    ,Y+
+DDBA: A7 08          STA    ,X+      ; [video_address]
+DDBC: A7 A8          STA    ,X+      ; [video_address]
+DDBE: A7 08          STA    ,X+      ; [video_address]
+DDC0: E7 82          STB    ,Y+      ; [video_address]
+DDC2: E7 22          STB    ,Y+      ; [video_address]
+DDC4: E7 82          STB    ,Y+      ; [video_address]
 DDC6: 30 0A 35       LEAX   $1D,X
 DDC9: 31 20 95       LEAY   $1D,Y
 DDCC: 7A 72 89       DEC    $5A01
@@ -8400,12 +8400,12 @@ DDE6: BE D8 2C       LDX    $5A04
 DDE9: 8C C4 B4       CMPX   #$4C3C
 DDEC: 27 3B          BEQ    $DE01
 DDEE: F6 D2 28       LDB    $5A0A
-DDF1: A7 00          STA    ,-X
+DDF1: A7 00          STA    ,-X   ; [video_address]
 DDF3: 5A             DECB
 DDF4: 26 D9          BNE    $DDF1
 DDF6: BE D8 2E       LDX    $5A06
 DDF9: F6 D2 82       LDB    $5A0A
-DDFC: A7 AA          STA    ,-X
+DDFC: A7 AA          STA    ,-X   ; [video_address]
 DDFE: 5A             DECB
 DDFF: 26 D9          BNE    $DDFC
 DE01: BE D8 8A       LDX    $5A08
@@ -8416,7 +8416,7 @@ DE0B: 86 36          LDA    #$1E
 DE0D: 97 98          STA    $10
 DE0F: 39             RTS
 DE10: F6 78 89       LDB    $5A0B
-DE13: A7 A6          STA    ,X
+DE13: A7 A6          STA    ,X 	; [video_address]
 DE15: 30 0A A2       LEAX   $20,X
 DE18: 5A             DECB
 DE19: 26 70          BNE    $DE13
@@ -8449,7 +8449,7 @@ DE5E: 30 01 DE 22    LEAX   -$0400,X
 DE62: BF D8 2F       STX    $5A0D
 DE65: B6 D8 8E       LDA    $5A0C
 DE68: F6 72 82       LDB    $5A0A
-DE6B: A7 AA          STA    ,-X
+DE6B: A7 AA          STA    ,-X		; [video_address]
 DE6D: 5A             DECB
 DE6E: 26 73          BNE    $DE6B
 DE70: BE 78 8F       LDX    $5A0D
@@ -8469,7 +8469,7 @@ DE90: 39             RTS
 DE91: 8E C9 22       LDX    #$4BA0
 DE94: B6 78 8E       LDA    $5A0C
 DE97: C6 34          LDB    #$1C
-DE99: A7 08          STA    ,X+
+DE99: A7 08          STA    ,X+		; [video_address]
 DE9B: 5A             DECB
 DE9C: 26 D3          BNE    $DE99
 DE9E: 30 00 E6       LEAX   -$3C,X

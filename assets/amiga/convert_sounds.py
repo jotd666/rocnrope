@@ -40,9 +40,14 @@ def convert(ocs):
     0x1F,
     0x1D,0x1C,0x1B,0x1A,0x19,  # music indicators
     0x20,  # level 1
+    0x21,  # level 2
+    0x22,  # level 3
+    0x23,  # level 4
     0x24,  # superpower
     0x2A,  # dead?
     0x2B, # ???
+    0x27, # end of level?
+    0x28, # level 4 complete
     ]  # ATM no music
 
 
