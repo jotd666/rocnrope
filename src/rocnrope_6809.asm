@@ -35,6 +35,7 @@ interrupt_vector_8188 = $8188
 interrupt_vector_818a = $818a
 interrupt_vector_818c = $818c
 players_controls_32 = $32
+player_state_51c0 = $51c0
 
 color_ram_4800 = $4800
 video_ram_4c00 = $4c00
@@ -1950,7 +1951,7 @@ process_audio_queue_72fc:
 76CE: 0D 3E          TST    $B6
 76D0: 26 3E          BNE    $76EE
 76D2: 8D 99          BSR    $76EF
-76D4: 8E 73 42       LDX    #$51C0
+76D4: 8E 73 42       LDX    #player_state_51c0
 76D7: 10 AE 23       LDY    $B,X
 76DA: A6 87          LDA    $F,X
 76DC: BD 48 B5       JSR    $603D
@@ -1970,7 +1971,7 @@ process_audio_queue_72fc:
 76FD: CC 86 90       LDD    #$0E18
 7700: BD 42 8A       JSR    $6008
 7703: 8E 95 CE       LDX    #$B7EC
-7706: 10 8E 79 E8    LDY    #$51C0
+7706: 10 8E 79 E8    LDY    #player_state_51c0
 770A: EC 09          LDD    ,X++
 770C: ED 89          STD    ,Y++
 770E: 10 8C 73 C2    CMPY   #$51E0
@@ -2082,7 +2083,7 @@ process_audio_queue_72fc:
 7806: FD C2 E8       STD    $40C0
 7809: FD C8 68       STD    $40E0
 780C: 7F 68 B7       CLR    $403F
-780F: 8E 73 E2       LDX    #$51C0
+780F: 8E 73 E2       LDX    #player_state_51c0
 7812: 6F 8C          CLR    $E,X
 7814: 10 8E 7E 1C    LDY    #$FC9E
 7818: 4F             CLRA
@@ -2118,7 +2119,7 @@ process_audio_queue_72fc:
 785A: 26 8A          BNE    $785E
 785C: 0C 23          INC    $0B
 785E: 39             RTS
-785F: 8E 73 E2       LDX    #$51C0
+785F: 8E 73 E2       LDX    #player_state_51c0
 7862: BD E2 35       JSR    $6017
 7865: 10 8E C2 68    LDY    #$4040
 7869: 16 B7 AA       LBRA   $B78E
@@ -2576,7 +2577,7 @@ process_audio_queue_72fc:
 7C4D: 7E 2B 7D       JMP    $A3F5
 7C50: 0D A2          TST    $80
 7C52: 26 8E          BNE    $7C60
-7C54: 8E 73 42       LDX    #$51C0
+7C54: 8E 73 42       LDX    #player_state_51c0
 7C57: A6 2B          LDA    $3,X
 7C59: 48             ASLA
 7C5A: 10 8E 54 49    LDY    #jump_table_7c61
@@ -3707,7 +3708,7 @@ process_audio_queue_72fc:
 
 86D7: 04 FB          LSR    $D3
 86D9: 8E D9 68       LDX    #$51E0
-86DC: 10 8E D9 48    LDY    #$51C0
+86DC: 10 8E D9 48    LDY    #player_state_51c0
 86E0: 6D A6          TST    ,X
 86E2: 27 81          BEQ    $86E7
 86E4: 7E A4 6A       JMP    $86E8
@@ -3934,7 +3935,7 @@ process_audio_queue_72fc:
 891E: 39             RTS
 891F: A6 AA 39       LDA    $1B,X
 8922: 26 B0          BNE    $8956
-8924: 10 8E D3 42    LDY    #$51C0
+8924: 10 8E D3 42    LDY    #player_state_51c0
 8928: A6 0B          LDA    $3,Y
 892A: 81 89          CMPA   #$01
 892C: 26 00          BNE    $8956
@@ -4649,7 +4650,7 @@ process_audio_queue_72fc:
 8FA3: 54             LSRB
 8FA4: 54             LSRB
 8FA5: 7E 0D AB       JMP    $8F29
-8FA8: 10 8E D9 48    LDY    #$51C0
+8FA8: 10 8E D9 48    LDY    #player_state_51c0
 8FAC: E6 A0 93       LDB    $1B,X
 8FAF: 27 29          BEQ    $8FBC
 8FB1: 10 8E D0 E2    LDY    #$52C0
@@ -4669,7 +4670,7 @@ process_audio_queue_72fc:
 8FCC: C1 2C          CMPB   #$04
 8FCE: 23 67          BLS    $8FBF
 8FD0: 6F AA 99       CLR    $1B,X
-8FD3: 10 8E 73 42    LDY    #$51C0
+8FD3: 10 8E 73 42    LDY    #player_state_51c0
 8FD7: 4F             CLRA
 8FD8: 5F             CLRB
 8FD9: DD E8          STD    $60
@@ -5147,7 +5148,7 @@ process_audio_queue_72fc:
 93EC: 6E 9E          JMP    [A,Y]        ; [indirect_jump] [nb_entries=3]
 
 93F4: 34 32          PSHS   X
-93F6: 10 8E 79 E8    LDY    #$51C0
+93F6: 10 8E 79 E8    LDY    #player_state_51c0
 93FA: BD 07 95       JSR    $8FBD
 93FD: 35 98          PULS   X
 93FF: DC 42          LDD    $60
@@ -6090,7 +6091,7 @@ A6E9: 27 FB          BEQ    $A75E
 A6EB: A6 6B          LDA    $3,U
 A6ED: 81 89          CMPA   #$01
 A6EF: 26 4F          BNE    $A75E
-A6F1: 8E D3 42       LDX    #$51C0
+A6F1: 8E D3 42       LDX    #player_state_51c0
 A6F4: 6D 21          TST    $3,X
 A6F6: 26 E4          BNE    $A75E
 A6F8: 6D A0 91       TST    $19,X
@@ -6184,7 +6185,7 @@ A7AD: 10 8E 74 E0    LDY    #$FCC2
 A7B1: 7E E2 BF       JMP    $603D
 A7B4: 10 8E 7E 50    LDY    #$FCD2
 A7B8: 7E 48 B5       JMP    $603D
-A7BB: 8E 79 E8       LDX    #$51C0
+A7BB: 8E 79 E8       LDX    #player_state_51c0
 A7BE: 6D 0C          TST    ,X
 A7C0: 27 2F          BEQ    $A7CF
 A7C2: 6D 83          TST    $1,X
@@ -6316,7 +6317,7 @@ A8D2: 86 83          LDA    #$01
 A8D4: 97 42          STA    $60
 A8D6: 39             RTS
 A8D7: 10 8E 7C 88    LDY    #$5400
-A8DB: 8E 79 E8       LDX    #$51C0
+A8DB: 8E 79 E8       LDX    #player_state_51c0
 A8DE: 8D 99          BSR    $A8F1
 A8E0: 39             RTS
 
@@ -6442,7 +6443,7 @@ A9F5: 90 E2          SUBA   $60
 A9F7: 8B 20          ADDA   #$08
 A9F9: 81 9A          CMPA   #$12
 A9FB: 22 36          BHI    $AA1B
-A9FD: B6 D9 48       LDA    $51C0
+A9FD: B6 D9 48       LDA    player_state_51c0
 AA00: 81 20          CMPA   #$02
 AA02: 27 9A          BEQ    $AA1C
 AA04: A6 01          LDA    $3,Y
@@ -6517,7 +6518,7 @@ AA8F: CC 23 22       LDD    #$0100
 AA92: A7 A1          STA    $3,Y
 AA94: E7 8A 9D       STB    $1F,Y
 AA97: 39             RTS
-AA98: 8E 79 48       LDX    #$51C0
+AA98: 8E 79 48       LDX    #player_state_51c0
 AA9B: 6D AC          TST    ,X
 AA9D: 27 A2          BEQ    $AAC9
 AA9F: 10 8E 70 82    LDY    #$5200
@@ -6612,7 +6613,7 @@ AB63: A7 01          STA    $3,Y
 AB65: 6F 2A 9D       CLR    $1F,Y
 AB68: 39             RTS
 
-AB71: 8E D3 42       LDX    #$51C0
+AB71: 8E D3 42       LDX    #player_state_51c0
 AB74: 6D A6          TST    ,X
 AB76: 27 9D          BEQ    $AB97
 AB78: 10 8E DB C8    LDY    #$5340
@@ -6655,7 +6656,7 @@ ABC3: 0F 29          CLR    $0B
 ABC5: 0F 8C          CLR    $0E
 ABC7: 39             RTS
 ABC8: 39             RTS
-ABC9: 8E D9 48       LDX    #$51C0
+ABC9: 8E D9 48       LDX    #player_state_51c0
 ABCC: 96 E9          LDA    $C1
 ABCE: 84 8B          ANDA   #$03
 ABD0: 48             ASLA
@@ -6697,7 +6698,7 @@ AC19: 96 EB          LDA    $63
 AC1B: 97 67          STA    $4F
 AC1D: 39             RTS
 AC1E: 8E DA E2       LDX    #$52C0
-AC21: 10 8E D3 E2    LDY    #$51C0
+AC21: 10 8E D3 E2    LDY    #player_state_51c0
 AC25: C6 86          LDB    #$04
 AC27: 34 3C          PSHS   X,B		; [target_stack_push]
 AC29: 6D 0C          TST    ,X
@@ -6775,7 +6776,7 @@ ACC5: A6 06          LDA    ,X
 ACC7: 81 2A          CMPA   #$02
 ACC9: 26 A4          BNE    $ACF7
 ACCB: 34 08          PSHS   Y
-ACCD: 10 8E D9 E2    LDY    #$51C0
+ACCD: 10 8E D9 E2    LDY    #player_state_51c0
 ACD1: E6 26          LDB    ,Y
 ACD3: 5A             DECB
 ACD4: 26 30          BNE    $ACE8
@@ -6799,7 +6800,7 @@ ACF8: 96 E9          LDA    $C1
 ACFA: 84 8B          ANDA   #$03
 ACFC: 81 2A          CMPA   #$02
 ACFE: 26 CA          BNE    $AD42
-AD00: 8E 73 42       LDX    #$51C0
+AD00: 8E 73 42       LDX    #player_state_51c0
 AD03: A6 21          LDA    $3,X
 AD05: 81 83          CMPA   #$01
 AD07: 27 11          BEQ    $AD42
@@ -6853,7 +6854,7 @@ AD70: 96 E3          LDA    $C1
 AD72: 84 81          ANDA   #$03
 AD74: 81 21          CMPA   #$03
 AD76: 26 C2          BNE    $ADB8
-AD78: 8E 79 48       LDX    #$51C0
+AD78: 8E 79 48       LDX    #player_state_51c0
 AD7B: 6D AC          TST    ,X
 AD7D: 27 B1          BEQ    $ADB8
 AD7F: 10 8E 74 02    LDY    #$5680
@@ -6982,7 +6983,7 @@ AE91: 9A E3          ORA    $61
 AE93: A7 A2          STA    ,X+		; [video_address]
 AE95: 39             RTS
 
-AEB2: 8E D3 E2       LDX    #$51C0
+AEB2: 8E D3 E2       LDX    #player_state_51c0
 AEB5: A6 06          LDA    ,X
 AEB7: 81 2A          CMPA   #$02
 AEB9: 26 8C          BNE    $AEBF
@@ -6994,6 +6995,7 @@ AEC2: 85 9D          BITA   #$1F
 AEC4: 26 38          BNE    $AEE0
 AEC6: 6A 0A 3E       DEC    $16,X
 AEC9: 26 9D          BNE    $AEE0
+; end invincibility
 AECB: 86 29          LDA    #$01
 AECD: A7 0C          STA    ,X
 AECF: E6 2C          LDB    $E,X
@@ -7022,7 +7024,7 @@ AEFC: E7 26          STB    $E,X
 AEFE: 39             RTS
 AEFF: 0D A2          TST    $80
 AF01: 10 26 83 33    LBNE   $B016
-AF05: 8E D3 42       LDX    #$51C0
+AF05: 8E D3 42       LDX    #player_state_51c0
 AF08: 6D 2B          TST    $3,X
 AF0A: 10 26 29 2F    LBNE   $B015
 AF0E: 10 8E 75 22    LDY    #$5700
@@ -7642,7 +7644,7 @@ B6D1: BD 35 E6       JSR    $B764
 B6D4: BD 95 FD       JSR    $B77F
 B6D7: 7E 9E CD       JMP    $B6E5
 B6DA: 39             RTS
-B6DB: 8E 79 E8       LDX    #$51C0
+B6DB: 8E 79 E8       LDX    #player_state_51c0
 B6DE: 10 8E 62 62    LDY    #$4040
 B6E2: 7E 35 AC       JMP    $B78E
 B6E5: 8E D7 E2       LDX    #$5560
@@ -7771,7 +7773,7 @@ D4E1: 97 34          STA    $B6
 D4E3: BD 54 CD       JSR    $76EF
 D4E6: 86 42          LDA    #$C0
 D4E8: B7 79 46       STA    $51CE
-D4EB: 8E 79 E8       LDX    #$51C0
+D4EB: 8E 79 E8       LDX    #player_state_51c0
 D4EE: 10 AE 29       LDY    $B,X
 D4F1: A6 8D          LDA    $F,X
 D4F3: BD 42 1F       JSR    $603D
@@ -8013,7 +8015,7 @@ D726: 26 7B          BNE    $D721
 D728: 39             RTS
 D729: 86 9B          LDA    #$13
 D72B: B7 72 29       STA    $5A01
-D72E: 8E D9 E2       LDX    #$51C0
+D72E: 8E D9 E2       LDX    #player_state_51c0
 D731: 10 8E C2 62    LDY    #$4040
 D735: BD 35 0C       JSR    $B78E
 D738: 30 A0 A8       LEAX   $20,X
@@ -8075,7 +8077,7 @@ D7A6: A7 02          STA    ,X+
 D7A8: 8C 68 28       CMPX   #$40A0
 D7AB: 26 D1          BNE    $D7A6
 D7AD: 39             RTS
-D7AE: 8E D9 E2       LDX    #$51C0
+D7AE: 8E D9 E2       LDX    #player_state_51c0
 D7B1: 86 A2          LDA    #$20
 D7B3: 6F A2          CLR    ,X+
 D7B5: 4A             DECA
@@ -8154,12 +8156,12 @@ DB6A: CE 08 28       LDU    #watchdog_8000
 DB6D: 86 8C          LDA    #$04
 DB6F: B7 78 23       STA    $5A01
 DB72: 1E B2          EXG    U,D
-DB74: E7 AB 7E 82    STB    -$0400,X
-DB78: A7 A8          STA    ,X+
-DB7A: E7 01 D4 28    STB    -$0400,X
-DB7E: A7 08          STA    ,X+
-DB80: E7 AB 7E 82    STB    -$0400,X
-DB84: A7 A6          STA    ,X
+DB74: E7 AB 7E 82    STB    -$0400,X           ; [video_address]
+DB78: A7 A8          STA    ,X+                ; [video_address]
+DB7A: E7 01 D4 28    STB    -$0400,X           ; [video_address]
+DB7E: A7 08          STA    ,X+                ; [video_address]
+DB80: E7 AB 7E 82    STB    -$0400,X           ; [video_address]
+DB84: A7 A6          STA    ,X                 ; [video_address]
 DB86: 30 0A 36       LEAX   $1E,X
 DB89: 7A D2 89       DEC    $5A01
 DB8C: 26 CE          BNE    $DB74
@@ -8193,7 +8195,7 @@ DBCE: BD 5E D0       JSR    $D6F2
 DBD1: BD 55 4E       JSR    $D7CC
 DBD4: 8E F8 99       LDX    #$DA1B
 DBD7: BD FE F2       JSR    $D6DA
-DBDA: 8E D9 E8       LDX    #$51C0
+DBDA: 8E D9 E8       LDX    #player_state_51c0
 DBDD: CC 38 58       LDD    #$B0D0
 DBE0: ED 26          STD    $4,X
 DBE2: 6F 88          CLR    $A,X
@@ -8208,7 +8210,7 @@ DBFA: 0C 99          INC    $11
 DBFC: BD FF A1       JSR    $D729
 DBFF: BD F5 CA       JSR    $D7E8
 DC02: 39             RTS
-DC03: 8E 73 E2       LDX    #$51C0
+DC03: 8E 73 E2       LDX    #player_state_51c0
 DC06: BD E2 3F       JSR    $6017
 DC09: BD 5F A1       JSR    $D729
 DC0C: BD FF 60       JSR    $D7E8
@@ -8244,7 +8246,7 @@ DC58: 20 2A          BRA    $DC5C
 DC5A: C6 C8          LDB    #$40
 DC5C: 8E F1 63       LDX    #$D9EB
 DC5F: BD F4 F8       JSR    $D6DA
-DC62: 8E D3 E2       LDX    #$51C0
+DC62: 8E D3 E2       LDX    #player_state_51c0
 DC65: CC EB 50       LDD    #$69D2
 DC68: ED 2C          STD    $4,X
 DC6A: 6F 82          CLR    $A,X
@@ -8260,7 +8262,7 @@ DC7E: 20 8A          BRA    $DC82
 DC80: C6 62          LDB    #$40
 DC82: 8E 5B DB       LDX    #$D9F9
 DC85: BD 54 58       JSR    $D6DA
-DC88: 8E 79 48       LDX    #$51C0
+DC88: 8E 79 48       LDX    #player_state_51c0
 DC8B: CC 12 99       LDD    #$3AB1
 DC8E: ED 8C          STD    $4,X
 DC90: 6F 28          CLR    $A,X
@@ -8276,7 +8278,7 @@ DCA7: 8E F1 3A       LDX    #$D912
 DCAA: BD 5F 38       JSR    $D710
 DCAD: 0C 99          INC    $11
 DCAF: 39             RTS
-DCB0: 8E 73 42       LDX    #$51C0
+DCB0: 8E 73 42       LDX    #player_state_51c0
 DCB3: BD 42 35       JSR    $6017
 DCB6: BD 55 01       JSR    $D729
 DCB9: BD 5F 60       JSR    $D7E8
@@ -8312,7 +8314,7 @@ DD05: 20 80          BRA    $DD09
 DD07: C6 E8          LDB    #$C0
 DD09: 8E 51 63       LDX    #$D9EB
 DD0C: BD FE 52       JSR    $D6DA
-DD0F: 8E 73 E2       LDX    #$51C0
+DD0F: 8E 73 E2       LDX    #player_state_51c0
 DD12: CC A6 56       LDD    #$2474
 DD15: ED 86          STD    $4,X
 DD17: 6F 22          CLR    $A,X
@@ -8327,7 +8329,7 @@ DD2E: BD 5E D0       JSR    $D6F2
 DD31: BD 55 58       JSR    $D7DA
 DD34: 8E F8 99       LDX    #$DA1B
 DD37: BD FE F2       JSR    $D6DA
-DD3A: 8E D9 E8       LDX    #$51C0
+DD3A: 8E D9 E8       LDX    #player_state_51c0
 DD3D: CC B7 CA       LDD    #$3F42
 DD40: ED 26          STD    $4,X
 DD42: 6F 88          CLR    $A,X
@@ -8490,7 +8492,7 @@ DEC3: BD F4 D0       JSR    $D6F2
 DEC6: BD 55 E4       JSR    $D7CC
 DEC9: 8E 51 63       LDX    #$D9EB
 DECC: BD FE 52       JSR    $D6DA
-DECF: 8E 73 E2       LDX    #$51C0
+DECF: 8E 73 E2       LDX    #player_state_51c0
 DED2: CC B7 07       LDD    #$3525
 DED5: ED 86          STD    $4,X
 DED7: 86 FD          LDA    #$D5

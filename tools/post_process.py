@@ -1,6 +1,30 @@
 import re,pathlib
 
 gamename = "rocnrope"
+
+# game_specific: replace or remove I/O addresses
+# if not done it will write in ROM here!!
+input_dict = {
+"mainlatch_8081":"",
+"watchdog_8000":"",
+"interrupt_vector_8182":"",
+"interrupt_vector_8184":"",
+"interrupt_vector_8186":"",
+"interrupt_vector_8188":"",
+"interrupt_vector_818a":"",
+"interrupt_vector_818c":"",
+"audio_8100":"sound_start",
+"dsw1_3083":"read_dsw_1",
+"dsw2_3000":"read_dsw_2",
+"dsw3_3100":"read_dsw_3",
+"port1_3081":"read_inputs_1",
+"port2_3082":"read_inputs_2",
+"system_3080":"read_system_inputs",
+}
+
+store_to_video = re.compile("GET_ADDRESS\s+(0x4[89ABCDEF]|video_ram_4)",flags=re.I)   # game_specific
+
+
 # post-conversion automatic patches, allowing not to change the asm file by hand
 tablere = re.compile("move.w\t#(\w*table_....),d(.)")
 jmpre = re.compile("(j..)\s+\[a,(.)\]")
@@ -109,27 +133,6 @@ this_dir = pathlib.Path(__file__).absolute().parent
 
 source_dir = this_dir / "../src"
 
-# game_specific: replace or remove I/O addresses
-# if not done it will write in ROM here!!
-input_dict = {
-"audio_8100":"",
-"watchdog_8000":"",
-"interrupt_vector_8182":"",
-"interrupt_vector_8184":"",
-"interrupt_vector_8186":"",
-"interrupt_vector_8188":"",
-"interrupt_vector_818a":"",
-"interrupt_vector_818c":"",
-
-"dsw1_3083":"read_dsw_1",
-"dsw2_3000":"read_dsw_2",
-"dsw3_3100":"read_dsw_3",
-"port1_3081":"read_inputs_1",
-"port2_3082":"read_inputs_2",
-"system_3080":"read_system_inputs",
-}
-
-store_to_video = re.compile("GET_ADDRESS\s+(0x4[89ABCDEF]|video_ram_4)",flags=re.I)   # game_specific
 
 # various dirty but at least automatic patches applying on the converted code
 with open(source_dir / "conv.s") as f:
@@ -256,6 +259,21 @@ with open(source_dir / "conv.s") as f:
         elif "addx mix" in line:
             line = "\tPOP_SR\n"
 
+        elif address == 0xAECD:
+            line = f"""\ttst.b\tinvincible_flag
+\tjne\t0f
+# don't reset invincible state
+{line}
+0:
+"""
+        elif address == 0x7714:
+            line = f"""\ttst.b\tinvincible_flag
+\tjeq\t0f
+\tGET_ADDRESS\tplayer_state_51c0
+\tmove.b\t#2,(a0)  | invincible (egg power)
+0:
+{line}
+"""
         # end game_specific
         ###############################################
         if "GET_ADDRESS" in line:

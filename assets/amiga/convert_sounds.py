@@ -36,7 +36,14 @@ def convert(ocs):
     loop_channel = 2
 
     EMPTY_SND = "EMPTY_SND"
-    dummy_sounds = [0,1,2,3,4,5,6,7,8,9,10]  # ATM no music
+    dummy_sounds = [0,0x1E,
+    0x1F,
+    0x1D,0x1C,0x1B,0x1A,0x19,  # music indicators
+    0x20,  # level 1
+    0x24,  # superpower
+    0x2A,  # dead?
+    0x2B, # ???
+    ]  # ATM no music
 
 
 
@@ -48,7 +55,7 @@ def convert(ocs):
         parts = sound_name.rsplit("_",maxsplit=1)
         if len(parts)>1:
             try:
-                index = int(parts[1],16)
+                index = int(parts[1],16) - 0xD  # like MAME sound test
                 if index not in dummy_sounds:
                     sfx_list.add(index)
                     # auto-declare according to name suffix

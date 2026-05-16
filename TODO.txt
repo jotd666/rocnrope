@@ -1,6 +1,6 @@
 - demo version left bottom dino doesn't get angry and climbs at once: sequence disrupted
 - implement sprites
-- rip sfx
+
 
 converter misses the optimization:
 	GET_ADDRESS	0x818a                     	| [$61b6: std    $818a]
