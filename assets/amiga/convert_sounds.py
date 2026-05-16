@@ -3,7 +3,7 @@ import shutil
 
 from shared import *
 
-gamename = "jailbreak"
+gamename = "rocnrope"
 sox = "sox"
 
 sound_dir = this_dir / ".." / "sounds"
@@ -27,35 +27,19 @@ def convert(ocs):
         lq_sample_rate = 10000
 
 
-    sound_settings_dict = { 1 : {"channel":3,"priority":1},
- 3 : {"channel":1,"priority":20},
- 2 : {"channel":2,"priority":100,"sample_rate":lq_sample_rate},
- 0xE : {"channel":2,"priority":100,"sample_rate":lq_sample_rate},
-  0x13 : {"channel":3,"priority":10},
-  0x20 : {"channel":2,"priority":10},
-  0x21 : {"channel":2,"priority":10},
-  0x22 : {"channel":2,"priority":10},
-  0x82 : {"channel":1,"priority":10},
-  0x83 : {"channel":1,"priority":10},
-  0x89 : {"channel":3,"priority":100}, # thank you you saved me
-  0x8B : {"channel":3,"priority":100}, # level name
-  0x8C : {"channel":3,"priority":100}, # level name
-  0x8D : {"channel":3,"priority":100}, # level name
-  0x8E : {"channel":3,"priority":100}, # level name
-  0x8F : {"channel":3,"priority":100}, # level name
-  0x93 : {"channel":-1,"priority":100}, # level name
+    sound_settings_dict = {
+    #1 : {"channel":3,"priority":1,"sample_rate":lq_sample_rate}
+
 
 }
 
     loop_channel = 2
 
     EMPTY_SND = "EMPTY_SND"
-    dummy_sounds = [0
-    ]
+    dummy_sounds = [0,1,2,3,4,5,6,7,8,9,10]  # ATM no music
 
-    if ocs:
-        dummy_sounds.extend([0x84,0x93,0x8A,0x8B,0x8C,0x8D,0x8E,0x10,0x95,0x8F,0x90]) # rare/large sounds/speech
-#,0x89,,0x91
+
+
     sound_dict = {}
     sfx_list = set()
     # scan directory for speech
@@ -82,26 +66,26 @@ def convert(ocs):
 
     for v in sound_dict.values():
         if "channel" not in v:
-            v["channel"] = -1 # auto
+            v["channel"] = 3
 
     music_volume = 20
 
-    sound_dict.update({
-    "LEVEL_COMPLETED_SND"      :{"index":0x40,"pattern":0x4,"volume":music_volume},
-    "LEVEL_START_SND"      :{"index":0x44,"pattern":0x1,"volume":music_volume},
-    "GAME_OVER_SND"      :{"index":0x45,"pattern":0x3,"volume":music_volume},
-    "INTRO_SND"      :{"index":0x43,"pattern":0x0,"volume":music_volume},
-    "GAME_COMPLETED_SND"      :{"index":0x41,"pattern":0x5,"volume":music_volume},
-    "HIGH_SCORE_SND"      :{"index":0x42,"pattern":0x9,"volume":music_volume},
-
-})
+##    sound_dict.update({
+##    "LEVEL_COMPLETED_SND"      :{"index":0x40,"pattern":0x4,"volume":music_volume},
+##    "LEVEL_START_SND"      :{"index":0x44,"pattern":0x1,"volume":music_volume},
+##    "GAME_OVER_SND"      :{"index":0x45,"pattern":0x3,"volume":music_volume},
+##    "INTRO_SND"      :{"index":0x43,"pattern":0x0,"volume":music_volume},
+##    "GAME_COMPLETED_SND"      :{"index":0x41,"pattern":0x5,"volume":music_volume},
+##    "HIGH_SCORE_SND"      :{"index":0x42,"pattern":0x9,"volume":music_volume},
+##
+##})
 
 
     with open(os.path.join(src_dir,"..",f"sounds{suffix}.inc"),"w") as f:
         for k,v in sorted(sound_dict.items(),key = lambda x:x[1]["index"]):
             f.write(f"\t.equ\t{k.upper()},  0x{v['index']:x}\n")
 
-    max_sound = 0x100  # max(x["index"] for x in sound_dict.values())+1
+    max_sound = 0x40  # max(x["index"] for x in sound_dict.values())+1
     sound_table = [""]*max_sound
     sound_table_set_1 = ["\t.long\t0,0"]*max_sound
 
@@ -203,7 +187,7 @@ def convert(ocs):
 
                 amp_ratio = max(maxsigned,abs(minsigned))/32
 
-                # JOTD: for that one, I'm using maxxed out sfx by no9, no amp
+
                 print(f"amp_ratio: {amp_ratio}")
 
                 wav = os.path.splitext(wav_name)[0]
@@ -246,9 +230,10 @@ def convert(ocs):
                 write_asm(contents,fw)
 
 
+        contents = bytes()
         # make sure next section will be aligned
-        with open(os.path.join(sound_dir,f"{gamename}_conv.mod"),"rb") as f:
-            contents = f.read()
+        #with open(os.path.join(sound_dir,f"{gamename}_conv.mod"),"rb") as f:
+        #    contents = f.read()
 
         fw.write("{}:".format(music_module_label))
         write_asm(contents,fw)
@@ -263,7 +248,7 @@ def convert(ocs):
 
 
 convert(ocs=False)
-convert(ocs=True)
+#convert(ocs=True)
 
 
 
