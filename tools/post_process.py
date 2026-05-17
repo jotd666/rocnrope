@@ -304,6 +304,21 @@ with open(source_dir / "conv.s") as f:
             # and we need a0 to be correct when we call dirty
             lines[i+4] = "\tsubq\t#1,a0\n\tmove.b\td1,(a0)\n\tVIDEO_BYTE_DIRTY\n"
 
+        elif address == 0xD5A2:
+            line = f"""
+\ttst.b\tskip_intro_flag
+\tjne\tbird_mid_course_d627
+{line}"""
+        elif address == 0xD64A:
+            line = f"""
+\ttst.b\tskip_intro_flag
+\tjne\tbird_reached_top_of_screen_d6a2
+{line}"""
+
+        # all swaps are legit
+        if "push cc had to be swapped" in line:
+            line = remove_error(line)
+
         # end game_specific
         ###############################################
         if "GET_ADDRESS" in line:

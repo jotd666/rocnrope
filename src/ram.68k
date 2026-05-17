@@ -3,6 +3,7 @@
 	.global infinite_lives_flag
 
 	.global invincible_flag
+	.global skip_intro_flag
 	.global start_level
 	.global vb_ticks_count
 	.global break_at_startup_flag

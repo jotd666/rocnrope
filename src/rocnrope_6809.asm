@@ -8065,6 +8065,8 @@ D73B: 31 0C          LEAY   $4,Y
 D73D: 7A D2 89       DEC    $5A01
 D740: 26 D1          BNE    $D735
 D742: 39             RTS
+
+move_bird_sprites_d743:
 D743: A6 2A          LDA    $8,X
 D745: AB 84          ADDA   $6,X
 D747: A7 2E          STA    $6,X
@@ -8077,6 +8079,8 @@ D754: 5A             DECB
 D755: 26 7A          BNE    $D74F
 D757: 35 39          PULS   CC,X
 D759: 39             RTS
+
+move_bird_sprites_d75a:
 D75A: A6 80          LDA    $8,X
 D75C: AB 2E          ADDA   $6,X
 D75E: A7 8E          STA    $6,X
@@ -8089,6 +8093,8 @@ D76B: 5A             DECB
 D76C: 26 D0          BNE    $D766
 D76E: 35 99          PULS   CC,X
 D770: 39             RTS
+
+move_bird_sprites_d771:
 D771: A6 0A 94       LDA    $16,X
 D774: AB 25          ADDA   $7,X
 D776: A7 85          STA    $7,X
@@ -8101,6 +8107,8 @@ D783: 5A             DECB
 D784: 26 DA          BNE    $D77E
 D786: 35 93          PULS   CC,X
 D788: 39             RTS
+
+move_bird_sprites_d789:
 D789: A6 00 9E       LDA    $16,X
 D78C: AB 2F          ADDA   $7,X
 D78E: A7 8F          STA    $7,X
@@ -8253,6 +8261,8 @@ DBFA: 0C 99          INC    bird_direction_11
 DBFC: BD FF A1       JSR    $D729
 DBFF: BD F5 CA       JSR    $D7E8
 DC02: 39             RTS
+
+
 DC03: 8E 73 E2       LDX    #player_state_51c0
 DC06: BD E2 3F       JSR    $6017
 DC09: BD 5F A1       JSR    $D729
@@ -8268,13 +8278,13 @@ DC23: 27 6B          BEQ    $DC6E
 DC25: 10 83 82 28    CMPD   #$0000
 DC29: 27 F1          BEQ    $DCA4
 DC2B: 8E 79 C8       LDX    #$51E0
-DC2E: BD 5F 61       JSR    $D743
+DC2E: BD 5F 61       JSR    move_bird_sprites_d743
 DC31: 24 81          BCC    $DC36
 DC33: 7A 73 E6       DEC    $51C4
 DC36: EC 0A 3E       LDD    $16,X
 DC39: E3 00 90       ADDD   $18,X
 DC3C: ED A0 9E       STD    $16,X
-DC3F: BD F5 53       JSR    $D771
+DC3F: BD F5 53       JSR    move_bird_sprites_d771
 DC42: 24 81          BCC    $DC47
 DC44: 7A 73 47       DEC    $51C5
 DC47: 39             RTS
@@ -8336,13 +8346,13 @@ DCD0: 27 7B          BEQ    $DD2B
 DCD2: 10 83 28 02    CMPD   #$0A20
 DCD6: 27 EC          BEQ    $DD46
 DCD8: 8E 79 68       LDX    #$51E0
-DCDB: BD FF 72       JSR    $D75A
+DCDB: BD FF 72       JSR    move_bird_sprites_d75a
 DCDE: 24 8B          BCC    $DCE3
 DCE0: 7C 73 46       INC    $51C4
 DCE3: EC AA 34       LDD    $16,X
 DCE6: A3 0A 30       SUBD   $18,X
 DCE9: ED 00 9E       STD    $16,X
-DCEC: BD FF F9       JSR    $D771
+DCEC: BD FF F9       JSR    move_bird_sprites_d771
 DCEF: 24 21          BCC    $DCF4
 DCF1: 7A D3 47       DEC    $51C5
 DCF4: 39             RTS
@@ -8571,13 +8581,13 @@ DF1A: 10 27 28 51    LBEQ   $DF97
 DF1E: 81 79          CMPA   #$F1
 DF20: 10 27 82 07    LBEQ   $DFA9
 DF24: 8E 73 62       LDX    #$51E0
-DF27: BD FF 72       JSR    $D75A
+DF27: BD FF 72       JSR    move_bird_sprites_d75a
 DF2A: 24 8B          BCC    $DF2F
 DF2C: 7C 79 4C       INC    $51C4
 DF2F: EC AA 34       LDD    $16,X
 DF32: E3 0A 3A       ADDD   $18,X
 DF35: ED 0A 94       STD    $16,X
-DF38: BD FF 01       JSR    $D789
+DF38: BD FF 01       JSR    move_bird_sprites_d789
 DF3B: 24 2B          BCC    $DF40
 DF3D: 7C D9 4D       INC    $51C5
 DF40: 39             RTS

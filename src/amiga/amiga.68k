@@ -508,6 +508,8 @@ _user:
 	move.l	misc_options,d1
 	btst	#0,d1
 	sne		frameskip
+	btst	#1,d1
+	sne		skip_intro_flag
 	.ifndef	RELEASE
 	btst	#31,d1
 	sne		break_at_startup_flag

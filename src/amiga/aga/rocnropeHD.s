@@ -43,6 +43,7 @@ _config
 	dc.b	"C1:X:infinite lives:1;"
 	dc.b	"C1:X:cheat keys:4;"
 	dc.b	"C2:X:25 Hz update:0;"
+	dc.b	"C2:X:skip introduction:1;"
 	dc.b	"C3:L:start level:1,2,3,4;"
 	*dc.b	"C4:L:number of lives:5,3,2;"
 	*dc.b	"C5:L:difficulty level:easy,normal,difficult,very difficult;"
