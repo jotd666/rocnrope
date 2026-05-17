@@ -2,7 +2,7 @@ import subprocess,os,glob,shutil,pathlib
 
 progdir = pathlib.Path(__file__).parent.parent.absolute()
 
-gamename = "digdug2"
+gamename = "rocnrope"
 # JOTD path for cranker, adapt to whatever your path is :)
 os.environ["PATH"] += os.pathsep+r"K:\progs\cli"
 
@@ -20,16 +20,16 @@ if os.path.exists(outdir):
         x.unlink()
 else:
     outdir.mkdir()
-for file in ["readme.md",f"{gamename}_ocs.slave",f"{gamename}_aga.slave"]:  #f"{gamename}.slave",
+for file in ["readme.md",f"{gamename}_aga.slave"]:  #f"{gamename}.slave",f"{gamename}_ocs.slave",
     shutil.copy(progdir / file,outdir)
 
 assets = progdir /"assets"/"amiga"
-shutil.copy(assets/"DigDug2-A.info",outdir)
-shutil.copy(assets/"DigDug2-B.info",outdir)
+shutil.copy(assets/"RocNRope.info",outdir)
 
 
 
-for ext in ["aga","ocs"]:
+
+for ext in ["aga"]:
     exename = f"{gamename}_{ext}"
     shutil.copy(progdir/exename,outdir)
     subprocess.run(["cranker_windows.exe","-f",progdir/exename,"-o",progdir/f"{exename}.rnc"],check=True)

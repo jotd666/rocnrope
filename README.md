@@ -13,11 +13,11 @@ Credits:
 
 Instructions:
 
-5: insert coin
-1/2: start game
-arrows/joystick: move
-red/ctrl: shoot
-blue/alt: change weapon
+fire/5: insert coin
+up/down/1/2: start game
+joystick/arrows: move
+red/ctrl: shoot grappling hook
+blue/alt: dazze
 
 Cheat keys:
 

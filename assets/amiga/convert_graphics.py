@@ -31,7 +31,8 @@ mirror_sprites = get_mirror_sprites()
 # is not activated
 dynamic_mirror = False
 
-possible_hw_sprites = set() #get_possible_hw_sprites()
+# here possible HW sprites have exclusive bitmap, no BOB data
+possible_hw_sprites = get_possible_hw_sprites()
 
 magenta = (254,0,254)
 

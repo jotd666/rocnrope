@@ -1,11 +1,24 @@
+- use hardware sprites (A1200/nofast flashes)
+  => main character
+  => pterodactyl+stone (no mirror!!)
+  (avoids generating bitmap data for other characters)
 - demo version left bottom dino doesn't get angry and climbs at once: sequence disrupted
 - end of level: wrong sprite position for player clinging to bird
 - end of game: same??
-
+- eCS version!!! 18 colors to reduce to 16? unless player sprites & ptero & rock use some
+  exclusively
+- when does ptero drop the rock?
+  
 converter misses the optimization:
 	GET_ADDRESS	0x818a                     	| [$61b6: std    $818a]
 	move.w	d1,(a0) |  [...]
 	MAKE_D                                 	| [...]
+
+
+skip intro:
+bpset D5A2,,{PC=$d627;g}
+bpset D64A,,{PC=$d6a2;g}
+
 
 
 - set DSW difficulty lives, etc.

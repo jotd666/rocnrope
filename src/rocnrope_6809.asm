@@ -35,9 +35,12 @@ interrupt_vector_8188 = $8188
 interrupt_vector_818a = $818a
 interrupt_vector_818c = $818c
 players_controls_32 = $32
+timer_4f = $4f
+bird_direction_11 = $11
 player_state_51c0 = $51c0
+bird_y_position_5a10 = $5a10
 ; player status in $5005:
-; 0: inactive
+; 0: inactive (during intro)
 ; 1: normal
 ; 2: dead
 ; 3: level complete
@@ -113,7 +116,7 @@ start_6000:      ; [global]
 6091: 10 EC CD       LDD    $F,U
 6094: 0D 00          TST    game_in_play_22
 6096: 27 B3          BEQ    $60C9
-6098: D6 67          LDB    $4F
+6098: D6 67          LDB    timer_4f
 609A: C5 87          BITB   #$0F
 609C: 27 03          BEQ    $60C9
 609E: C5 98          BITB   #$10
@@ -836,6 +839,7 @@ l_686d:
 698B: 8C 63 97       CMPX   #$4BBF
 698E: 23 78          BLS    $6980
 6990: 39             RTS
+
 6991: 0F F2          CLR    $70
 6993: 0F 54          CLR    $76
 6995: D6 43          LDB    $C1
@@ -1078,7 +1082,7 @@ l_686d:
 
 6EF8: 0D 0A          TST    game_in_play_22
 6EFA: 26 8C          BNE    $6F00
-6EFC: 0F 67          CLR    $4F
+6EFC: 0F 67          CLR    timer_4f
 6EFE: 0F 4A          CLR    $C2
 6F00: 8E 72 42       LDX    #$50C0
 6F03: 10 8E 95 4E    LDY    #$B7CC
@@ -1201,7 +1205,7 @@ l_686d:
 700F: 0D 00          TST    game_in_play_22
 7011: 26 86          BNE    $7017
 7013: 0F E0          CLR    $C2
-7015: 0F CD          CLR    $4F
+7015: 0F CD          CLR    timer_4f
 7017: 96 EA          LDA    $C2
 7019: 84 94          ANDA   #$1C
 701B: 44             LSRA
@@ -1269,8 +1273,8 @@ irq_70a0:   ; [global]
 70A0: 4F             CLRA
 70A1: B7 02 05       STA    mainlatch_8087
 70A4: B7 A2 82       STA    watchdog_8000
-70A7: 0C 67          INC    $4F
-70A9: 8D A9          BSR    $70CC
+70A7: 0C 67          INC    timer_4f
+70A9: 8D A9          BSR    update_sprites_and_tiles_70cc
 70AB: BD 5A 62       JSR    $724A
 70AE: BD FA 4D       JSR    $726F
 70B1: BD F0 7E       JSR    process_audio_queue_72fc
@@ -1282,9 +1286,9 @@ irq_70a0:   ; [global]
 70BE: B7 08 A5       STA    mainlatch_8087
 70C1: 3B             RTI
 
-
+update_sprites_and_tiles_70cc:
 70CC: 34 20          PSHS   DP
-70CE: 86 C8          LDA    #$40
+70CE: 86 C8          LDA    #$40	; source is $40xx
 70D0: 1F A9          TFR    A,DP
 70D2: 96 C1          LDA    $43
 70D4: D6 62          LDB    $40
@@ -1301,7 +1305,7 @@ irq_70a0:   ; [global]
 70EC: DD 2C          STD    $04
 70EE: DC C1          LDD    $49
 70F0: FD 66 86       STD    $4404
-70F3: 96 6D          LDA    $4F
+70F3: 96 6D          LDA    timer_4f
 70F5: D6 CE          LDB    $4C
 70F7: DD 2E          STD    $06
 70F9: DC C5          LDD    $4D
@@ -1826,6 +1830,7 @@ process_audio_queue_72fc:
 757B: 10 8E 5D 09    LDY    #jump_table_7581
 757F: 6E 94          JMP    [A,Y]        ; [indirect_jump] [nb_entries=4]
 
+player_inactive_7589:
 7589: 96 80          LDA    $08
 758B: 48             ASLA
 758C: 10 8E FD 1A    LDY    #jump_table_7592
@@ -1869,7 +1874,7 @@ process_audio_queue_72fc:
 75FD: 27 92          BEQ    $7619
 75FF: 30 3D          LEAX   -$1,X
 7601: 9F 84          STX    $06
-7603: 96 6D          LDA    $4F
+7603: 96 6D          LDA    timer_4f
 7605: 85 9D          BITA   #$1F
 7607: 26 3A          BNE    $761B
 7609: 85 A8          BITA   #$20
@@ -1923,7 +1928,7 @@ process_audio_queue_72fc:
 7676: 27 98          BEQ    $7692
 7678: 30 37          LEAX   -$1,X
 767A: 9F 8E          STX    $06
-767C: 96 67          LDA    $4F
+767C: 96 67          LDA    timer_4f
 767E: 85 97          BITA   #$1F
 7680: 26 30          BNE    $7694
 7682: 85 A2          BITA   #$20
@@ -1989,6 +1994,8 @@ process_audio_queue_72fc:
 770E: 10 8C 73 C2    CMPY   #$51E0
 7712: 25 74          BCS    $770A
 7714: 39             RTS
+
+start_gameplay_7715:
 7715: 0A 85          DEC    $07
 7717: 26 3B          BNE    $772C
 7719: BD F3 54       JSR    $7BDC
@@ -2033,6 +2040,7 @@ process_audio_queue_72fc:
 7771: 97 89          STA    $0B
 7773: D7 2C          STB    $0E
 7775: 39             RTS
+
 7776: DC 41          LDD    $C3
 7778: C3 28 89       ADDD   #$0001
 777B: DD EB          STD    $C3
@@ -2342,7 +2350,7 @@ process_audio_queue_72fc:
 7A34: 33 E4          LEAU   A,U
 7A36: EE 46          LDU    ,U
 7A38: 33 E1 74 88    LEAU   -$0400,U
-7A3C: 96 67          LDA    $4F
+7A3C: 96 67          LDA    timer_4f
 7A3E: 84 87          ANDA   #$0F
 7A40: 97 43          STA    $61
 7A42: C6 86          LDB    #$04
@@ -3035,7 +3043,7 @@ process_audio_queue_72fc:
 8053: 86 23          LDA    #$01
 8055: A7 0A 9E       STA    $1C,X
 8058: 39             RTS
-8059: 96 C7          LDA    $4F
+8059: 96 C7          LDA    timer_4f
 805B: 85 17          BITA   #$3F
 805D: 26 85          BNE    $806C
 805F: 6C AA 37       INC    $15,X
@@ -3708,7 +3716,7 @@ process_audio_queue_72fc:
 8658: 27 3A          BEQ    $866C
 865A: 6A 00 38       DEC    $10,X
 865D: CE 0E AB       LDU    #$8623
-8660: 96 6D          LDA    $4F
+8660: 96 6D          LDA    timer_4f
 8662: 84 8D          ANDA   #$0F
 8664: A6 E4          LDA    A,U
 8666: AB 0A 39       ADDA   $11,X
@@ -3750,7 +3758,7 @@ process_audio_queue_72fc:
 870A: 20 8A          BRA    $870E
 870C: 8B 23          ADDA   #$0B
 870E: A7 8C          STA    $4,X
-8710: 96 6D          LDA    $4F
+8710: 96 6D          LDA    timer_4f
 8712: 84 8D          ANDA   #$0F
 8714: 97 42          STA    $60
 8716: A6 8C          LDA    $E,X
@@ -4028,7 +4036,7 @@ process_audio_queue_72fc:
 89BE: A7 8B          STA    $3,X
 89C0: E7 AA 9D       STB    $1F,X
 89C3: 39             RTS
-89C4: 96 6D          LDA    $4F
+89C4: 96 6D          LDA    timer_4f
 89C6: 85 9D          BITA   #$1F
 89C8: 26 1E          BNE    $8A00
 89CA: BD 0F 44       JSR    $876C
@@ -4039,7 +4047,7 @@ process_audio_queue_72fc:
 89D5: 81 80          CMPA   #$02
 89D7: 27 2A          BEQ    $89DB
 89D9: C6 C8          LDB    #$40
-89DB: D5 67          BITB   $4F
+89DB: D5 67          BITB   timer_4f
 89DD: 10 26 88 A5    LBNE   $8A68
 89E1: 86 80          LDA    #$02
 89E3: A8 2D          EORA   $F,X
@@ -4074,7 +4082,7 @@ process_audio_queue_72fc:
 8A26: 8B 92          ADDA   #$10
 8A28: 81 36          CMPA   #$1E
 8A2A: 23 AF          BLS    $8A53
-8A2C: 96 67          LDA    $4F
+8A2C: 96 67          LDA    timer_4f
 8A2E: 84 C8          ANDA   #$40
 8A30: 27 2B          BEQ    $8A3B
 8A32: CC 8A 22       LDD    #$0800
@@ -6356,7 +6364,7 @@ A90E: A7 00 33       STA    $11,X
 A911: A6 87          LDA    $5,X
 A913: A7 AA 32       STA    $10,X
 A916: CE 04 0B       LDU    #$8623
-A919: 96 C7          LDA    $4F
+A919: 96 C7          LDA    timer_4f
 A91B: 84 27          ANDA   #$0F
 A91D: A6 4E          LDA    A,U
 A91F: AB AA 32       ADDA   $10,X
@@ -6703,10 +6711,10 @@ ABF8: F8 E0 30       EORB   $C8B8
 ABFB: 48             ASLA
 ABFC: F8 E0 F0       EORB   $C878
 ABFF: 40             NEGA
-AC00: 96 6D          LDA    $4F
+AC00: 96 6D          LDA    timer_4f
 AC02: 97 E1          STA    $63
 AC04: 86 22          LDA    #$00
-AC06: 97 CD          STA    $4F
+AC06: 97 CD          STA    timer_4f
 AC08: BD 86 9A       JSR    $AE12
 AC0B: 8E 7A E8       LDX    #$52C0
 AC0E: CC 88 26       LDD    #$0004
@@ -6715,7 +6723,7 @@ AC13: 30 AA 32       LEAX   $10,X
 AC16: 5A             DECB
 AC17: 26 D0          BNE    $AC11
 AC19: 96 EB          LDA    $63
-AC1B: 97 67          STA    $4F
+AC1B: 97 67          STA    timer_4f
 AC1D: 39             RTS
 AC1E: 8E DA E2       LDX    #$52C0
 AC21: 10 8E D3 E2    LDY    #player_state_51c0
@@ -6942,7 +6950,7 @@ AE09: BD 3C D9       JSR    $B451
 AE0C: BD 9E 01       JSR    $B689
 AE0F: 7E 97 94       JMP    $B5B6
 AE12: 8E D0 E2       LDX    #$52C0
-AE15: D6 CD          LDB    $4F
+AE15: D6 CD          LDB    timer_4f
 AE17: C4 2E          ANDB   #$06
 AE19: 54             LSRB
 AE1A: 10 8E 86 8E    LDY    #$AEA6
@@ -6986,7 +6994,7 @@ AE6A: 48             ASLA
 AE6B: 30 AE          LEAX   A,X
 AE6D: 10 AE 0C       LDY    ,X
 AE70: AE 20          LDX    $2,X
-AE72: 96 CD          LDA    $4F
+AE72: 96 CD          LDA    timer_4f
 AE74: 84 21          ANDA   #$03
 AE76: A6 24          LDA    A,Y
 AE78: 97 49          STA    $61
@@ -7011,7 +7019,7 @@ AEB9: 26 8C          BNE    $AEBF
 AEBB: 8D 0C          BSR    $AEE1
 AEBD: 20 89          BRA    $AEC0
 AEBF: 39             RTS
-AEC0: 96 6D          LDA    $4F
+AEC0: 96 6D          LDA    timer_4f
 AEC2: 85 9D          BITA   #$1F
 AEC4: 26 38          BNE    $AEE0
 AEC6: 6A 0A 3E       DEC    $16,X
@@ -7031,7 +7039,7 @@ AEE0: 39             RTS
 AEE1: A6 0A 94       LDA    $16,X
 AEE4: 81 26          CMPA   #$04
 AEE6: 22 94          BHI    $AEFE
-AEE8: 96 67          LDA    $4F
+AEE8: 96 67          LDA    timer_4f
 AEEA: 85 8F          BITA   #$07
 AEEC: 26 38          BNE    $AEFE
 AEEE: E6 86          LDB    $E,X
@@ -7248,7 +7256,7 @@ B0DF: 81 3A          CMPA   #$18
 B0E1: 22 8C          BHI    $B0F1
 B0E3: 0D AB          TST    $89
 B0E5: 27 88          BEQ    $B0F1
-B0E7: 96 67          LDA    $4F
+B0E7: 96 67          LDA    timer_4f
 B0E9: 85 97          BITA   #$1F
 B0EB: 26 64          BNE    $B139
 B0ED: 0A 01          DEC    $89
@@ -7481,7 +7489,7 @@ B447: 10 8E 8C 2A    LDY    #$A4A2
 B44B: BD 48 15       JSR    $603D
 B44E: 6F 82          CLR    $A,X
 B450: 39             RTS
-B451: 96 CD          LDA    $4F
+B451: 96 CD          LDA    timer_4f
 B453: 84 3D          ANDA   #$1F
 B455: 26 AD          BNE    $B486
 B457: 96 E9          LDA    $C1
@@ -7532,7 +7540,7 @@ B5B6: 8D 94          BSR    $B5CE
 B5B8: 96 48          LDA    $60                                         
 B5BA: 8E 3D EF       LDX    #$B5C7
 B5BD: A6 0E          LDA    A,X
-B5BF: 95 6D          BITA   $4F
+B5BF: 95 6D          BITA   timer_4f
 B5C1: 26 E1          BNE    $B626
 B5C3: 8D 40          BSR    $B627
 B5C5: 20 9F          BRA    $B5E4
@@ -7833,7 +7841,9 @@ D539: 0F 83          CLR    $0B
 D53B: 0F 26          CLR    $0E
 D53D: BD 5F 29       JSR    $D7A1
 D540: 39             RTS
-D541: 96 93          LDA    $11
+
+move_bird_d541:
+D541: 96 93          LDA    bird_direction_11
 D543: 48             ASLA
 D544: 10 8E 57 C8    LDY    #jump_table_d54a
 D548: 6E 9E          JMP    [A,Y]        ; [indirect_jump] [nb_entries=3]
@@ -7850,12 +7860,14 @@ D565: BD 55 58       JSR    $D7DA
 D568: 8E F1 63       LDX    #$D9EB
 D56B: BD FE F2       JSR    $D6DA
 D56E: 86 40          LDA    #$C8
-D570: B7 78 92       STA    $5A10
-D573: 0F 6D          CLR    $4F
+D570: B7 78 92       STA    bird_y_position_5a10
+D573: 0F 6D          CLR    timer_4f
 D575: 7F D8 94       CLR    $5A16
 D578: 7F 72 87       CLR    $5A0F
-D57B: 0C 39          INC    $11
+D57B: 0C 39          INC    bird_direction_11	; change direction
 D57D: 39             RTS
+
+bird_on_bottom_d57e:
 D57E: 0D 3E          TST    $B6
 D580: 26 78          BNE    $D5DC
 D582: 8E D1 82       LDX    #$53A0
@@ -7868,17 +7880,17 @@ D590: BD 42 95       JSR    $6017
 D593: BD F5 0B       JSR    $D729
 D596: 86 92          LDA    #$10
 D598: BD FF 62       JSR    $D7EA
-D59B: B6 72 38       LDA    $5A10
+D59B: B6 72 38       LDA    bird_y_position_5a10
 D59E: 4A             DECA
-D59F: B7 78 32       STA    $5A10
+D59F: B7 78 32       STA    bird_y_position_5a10
 D5A2: 81 14          CMPA   #$96
 D5A4: 27 15          BEQ    $D5DD
 D5A6: 81 B0          CMPA   #$32
 D5A8: 27 6C          BEQ    $D5EE
 D5AA: 81 88          CMPA   #$00
-D5AC: 27 51          BEQ    $D627
-D5AE: B6 D2 32       LDA    $5A10
-D5B1: F6 D8 92       LDB    $5A10
+D5AC: 27 51          BEQ    bird_mid_course_d627
+D5AE: B6 D2 32       LDA    bird_y_position_5a10
+D5B1: F6 D8 92       LDB    bird_y_position_5a10
 D5B4: 3D             MUL
 D5B5: 84 7E          ANDA   #$FC
 D5B7: B1 72 3E       CMPA   $5A16
@@ -7886,16 +7898,17 @@ D5BA: 27 81          BEQ    $D5C5
 D5BC: B7 72 9E       STA    $5A16
 D5BF: 8E 73 C2       LDX    #$51E0
 D5C2: BD 55 69       JSR    $D74B
-D5C5: 96 CD          LDA    $4F
+D5C5: 96 CD          LDA    timer_4f
 D5C7: 84 29          ANDA   #$01
 D5C9: 26 99          BNE    $D5DC
 D5CB: 8E 79 C8       LDX    #$51E0
-D5CE: BD 5F B0       JSR    $D792
+D5CE: BD 5F B0       JSR    move_bird_sprites_left_d792
 D5D1: 7D D1 22       TST    $53A0
 D5D4: 27 24          BEQ    $D5DC
 D5D6: 8E D1 88       LDX    #$53A0
-D5D9: BD 5E 3A       JSR    $D6B2
+D5D9: BD 5E 3A       JSR    move_bird_sprites_vertically_d6b2
 D5DC: 39             RTS
+
 D5DD: 8E 50 A5       LDX    #$D82D
 D5E0: BD F4 70       JSR    $D6F2
 D5E3: BD F5 F8       JSR    $D7DA
@@ -7923,8 +7936,11 @@ D61D: ED 83          STD    $B,X
 D61F: CC F8 6C       LDD    #$DA4E
 D622: ED 0A 09       STD    $2B,X
 D625: 20 05          BRA    $D5AE
-D627: 0C 39          INC    $11
+bird_mid_course_d627:
+D627: 0C 39          INC    bird_direction_11
 D629: 39             RTS
+
+bird_on_top_d62a:
 D62A: 8E DB 88       LDX    #$53A0
 D62D: A6 0C          LDA    ,X
 D62F: 4D             TSTA
@@ -7935,17 +7951,17 @@ D638: BD 48 9F       JSR    $6017
 D63B: BD FF 01       JSR    $D729
 D63E: 86 98          LDA    #$10
 D640: BD F5 68       JSR    $D7EA
-D643: B6 78 32       LDA    $5A10
+D643: B6 78 32       LDA    bird_y_position_5a10
 D646: 4C             INCA
-D647: B7 72 38       STA    $5A10
+D647: B7 72 38       STA    bird_y_position_5a10
 D64A: 81 96          CMPA   #$1E
 D64C: 27 6B          BEQ    $D691
 D64E: 81 D8          CMPA   #$50
 D650: 27 0C          BEQ    $D680
 D652: 81 28          CMPA   #$AA
-D654: 27 6E          BEQ    $D6A2
-D656: B6 D8 38       LDA    $5A10
-D659: F6 D2 98       LDB    $5A10
+D654: 27 6E          BEQ    bird_reached_top_of_screen_d6a2
+D656: B6 D8 38       LDA    bird_y_position_5a10
+D659: F6 D2 98       LDB    bird_y_position_5a10
 D65C: 3D             MUL
 D65D: 84 74          ANDA   #$FC
 D65F: B1 78 34       CMPA   $5A16
@@ -7953,13 +7969,13 @@ D662: 27 8B          BEQ    $D66D
 D664: B7 78 94       STA    $5A16
 D667: 8E 79 C8       LDX    #$51E0
 D66A: BD 5F 4A       JSR    $D762
-D66D: 96 C7          LDA    $4F
+D66D: 96 C7          LDA    timer_4f
 D66F: 84 23          ANDA   #$01
 D671: 26 8E          BNE    $D67F
 D673: 8E 73 C2       LDX    #$51E0
-D676: BD 55 BA       JSR    $D792
+D676: BD 55 BA       JSR    move_bird_sprites_left_d792
 D679: 8E DB 28       LDX    #$53A0
-D67C: BD FE 3A       JSR    $D6B2
+D67C: BD FE 3A       JSR    move_bird_sprites_vertically_d6b2
 D67F: 39             RTS
 D680: 8E FA FC       LDX    #$D87E
 D683: BD F4 D0       JSR    $D6F2
@@ -7973,14 +7989,17 @@ D697: BD FF E4       JSR    $D7CC
 D69A: 8E 51 F5       LDX    #$D9DD
 D69D: BD 5E 52       JSR    $D6DA
 D6A0: 20 96          BRA    $D656
+
+bird_reached_top_of_screen_d6a2:
 D6A2: BD 55 83       JSR    $D7A1
 D6A5: BD EC 7A       JSR    $6EF8
-D6A8: 0F 39          CLR    $11
+D6A8: 0F 39          CLR    bird_direction_11
 D6AA: 0F 86          CLR    $0E
 D6AC: 86 2A          LDA    #$02
 D6AE: 97 83          STA    $0B
 D6B0: 4F             CLRA
 D6B1: 39             RTS
+move_bird_sprites_vertically_d6b2:
 D6B2: A6 0A 32       LDA    $10,X
 D6B5: 85 85          BITA   #$07
 D6B7: 26 35          BNE    $D6D6
@@ -8086,6 +8105,7 @@ D789: A6 00 9E       LDA    $16,X
 D78C: AB 2F          ADDA   $7,X
 D78E: A7 8F          STA    $7,X
 D790: 24 2C          BCC    $D7A0
+move_bird_sprites_left_d792:
 D792: C6 8C          LDB    #$0E
 D794: 34 33          PSHS   X,CC
 D796: 6C 87          INC    $5,X
@@ -8152,7 +8172,7 @@ D80E: B7 D2 2D       STA    $5A0F
 D811: 39             RTS
 
 
-DB21: 96 93          LDA    $11
+DB21: 96 93          LDA    bird_direction_11
 DB23: 48             ASLA
 DB24: 8E F9 AB       LDX    #jump_table_db29
 DB27: 6E BE          JMP    [A,X]        ; [indirect_jump] [nb_entries=7]
@@ -8196,7 +8216,7 @@ DB9A: BD 5E F2       JSR    $D6DA
 DB9D: 7F D2 87       CLR    $5A0F
 DBA0: 86 02          LDA    #$20
 DBA2: 97 92          STA    $10
-DBA4: 0C 33          INC    $11
+DBA4: 0C 33          INC    bird_direction_11
 DBA6: 39             RTS
 DBA7: 0A 38          DEC    $10
 DBA9: 26 9D          BNE    $DBC0
@@ -8207,7 +8227,7 @@ DBB4: 8E F8 93       LDX    #$DA11
 DBB7: BD FE F2       JSR    $D6DA
 DBBA: 86 A8          LDA    #$20
 DBBC: 97 38          STA    $10
-DBBE: 0C 99          INC    $11
+DBBE: 0C 99          INC    bird_direction_11
 DBC0: BD F5 AB       JSR    $D729
 DBC3: BD F5 CA       JSR    $D7E8
 DBC6: 39             RTS
@@ -8229,7 +8249,7 @@ DBED: 10 8E 51 92    LDY    #$D9B0
 DBF1: 10 AF 89       STY    $B,X
 DBF4: 8E FA 50       LDX    #$D8D2
 DBF7: BD FF 38       JSR    $D710
-DBFA: 0C 99          INC    $11
+DBFA: 0C 99          INC    bird_direction_11
 DBFC: BD FF A1       JSR    $D729
 DBFF: BD F5 CA       JSR    $D7E8
 DC02: 39             RTS
@@ -8295,11 +8315,11 @@ DC99: 26 8C          BNE    $DC9F
 DC9B: 10 8E F1 4A    LDY    #$D9C2
 DC9F: 10 AF 29       STY    $B,X
 DCA2: 20 05          BRA    $DC2B
-DCA4: 0C 33          INC    $11
+DCA4: 0C 33          INC    bird_direction_11
 DCA6: 39             RTS
 DCA7: 8E F1 3A       LDX    #$D912
 DCAA: BD 5F 38       JSR    $D710
-DCAD: 0C 99          INC    $11
+DCAD: 0C 99          INC    bird_direction_11
 DCAF: 39             RTS
 DCB0: 8E 73 42       LDX    #player_state_51c0
 DCB3: BD 42 35       JSR    $6017
@@ -8365,15 +8385,15 @@ DD50: BD F5 23       JSR    $D7A1
 DD53: CC 6E 22       LDD    #video_ram_4c00
 DD56: FD C2 E8       STD    $40C0
 DD59: FD C8 68       STD    $40E0
-DD5C: 0C 39          INC    $11
+DD5C: 0C 39          INC    bird_direction_11
 DD5E: 39             RTS
 DD5F: 0D 94          TST    $B6
 DD61: 26 84          BNE    $DD69
-DD63: 0F 33          CLR    $11
+DD63: 0F 33          CLR    bird_direction_11
 DD65: 0F 89          CLR    $0B
 DD67: 0C 20          INC    $08
 DD69: 39             RTS
-DD6A: 96 99          LDA    $11
+DD6A: 96 99          LDA    bird_direction_11
 DD6C: 48             ASLA
 DD6D: 8E 55 FA       LDX    #jump_table_dd72
 DD70: 6E B4          JMP    [A,X]        ; [indirect_jump] [nb_entries=6]
@@ -8412,10 +8432,10 @@ DDCC: 7A 72 89       DEC    $5A01
 DDCF: 26 CB          BNE    $DDBA
 DDD1: 8E CA 82       LDX    #color_ram_4800
 DDD4: BF 78 8F       STX    $5A0D
-DDD7: 0F 67          CLR    $4F
-DDD9: 0C 99          INC    $11
+DDD7: 0F 67          CLR    timer_4f
+DDD9: 0C 99          INC    bird_direction_11
 DDDB: 39             RTS
-DDDC: 96 67          LDA    $4F
+DDDC: 96 67          LDA    timer_4f
 DDDE: 85 8B          BITA   #$03
 DDE0: 10 26 82 EA    LBNE   $DE4C
 DDE4: 86 4F          LDA    #$6D
@@ -8434,7 +8454,7 @@ DDFF: 26 D9          BNE    $DDFC
 DE01: BE D8 8A       LDX    $5A08
 DE04: 8C 6E BD       CMPX   #$4C3F
 DE07: 26 2F          BNE    $DE10
-DE09: 0C 99          INC    $11
+DE09: 0C 99          INC    bird_direction_11
 DE0B: 86 36          LDA    #$1E
 DE0D: 97 98          STA    $10
 DE0F: 39             RTS
@@ -8504,7 +8524,7 @@ DEAA: 84 87          ANDA   #$0F
 DEAC: B7 72 84       STA    $5A0C
 DEAF: 0A 32          DEC    $10
 DEB1: 26 80          BNE    $DEB5
-DEB3: 0C 33          INC    $11
+DEB3: 0C 33          INC    bird_direction_11
 DEB5: 39             RTS
 DEB6: CC 82 28       LDD    #$0000
 DEB9: BD E8 80       JSR    $6008
@@ -8526,7 +8546,7 @@ DEE0: A7 A6          STA    ,X
 DEE2: 8E 5B B6       LDX    #$D994
 DEE5: BD 55 92       JSR    $D710
 DEE8: 7F 72 87       CLR    $5A0F
-DEEB: 0C 39          INC    $11
+DEEB: 0C 39          INC    bird_direction_11
 DEED: 39             RTS
 
 DEEE: 0D 3E          TST    $B6
@@ -8602,14 +8622,14 @@ DFAC: BD 48 80       JSR    $6008
 DFAF: 86 23          LDA    #$01
 DFB1: 97 34          STA    $B6
 DFB3: BD F5 83       JSR    $D7A1
-DFB6: 0C 93          INC    $11
+DFB6: 0C 93          INC    bird_direction_11
 DFB8: 39             RTS
 
 DFB9: 0D 3E          TST    $B6
 DFBB: 26 2E          BNE    $DFC3
 DFBD: 0C 80          INC    $08
 DFBF: 0F 29          CLR    $0B
-DFC1: 0F 93          CLR    $11
+DFC1: 0F 93          CLR    bird_direction_11
 DFC3: 39             RTS
 jump_table_6074:
 	dc.w	$643a	; $6074
@@ -8655,7 +8675,7 @@ jump_table_74d2:
 	dc.w	$74d6	; $74d2
 	dc.w	$7505	; $74d4
 jump_table_7570:
-	dc.w	$7589	; $7570
+	dc.w	player_inactive_7589	; $7570
 	dc.w	$7776	; $7572
 	dc.w	$77c8	; $7574
 	dc.w	$7aa9	; $7576
@@ -8669,14 +8689,14 @@ jump_table_7581:
 jump_table_7592:
 	dc.w	$75af	; $7592
 	dc.w	$76b0	; $7594
-	dc.w	$7715	; $7596
+	dc.w	start_gameplay_7715	; $7596
 	dc.w	$772d	; $7598
 	dc.w	$7768	; $759a
 
 jump_table_75a5:
 	dc.w	$75be	; $75a5
 	dc.w	$76b0	; $75a7
-	dc.w	$7715	; $75a9
+	dc.w	start_gameplay_7715	; $75a9
 	dc.w	$7748	; $75ab
 	dc.w	$7768	; $75ad
 jump_table_75b8:
@@ -8841,7 +8861,7 @@ jump_table_a7d0:
 	dc.w	$a7cf	; $a7d8
 jump_table_d4b7:
 	dc.w	$d4bf	; $d4b7
-	dc.w	$d541	; $d4b9
+	dc.w	move_bird_d541	; $d4b9
 	dc.w	$db21	; $d4bb
 	dc.w	$dd6a	; $d4bd
 jump_table_d4c8:
@@ -8852,8 +8872,8 @@ jump_table_d4c8:
 	dc.w	$d52e	; $d4d0
 jump_table_d54a:
 	dc.w	$d550	; $d54a
-	dc.w	$d57e	; $d54c
-	dc.w	$d62a	; $d54e
+	dc.w	bird_on_bottom_d57e	; $d54c
+	dc.w	bird_on_top_d62a	; $d54e
 jump_table_db29:
 	dc.w	$db37	; $db29
 	dc.w	$dba7	; $db2b

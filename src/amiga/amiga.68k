@@ -747,7 +747,7 @@ demo_game:
 		bsr			platform_init					| amiga-specific init
 		
 0:	
-	.ifndef	RELEASE
+	.ifne	OPT_ALIGNED_MEMORY
 	* compute ram start for dev mode
 	* align so real addresses LSW match actual arcade addresses
 	* and lower 16-bit match original RAM & even ROM offsets
@@ -768,7 +768,7 @@ demo_game:
 	move.l 	d1,a1
 	move.w	#(0x10000-ROM_START)/4-1,d0
 	.else
-	* release mode
+	* release mode, memory is not aligned, we seek smallest memory chunk
 
 	* copy the ROM data after RAM
 	lea		rom_buffer,a1

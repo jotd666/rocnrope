@@ -7,7 +7,7 @@ from shared import *
 sprite_names = get_sprite_names()
 
 
-
+# save sprites,$4000,$430
 def raw_to_code(raw):
     lsb = raw & 0xFF
     msb = raw >> 8
