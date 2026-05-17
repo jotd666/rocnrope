@@ -2639,13 +2639,13 @@ update_bg_tile:
 	jeq		0f
 	bset	#8,d2			| bit 7 set, add 0x100
 0:
-*	cmp.w	#0x2A7,d7
+*	cmp.w	#0x4D15-0x4C00,d7
 *	jne		0f
-*	cmp.b	#0x12,d0
+*	cmp.b	#0x55,d0
 *	jne		0f
-*	cmp.b	#0xC0,d1
+*	cmp.b	#0x80,d1
 *	jne		0f
-*	BREAKPOINT	"cross"
+*	BREAKPOINT	"rung"
 *0:
 	.ifne	OPT_ENABLE_LOGGING
 	lea		character_log_table,a0

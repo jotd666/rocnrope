@@ -177,7 +177,7 @@ with open(source_dir / "conv.s") as f:
 
                     else:
                         lines[j] = next_line+"\tVIDEO_BYTE_DIRTY | [...]\n"
-                    break
+
 
         ###############################################
         # game_specific
@@ -295,6 +295,15 @@ with open(source_dir / "conv.s") as f:
 0:
 {line}
 """
+        elif address in [0x71fb,0x7230]:
+            # fix video dirty manually, PSHU code is good but does d0,-(a0)
+            # and we need a0 to be correct when we call dirty
+            lines[i+2] = "\tsubq\t#1,a0\n\tmove.b\td0,(a0)\n\tVIDEO_BYTE_DIRTY\n"
+        elif address  == 0x71f6:
+            # fix video dirty manually, PSHU code is good but does d0,-(a0)
+            # and we need a0 to be correct when we call dirty
+            lines[i+4] = "\tsubq\t#1,a0\n\tmove.b\td1,(a0)\n\tVIDEO_BYTE_DIRTY\n"
+
         # end game_specific
         ###############################################
         if "GET_ADDRESS" in line:

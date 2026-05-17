@@ -1412,6 +1412,7 @@ irq_70a0:   ; [global]
 71E0: 10 9E 5C       LDY    $DE
 71E3: 9E FE          LDX    $DC
 71E5: DC 58          LDD    $DA
+; level 3 vertical rungs
 71E7: 36 1E          PSHU   Y,X,D	; [video_address_word]
 71E9: 10 9E 50       LDY    $D8
 71EC: 9E FE          LDX    $D6
