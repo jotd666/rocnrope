@@ -2639,12 +2639,14 @@ update_bg_tile:
 	jeq		0f
 	bset	#8,d2			| bit 7 set, add 0x100
 0:
-	cmp.w	#0x127,d7
-	jne		0f
-	cmp.b	#0x54,d0
-	jne		0f
-	BREAKPOINT	"rung"
-0:
+*	cmp.w	#0x2A7,d7
+*	jne		0f
+*	cmp.b	#0x12,d0
+*	jne		0f
+*	cmp.b	#0xC0,d1
+*	jne		0f
+*	BREAKPOINT	"cross"
+*0:
 	.ifne	OPT_ENABLE_LOGGING
 	lea		character_log_table,a0
 	movem.l	d2-d3,-(a7)
@@ -2792,7 +2794,7 @@ flipped_tile:
 	
 0:
 	rts
-
+5:
 	CLEAR_TILE_PLANE	BG_NB_BYTES_PER_ROW
 	jra		41b
 	
@@ -2818,8 +2820,6 @@ mirror_tile:
 
 0:
 	rts
-1:
-
 5:
 	CLEAR_TILE_PLANE	BG_NB_BYTES_PER_ROW
 	jra		41b
