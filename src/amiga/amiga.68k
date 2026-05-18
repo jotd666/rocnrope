@@ -1137,12 +1137,14 @@ really_update_hw_sprites:
 	* draw current sprites from 6809 sprite memory *
 	************************************************
 	GET_MEMORY_START_AND_DP
-	* clear "sprite drawn" table
-	lea		sprite_drawn_table(pc),a0
-	move.w	#NB_TARGET_SPRITES/4-1,d7
-0:
-	clr.l	(a0)+
-	dbf		d7,0b
+*	* clear "sprite drawn" table
+*   not needed here, sprites are either HW or blitter
+*   but never both
+*	lea		sprite_drawn_table(pc),a0
+*	move.w	#NB_TARGET_SPRITES/4-1,d7
+*0:
+*	clr.l	(a0)+
+*	dbf		d7,0b
 
 	* now update in the reverted order // the bobs
 	lea		(FIRST_SPRITE,a6),a0		| sprite start
@@ -1220,9 +1222,10 @@ update_one_hw_sprite:
 
 	move.l	d3,a5	| clut table
 
-	
-	lea		sprite_drawn_table(pc),a3
-	st.b	(a3,d7.w)
+*  note down that this sprite is a HW sprite
+*  not needed here. The static "is hw sprite" is enough	
+*	lea		sprite_drawn_table(pc),a3
+*	st.b	(a3,d7.w)
 	
 
 	.ifne	HW_SPRITE_X_CORRECTION
@@ -1363,6 +1366,7 @@ update_bobs_and_hw_sprites:
     lea _custom,A5
 	lea		(LAST_SPRITE,a6),a0		| sprite start
 	lea		bob_table,a4
+	lea		hws_table,a2
 	move.w	#NB_TARGET_SPRITES-1,d7
 	move.l	bob_previous_drawn_sprites(pc),a6
 1:
@@ -1532,7 +1536,7 @@ copy_64:
 *	}
 *}
 * < A0: sprite array
-* < A2: sprite group table
+* < A2: HW sprite table
 * < A4: bob table
 * < A5: custom
 * < A6: previously drawn sprites array
@@ -1544,6 +1548,25 @@ update_one_bob:
 	
 	COMPUTE_SPRITE_COORDS
 
+	* get code after that. A lot of sprites won't be displayed
+	* as they are grouped with others
+	lea		hws_table,a2
+	moveq	#0,d3
+	move.b	(TARGET_SPRITE_CODE,a0),d3
+	* to know if sprite is defined, multiply offset by 8
+	add.w	d3,d3
+	.ifndef	MC68020
+	add.w	d3,d3
+	add.w	d3,d3
+	tst.l	(a2,d3.w)		| get pointer from bob table
+	.else
+	tst.l	(a2,d3.w*4)		| get pointer from bob table
+	.endif
+	jne		2f		| don't draw BOB if it's a HW sprite
+	
+	moveq	#0,d2
+	move.b	(TARGET_SPRITE_ATTR,a0),d2
+	and.b	#0xF,d2		| CLUT
 
 	.ifne	SPRITE_Y_CORRECTION
 	add.w	#SPRITE_Y_CORRECTION,d1
@@ -1552,20 +1575,17 @@ update_one_bob:
 	add.w	#SPRITE_X_CORRECTION,d0
 	.endif
 	
-	* get code immediately. A lot of sprites won't be displayed
-	* as they are grouped with others
-	moveq	#0,d2
-	moveq	#0,d3
-	move.b	(TARGET_SPRITE_ATTR,a0),d2
-	move.b	(TARGET_SPRITE_CODE,a0),d3
-	and.b	#0xF,d2		| CLUT
 	
+	lsr.w	#1,d3		| d3*8 => d3*4 (divide by 2)
 
 	* here D3 is code and D2 is clut
 	* log the usage
 	.ifne	OPT_ENABLE_LOGGING
 	movem.l	a2/d2-d3,-(a7)
 	lea		sprite_log_table,a2
+	.ifndef	MC68020
+	lsr.w	#2,d3		| re-divide by 8
+	.endif
 	lsl.w	#NB_SPRITE_CLUTS_POW,d3		| 16 cluts
 	add.w	d2,d3		| clut offset
 
@@ -1574,8 +1594,7 @@ update_one_bob:
 	.endif
 
 	.ifndef	MC68020
-	add.w	d3,d3
-	add.w	d3,d3
+	* D3 is already *=8
 	move.l	(a4,d3.w),d4		| get pointer from bob table
 	.else
 	move.l	(a4,d3.w*4),d4		| get pointer from bob table
@@ -3042,7 +3061,6 @@ osd_read_inputs_1:
 	bclr	#BIT_FIRE2,d0
 
 0:
-	move.b	#0,0x110
 	movem.l	(a7)+,a0/d1
 	rts
 	

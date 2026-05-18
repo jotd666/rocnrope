@@ -32,7 +32,7 @@ def apply_color_replacement(sprite_set_list,quantized):
 def get_possible_hw_sprites():
     sn = get_sprite_names()
 
-    return set(k for k,v in sn.items() if "player" in v or v=="rock" or v=="ptero")
+    return set(k for k,v in sn.items() if "player" in v or v=="rock" or v=="ptero" or v=="harpoon_tip")
 
 def palette_pad(palette,pad_nb):
     palette += (pad_nb-len(palette)) * [(0x10,0x20,0x30)]
