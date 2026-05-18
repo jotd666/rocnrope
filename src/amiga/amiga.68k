@@ -7,13 +7,7 @@
 	* first instruction (includes contain code)
 	jra		start
 
-	.ifdef	NONAGA_VERSION
-	.if	NONAGA_VERSION==2
-ECS_VERSION=1
-	.else
-OCS_VERSION=1
-	.endif
-	.endif
+
 
 	.include "options.inc"
 	.include "rocnrope.inc"
@@ -86,17 +80,14 @@ OPT_ENABLE_PROFILING = 0
 * if no bitplane data: there will be some color artefacts
 * but not noticeable unless 2 sprites cross each other paths
 OPT_IGNORE_ZERO_BITPLANE = 0
-	.ifdef	NONAGA_VERSION
-NO68020 = 1
+
 OPT_ENABLE_DOUBLE_BUFFERING = 1
-	.else
-OPT_ENABLE_DOUBLE_BUFFERING = 1
-	.endif
-OPT_ENABLE_MULTIPLEXED_SPRITES = 0
+
+*OPT_ENABLE_MULTIPLEXED_SPRITES = 0  | not necessary (could work in this game, though)
 
 	.ifdef	NONAGA_VERSION
 NB_TILE_PLANES = 4
-NB_BOB_PLANES = 3+NONAGA_VERSION
+NB_BOB_PLANES = 4
 	.else
 NB_TILE_PLANES = 4
 NB_BOB_PLANES = 4
@@ -114,12 +105,12 @@ NB_PLAYFIELD_LINES = NB_LINES
 
 
 BG_SCREEN_PLANE_SIZE = BG_NB_BYTES_PER_ROW*NB_PLAYFIELD_LINES
-FG_SCREEN_PLANE_SIZE = BG_SCREEN_PLANE_SIZE
 	.ifdef	NONAGA_VERSION
-* less memory used but 1 playfield
+* less memory used but 1 playfield for both BOBs & tiles
 BG_SCREEN_SIZE = BG_SCREEN_PLANE_SIZE*NB_BOB_PLANES
 	.else
-* 2 playfields
+* AGA: 2 playfields
+FG_SCREEN_PLANE_SIZE = BG_SCREEN_PLANE_SIZE
 BG_SCREEN_SIZE = BG_SCREEN_PLANE_SIZE*NB_TILE_PLANES
 FG_SCREEN_SIZE = FG_SCREEN_PLANE_SIZE*NB_BOB_PLANES
 	.endif
@@ -470,17 +461,12 @@ _user:
 	.endif
 	
 	lea		palette,a0
-	.ifdef	OCS_VERSION
-	move.w	#TOTAL_NB_COLORS,d0
-	.else
 	move.w	#TOTAL_NB_COLORS*2,d0
-	.endif
-	* ECS 16 cols: load 16 colors for tiles/bobs & sprites
-	* ECS: load 32 colors for tiles/bobs & sprites
+	* ECS 16 cols: load 16 colors for tiles/bobs & 16 different colors for sprites
 	* AGA: load 32 colors (16+16 DPF)
 	* in the end the colors are the same
 	lea		tiles_colors,a1	
-	bsr		load_palette
+	jbsr	load_palette
 	
 
 	move.l	cheat_flags,d0
@@ -1318,12 +1304,13 @@ update_bobs_and_hw_sprites:
 
 	* restore background
 	jbsr	blit_background
-	.ifdef		ECS_VERSION
-	* ECS: clear the last bitplane while blitter is still working
-	move.w	d4,d3		| height
-	add.l	#NB_TILE_PLANES*BG_SCREEN_PLANE_SIZE,a1
-	jbsr		clear_plane_using_cpu
-	.endif
+* disabled, there are only 4 bitplanes, all restored, no clear needed
+*	.ifdef		ECS_VERSION
+*	* ECS: clear the last bitplane while blitter is still working
+*	move.w	d4,d3		| height
+*	add.l	#NB_TILE_PLANES*BG_SCREEN_PLANE_SIZE,a1
+*	jbsr		clear_plane_using_cpu
+*	.endif
 	
 	jra		10f
 	
@@ -2190,18 +2177,10 @@ store_system:
 1:
 	move.w	AttnFlags(a6),d0
 	btst	#AFB_68020,d0
-	beq.b	0f				| no 68020: disable stars & switch to 25FPS
+	bne.b	1f				| 68020 will run 50 fps even without fastmem on that game
 	
-	* check fastmem
-	pea		2f(pc)	
-2:
-	move.l	(a7)+,d0
-	cmp.l	#0x200000,d0
-	bcc.b	1f				
-0:
-	* no whdload, no fastmem/68020: assume slow switch to 25 FPS
-	* if running on PiStorm, well, too bad use whdload
-	*
+	* no 68020: assume slow switch to 25 FPS
+	* too bad for pistorm 68000: use whdload to get full frames
 	*
 	st.b	frameskip
 1:
@@ -3368,12 +3347,6 @@ screen_data_ptr_2:
 	.long	0
 	.endif
 	
-	.set	offset,0
-	.ifdef  ECS_VERSION
-	.set	increment,48	| ECS: 5 planes total
-	.else
-	.set	increment,40    | OCS/AGA: 4 planes total
-	.endif
 	
 background_ptr:
 	.long	0
@@ -3557,12 +3530,10 @@ reset_bplcon1_1:
 	.word 	0
 
 	.ifdef	NONAGA_VERSION
-tiles_colors:
+tiles_and_bob_colors:
 	DECL_COLORS	0,TOTAL_NB_COLORS
-	.ifdef 	ECS_VERSION
-bobs_colors:
+sprite_colors:
 	DECL_COLORS	16,TOTAL_NB_COLORS
-	.endif
 	.else
 	* dual playfield. We could change so ocs & aga would have the same copperlist
 	* but that's annoying work, AGA works, let's not touch it
@@ -3577,7 +3548,7 @@ game_sprites:
 	DECL_SPRITES
 game_sprites_end:
 
-	.word	0x01+((25)*256),0xFFFE
+	.word	0x01+((25)*256),0xFFFE		| Y pos where DMA fetches sprite positions
 	.set	offset,0
 sprite_control_words:
 	.rept	8

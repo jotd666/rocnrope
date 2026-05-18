@@ -1,15 +1,12 @@
-- use hardware sprites (A1200/nofast flashes)
-  => main character
-  => pterodactyl+stone
-  (avoids generating bitmap data for other characters)
-- demo version left bottom dino doesn't get angry and climbs at once: sequence disrupted
-- end of game: same??
 - eCS version!!! 18 colors to reduce to 16? unless player sprites & ptero & rock use some
-  exclusively
+  exclusively: generate palette 
 
 - set DSW difficulty lives, etc.
 - highscore load/save
-  
+ 
+- demo version left bottom dino doesn't get angry and climbs at once: sequence disrupted
+- end of game: check positions
+ 
 converter misses the optimization:
 	GET_ADDRESS	0x818a                     	| [$61b6: std    $818a]
 	move.w	d1,(a0) |  [...]
