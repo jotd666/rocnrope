@@ -65,9 +65,10 @@ def get_sprite_names():
     rval = dict()
     rval[9] = "zapper"
     rval[0x20] = "egg"
-    set_names(rval,0xA,0x10,"harpoon")
+    rval[0xA] = "harpoon_tip"
+    set_names(rval,0xB,0x10,"harpoon")
     set_names(rval,0,9,"player")
-    set_names(rval,0xD4,0xDC,"player_dead")
+    set_names(rval,0xD4,0xDC,"player_flying")
     set_names(rval,0x11,0x17,"player")
     set_names(rval,0x1B,0x20,"player")
     set_names(rval,0x18,0x1B,"ptero")

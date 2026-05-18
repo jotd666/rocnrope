@@ -1,0 +1,37 @@
+.key nope
+
+set radix rocnrope
+
+set game ${radix}_aga
+copy $game.RNC DF0:$game
+protect DF0:$game RWED
+copy readme.md df0:
+
+;set game ${radix}_ecs
+;copy $game.RNC DF0:$game
+;protect DF0:$game RWED
+;copy readme.md df0:
+;
+;set game ${radix}_ocs
+;copy $game.RNC DF0:$game
+;protect DF0:$game RWED
+;copy readme.md df0:
+;
+;; copy startup exe
+set game ${radix}
+;copy $game DF0:$game
+;protect DF0:$game RWED
+
+if exists df0:$game.high
+   delete df0:$game.high
+endif
+
+set arc ${game}_HD.lha
+if exists ${arc}
+    echo deleting ${arc}...
+    delete ${arc}
+endif
+
+; also archive with lha
+lha a -r $arc ${game}_HD
+

@@ -46,7 +46,7 @@ NB_SPRITE_CLUTS = 1<<NB_SPRITE_CLUTS_POW
 
 * 3 & 3: most performant
 BITPLANE_FMODE = 3			| works with 1, albeit slower
-SPRITE_FMODE = 3			| required!!
+SPRITE_FMODE = 0			| no need for more than 16x16
 
 BORDERBLANK = 1
 
@@ -59,7 +59,7 @@ SPRITE_Y_CORRECTION = -2
 SPRITE_HEIGHT = 16
 SPRITE_WIDTH = 16
 HW_SPRITE_X_CORRECTION = 0
-HW_SPRITE_Y_CORRECTION = 0
+HW_SPRITE_Y_CORRECTION = -1
 
 Y_MAX = 256
 
@@ -883,7 +883,7 @@ level3_interrupt:
 	* may use it (D5 = S) to create local variables
 	jbsr		do_irq
 	* now D5 can be destroyed
-	*jbsr	really_update_hw_sprites
+	jbsr	really_update_hw_sprites
 	
 	tst.b	frameskip
 	jeq		0f
@@ -1145,17 +1145,17 @@ really_update_hw_sprites:
 	dbf		d7,0b
 
 	* now update in the reverted order // the bobs
-	lea		(LAST_SPRITE,a6),a0		| sprite start
+	lea		(FIRST_SPRITE,a6),a0		| sprite start
 	lea		hws_table,a4
 	lea		game_sprites+2,a2				| copperlist part
 	lea		game_sprites_end+2,a6			| end
 	move.w	#NB_TARGET_SPRITES,d6
 	moveq	#0,d7
-	lea		HW_SpriteYTable_16,a1		| most sprites have same size 16 high
+	lea		HW_SpriteYTable_16,a1		| all sprites have same size 16 high
 	move.l	#sprite_control_words,d5
 1:
 	jbsr	update_one_hw_sprite
-	subq.w	#2,a0
+	addq.w	#2,a0
 	cmp.l	a2,a6
 	jeq		2f			| all sprites are used already: bail out
 	addq	#1,d7
@@ -1201,15 +1201,17 @@ update_one_hw_sprite:
 	* get code immediately. we want to know if it's a
 	* hardware sprite right away
 	
+	moveq	#0,d2
 	moveq	#0,d3
+	move.b	(TARGET_SPRITE_ATTR,a0),d2
 	move.b	(TARGET_SPRITE_CODE,a0),d3
 
 	lsl.w	#3,d3
 	move.b	(TARGET_SPRITE_ATTR,a0),d2
-*	btst	#MIRROR_X_BIT,d2  | Y but portrait!
-*	jeq		0f
-*	addq	#4,d3
-*0:
+	btst	#MIRROR_X_BIT,d2
+	jne		0f
+	addq	#4,d3
+0:
 	
 	move.l	(a4,d3.w),d3
 	jeq		2f		| not defined or no HW sprite, pass to BOBs
@@ -1217,7 +1219,6 @@ update_one_hw_sprite:
 	COMPUTE_SPRITE_COORDS
 
 	move.l	d3,a5	| clut table
-
 
 	
 	lea		sprite_drawn_table(pc),a3
@@ -1231,7 +1232,6 @@ update_one_hw_sprite:
 	add.w	#HW_SPRITE_Y_CORRECTION,d1
 	.endif
 
-	exg		d0,d1
 	
 	and.b	#0xF,d2		| CLUT
 	
@@ -1247,7 +1247,7 @@ update_one_hw_sprite:
 
 	* first sprite of couple
 	move.l	(a5)+,a3	| pointer on sprite data
-	*move.l	d0,(a3)		| control word of sprite 1, not useful
+	*move.l	d0,(a3)		| control word of sprite 1
 	move.l	a3,d1
 	* store sprite pointer in copperlist
 	move.w	d1,(4,a2)
@@ -1264,7 +1264,7 @@ update_one_hw_sprite:
 	swap	d0
 	move.w	d0,(2+8,a3)
 	move.l	(a5),a3		| pointer on sprite data
-	*move.l	d0,(a3)		| control word of sprite 2, not useful
+	*move.l	d0,(a3)		| control word of sprite 2
 	move.l	a3,d1
 	* store sprite pointer in copperlist
 	move.w	d1,(4+8,a2)
@@ -1676,79 +1676,7 @@ update_one_bob:
 sprite_groups:
 	.include	"sprite_groups.68k"
 	
-	.ifdef	HW_SPRITES
-update_one_hw_sprite_old:
-	* code = 0 and clut = 0 => disabled ?? to check
-	moveq	#0,d2
-	move.b	(TARGET_SPRITE_CODE,a0),d2
-	jeq	2f
 
-	move.b	(TARGET_SPRITE_X,a0),d0
-	add.w	d2,d2
-	add.w	d2,d2
-	btst    #2,(TARGET_SPRITE_ATTR,a0)
-	jeq		0f
-	addq	#2,d2
-0:
-	cmp.b	#1,(a6,d2.w)
-	jne		2f		| not a hw sprite: zap
-	* get the actual sprite index for our engine
-	move.b	(1,a6,d2.w),d2
-	and.w	#0xFF,d2
-	* it is a HW sprite all right
-	lsl.w	#4,d2	| 4 pointers for each sprite
-	move.b  (TARGET_SPRITE_CODE,a0),d3
-	btst	#0,d3
-	jeq		10f
-	addq	#8,d2			| mirror sprite couple
-10:
-	lea		(a4,d2.w),a5	| pointer on first sprite
-
-	moveq	#0,d0
-	moveq	#0,d1
-	move.b	(TARGET_SPRITE_Y,a0),d1  | sprite Y
-	beq.b	2f			| Y set to 0: not shown
-	not.b	d1
-
-	move.b	(TARGET_SPRITE_X,a0),d0  | sprite X
-	
-	.ifne	SPRITE_Y_CORRECTION
-	add.b	#SPRITE_Y_CORRECTION,d1
-	.endif
-	.ifne	SPRITE_X_CORRECTION
-	add.b	#SPRITE_X_CORRECTION,d0
-	.endif
-
-	* D0 and D1 are already set
-
-	sub.w	#16,d0	| move each sprite 16 bits to the left
-	bmi.b	2f			| X < 0 after correction: can't show
-	bsr		store_sprite_pos
-
-	
-	* first sprite of couple
-	move.l	(a5)+,a3
-	move.l	d0,(a3)
-	move.l	a3,d1
-	* store sprite pointer in copperlist
-	move.w	d1,(4,a2)
-	swap	d1
-	move.w	d1,(a2)
-	* second sprite of couple
-	BSET	#7,d0		| attach bit set
-	move.l	(a5),a3
-	move.l	d0,(a3)
-	move.l	a3,d1
-	* store sprite pointer in copperlist
-	move.w	d1,(4+8,a2)
-	swap	d1
-	move.w	d1,(8,a2)
-	add.w	#0x10,a2	| advance in sprite copperlist part
-2:
-	
-	rts
-	.endif
-	
 
 	.ifne	OPT_ENABLE_LOGGING
 
