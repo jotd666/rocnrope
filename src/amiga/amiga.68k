@@ -53,12 +53,18 @@ BASE_BPLCON3_VALUE = (1<<12)+(BORDERBLANK<<5)  | dpf second playfield palette st
 BASE_BPLCON2_VALUE = 0x0024		| sprites above all playfields
 
 SPRITE_X_CORRECTION = 64
-SPRITE_Y_CORRECTION = -2
+
 SPRITE_HEIGHT = 16
 SPRITE_WIDTH = 16
 HW_SPRITE_X_CORRECTION = 0
+	.ifdef	NONAGA_VERSION
+SPRITE_Y_CORRECTION = 0
+HW_SPRITE_Y_CORRECTION = 0	
+	.else
+SPRITE_Y_CORRECTION = -2
 HW_SPRITE_Y_CORRECTION = -1
-
+	.endif
+	
 Y_MAX = 256
 
 _custom = 0xDFF000
@@ -888,6 +894,7 @@ level3_interrupt:
 	eor.b	#1,flip_flop
 	jeq		23f
 0:
+	jbsr		really_update_tiles
 	jbsr		really_update_sprites
 	
 	
@@ -895,7 +902,6 @@ level3_interrupt:
 	jbsr		switch_screen_buffers
 	.endif
 
-	jbsr		really_update_tiles
 	
 23:
 
@@ -1088,8 +1094,11 @@ add_10000_points:
 
 really_update_tiles:
 
-	*lea		_custom,a5
-	*WAIT_BLIT  | no need in AGA: dual playfield
+	.ifdef	NONAGA_VERSION
+	lea		_custom,a5
+	WAIT_BLIT  | no need in AGA: dual playfield
+	.endif
+	
 	GET_MEMORY_START_AND_DP
 	.ifne	VIDEO_ADDRESS
 	lea		(VIDEO_ADDRESS,a6),a6  | attributes
@@ -2704,7 +2713,6 @@ standard_tile:
 	jra		41b
 
 flipped_tile:	
-	rts
 4:
 	move.l	(a2)+,d0		| next plane
 	jeq		5f
@@ -2726,7 +2734,7 @@ flipped_tile:
 	jra		41b
 	
 mirror_tile:
-	lea		mirror_bits(pc),a5
+	lea		mirror_bits(pc),a5	| we can use A5 as there are no tile repeats (jump address)
 	moveq	#0,d1
 4:
 	move.l	(a2)+,d0		| next plane

@@ -1,5 +1,8 @@
-- eCS version!!! 18 colors to reduce to 16? unless player sprites & ptero & rock use some
-  exclusively: generate palette 
+- ECS version: don't update 2 buffers at once, just use a counter with 2,1,0
+  and use current drawn buffer only (works with async refresh mode, which should be a standard
+  in all games where tiles are animated: GnG!)
+  
+- ECS version sound inc/code copied, to remove as there's enough mem
 
 - set DSW difficulty lives, etc.
 - highscore load/save
