@@ -17,7 +17,9 @@ from shared import *
 
 AGA_MODE = 0
 ECS_MODE = 1
+OCS_MODE = 2
 
+nb_planes = 4
 
 dirs = ["aga","ecs","ocs"]
 
@@ -136,6 +138,9 @@ def add_hw_sprite(index,name,cluts=[0]):
 def read_tileset(img_set_list,palette,plane_orientation_flags,cache,is_bob,nb_planes):
     next_cache_id = 1
     tile_table = []
+
+
+
     for n,img_set in enumerate(img_set_list):
         tile_entry = []
         for i,tile in enumerate(img_set):
@@ -164,7 +169,8 @@ def read_tileset(img_set_list,palette,plane_orientation_flags,cache,is_bob,nb_pl
                                 if i in possible_hw_sprites:
                                     # using original, uncropped bitplane data to create 16x16 or 16x32 hw sprite
                                     bitplane_sprite_data = bitplanelib.palette_image2attached_sprites(orig_wtile,None,palette,with_control_words=True)
-                                    # sprites & bobs are exclusive in this game, this allows to save memory and colors
+                                    # sprites & bobs are exclusive in this game, this allows to save memory (we gave up on colors as it didn't save any)
+                                    # so it's much simpler to have 16+16 colors (same) for AGA or ECS (bobs+hwsprites)
                                     bitplane_data = None
                         else:
                             # 4 planes, no mask
@@ -314,13 +320,15 @@ def doit(mode):
 
 
     sprite_palette = sorted(sprite_palette)
+    # magenta is not a real color it's transparent
+    # we don't need it as there's no black, transparent
+    # just needs to be the first color (black=>magenta when reading BOBs/HW sprites)
+    # of the sprite palette
     magi = sprite_palette.index(magenta)
     sprite_palette.pop(magi)
-    # temporary: put magenta as first color to be able to decode the frames properly
-    sprite_palette.insert(0,magenta)
+
 
     print(f"Used sprite colors: {len(sprite_palette)}")
-    sprite_palette += (16-len(sprite_palette)) * [(0x10,0x20,0x30)]
 
     # sprite_set_list is now a 16x512 matrix of sprite tiles
 
@@ -332,29 +340,27 @@ def doit(mode):
 
     full_palette = tile_palette+sprite_palette
 
-    if mode == ECS_MODE:
+    if mode != AGA_MODE:
         # merge
         full_palette = sorted(set(full_palette))
         nb_raw_colors = len(full_palette)
         if nb_raw_colors > nb_colors:
-            print(f"too many colors {nb_raw_colors} for {nb_colors}, quantizing")
-            full_list = sprite_set_list+tile_set_list
-            # first, manual merge of colors, else automatic quantize makes a horrible result
-            maroon = (153,85,34)
-            manual_replacement_dict = {
-            #(0,17,0):(0,0,51),
-            #(17,0,17):(0,0,51)
-            }
+            raise Exception(f"too many colors {nb_raw_colors} for {nb_colors}, reducing")
+##            bitplanelib.palette_dump(full_palette,dump_dir / "original_palette.png",bitplanelib.PALETTE_FORMAT_PNG)
+##            full_list = sprite_set_list+tile_set_list
+##            # first, manual merge of colors, else automatic quantize makes a horrible result
+##            dark1 = (16,32,48)
+##            manual_replacement_dict = {
+##
+##            dark1:(0,33,80)    # merging 2 dark colors, leaving the dark blue
+##            }
+##
+##            # manual pre-processing to merge colors manually
+##            apply_color_replacement(full_list,manual_replacement_dict)
+##            # then quantize
+##
+##            full_palette.remove(dark1)
 
-            # manual pre-processing to merge colors manually
-            apply_color_replacement(full_list,manual_replacement_dict)
-            # then quantize
-            full_palette = quantize_image_sets(full_list,nb_colors,"sprites",remove_color=magenta,dump_it=True)
-
-    #full_palette_rgb4 = {(x>>4,y>>4,z>>4) for x,y,z in full_palette}
-    #actually_used_colors_rgb4 = {(x>>4,y>>4,z>>4) for x,y,z in actually_used_colors}
-    #unused_colors = full_palette_rgb4 - actually_used_colors_rgb4
-    #print([(hex(x<<4),hex(y<<4),hex(z<<4)) for x,y,z in unused_colors])
 
     # pad just in case we don't have 16+16 colors (but we have)
     full_palette += (nb_colors-len(full_palette)) * [(0x10,0x20,0x30)]
@@ -364,21 +370,33 @@ def doit(mode):
 
     tile_plane_cache = {}
     # 16 first colors, or 16 full colors (for OCS)
-    tile_table = read_tileset(tile_set_list,full_palette[:16],[True,False,False,False],cache=tile_plane_cache, is_bob=False, nb_planes=4)
+
+    tile_palette = full_palette if mode != AGA_MODE else full_palette[:16]
+    tile_table = read_tileset(tile_set_list,tile_palette,[True,False,False,False],cache=tile_plane_cache, is_bob=False, nb_planes=4)
 
     bob_plane_cache = {}
 
-    if mode == AGA_MODE:
-        # 16 last colors!
-        sprite_table = read_tileset(sprite_set_list,full_palette[16:],[True,False,True,False],cache=bob_plane_cache, is_bob=True, nb_planes=4)
+    sprite_palette = full_palette if mode != AGA_MODE else full_palette[16:]
+
+    # temporarily remove black because we know first color is magenta
+    if sprite_palette[0] != (0,0,0):
+        # black not here: add it
+        sprite_palette = [magenta]+sprite_palette
     else:
-        # ECS/OCS have only 1 palette
-        sprite_table = read_tileset(sprite_set_list,full_palette,[True,False,True,False],cache=bob_plane_cache, is_bob=True, nb_planes=5 if mode==ECS_MODE else 4)
+        sprite_palette = [magenta]+sprite_palette[1:]
+    # pad to 16 colors if needed
+    sprite_palette += ((1<<nb_planes)-len(sprite_palette)) * [(0x10,0x20,0x30)]
 
 
-    if mode != ECS_MODE:
+
+    sprite_table = read_tileset(sprite_set_list,sprite_palette,[True,False,True,False],cache=bob_plane_cache, is_bob=True, nb_planes=nb_planes)
+
+    full_palette = tile_palette+sprite_palette
+
+    if mode == AGA_MODE:
         # now that the sprites were decoded, put black as first color too (else for some priority reason
         # the background is magenta or whatever the color is)
+        # only needed for AGA (dual playfield lost color 16)
         full_palette[16] = (0,0,0)
 
     palette_file = xxx_src_dir / "palette.68k"
@@ -559,4 +577,4 @@ def doit(mode):
                                 f.write("\n")
 
 doit(mode=AGA_MODE)
-#doit(mode=ECS_MODE)
+doit(mode=OCS_MODE)

@@ -38,8 +38,12 @@ NB_TILE_CLUTS = 1<<NB_TILE_CLUTS_POW
 NB_SPRITE_CLUTS_POW = 4
 NB_SPRITE_CLUTS = 1<<NB_SPRITE_CLUTS_POW
 
+	.ifdef	NONAGA_VERSION
+BITPLANE_FMODE = 0
+	.else
 * 3 & 3: most performant
 BITPLANE_FMODE = 3			| works with 1, albeit slower
+	.endif
 SPRITE_FMODE = 0			| no need for more than 16x16
 
 BORDERBLANK = 1
@@ -85,13 +89,10 @@ OPT_ENABLE_DOUBLE_BUFFERING = 1
 
 *OPT_ENABLE_MULTIPLEXED_SPRITES = 0  | not necessary (could work in this game, though)
 
-	.ifdef	NONAGA_VERSION
+* AGA or OCS: 16 colors per layer, 1 layer for OCS, 2 layers for AGA
 NB_TILE_PLANES = 4
 NB_BOB_PLANES = 4
-	.else
-NB_TILE_PLANES = 4
-NB_BOB_PLANES = 4
-	.endif
+
 TOTAL_NB_COLORS = 1<<NB_TILE_PLANES
 
 
@@ -460,14 +461,25 @@ _user:
 	jbsr		set_bob_bitplanes
 	.endif
 	
+	.ifdef	NONAGA_VERSION
+	* ECS 16 cols: load 16 colors for tiles/bobs & 16 same colors for sprites
+	* in the end the colors are the same
+	move.w	#TOTAL_NB_COLORS,d0
+	lea		palette,a0
+	lea		tiles_and_bob_colors,a1	
+	jbsr	load_palette
+	move.w	#TOTAL_NB_COLORS,d0
+	lea		palette,a0
+	lea		sprite_colors,a1	
+	jbsr	load_palette
+	.else
+	* AGA: load 32 colors (16 for tiles+16 for bobs/sprites DPF)
 	lea		palette,a0
 	move.w	#TOTAL_NB_COLORS*2,d0
-	* ECS 16 cols: load 16 colors for tiles/bobs & 16 different colors for sprites
-	* AGA: load 32 colors (16+16 DPF)
 	* in the end the colors are the same
 	lea		tiles_colors,a1	
 	jbsr	load_palette
-	
+	.endif
 
 	move.l	cheat_flags,d0
 	jeq		1f
@@ -1677,9 +1689,6 @@ update_one_bob:
 	move.w	#0xF00,_custom+color
 	.endif
 	jra		2b
-
-sprite_groups:
-	.include	"sprite_groups.68k"
 	
 
 
@@ -2285,14 +2294,14 @@ platform_init:
 0:
 	.ifdef	NONAGA_VERSION
     move.w #0x200+(NB_BOB_PLANES<<12)+BORDERBLANK,bplcon0(a5) | 4/5 bitplanes
-    move.w #0x99-0X8+(COPPER_Y_START<<8),diwstrt(a5)
-    move.w #0x79+0x3F-0x30+(COPPER_Y_START<<8),diwstop(a5)
 	.else
     move.w #0x0610+BORDERBLANK,bplcon0(a5) | 8 bitplanes, dual playfield, borderblank
  	*         VVHH
+	.endif
+	* no scrolling: values are the same
     move.w #0x91+(COPPER_Y_START<<8),diwstrt(a5)
     move.w #0x71+(COPPER_Y_START<<8)+0x1000,diwstop(a5)
-	.endif
+
 	move.w	#BASE_BPLCON3_VALUE,bplcon3(a5)   | ecs needs borderblank
 	move.w	#BASE_BPLCON2_VALUE,bplcon2(a5)
 	
@@ -2313,8 +2322,6 @@ platform_init:
     move.w d0,bpl2mod(a5)
 
 	move.w	#0,bplcon1(a5)
-
-
 	
 	lea		game_copperlist,a0
 	move.l	a0,cop1lc(a5)
@@ -2557,7 +2564,7 @@ compute_tile_xy:   | portrait
 * < D0: tile code
 * < D1: color code
 
-update_bg_tile:
+update_bg_tile:	
 	moveq	#0,d2			| mask up to 255
 	move.b	d0,d2			| tile code
 	moveq	#0,d3
@@ -2566,14 +2573,7 @@ update_bg_tile:
 	jeq		0f
 	bset	#8,d2			| bit 7 set, add 0x100
 0:
-*	cmp.w	#0x4D15-0x4C00,d7
-*	jne		0f
-*	cmp.b	#0x55,d0
-*	jne		0f
-*	cmp.b	#0x80,d1
-*	jne		0f
-*	BREAKPOINT	"rung"
-*0:
+
 	.ifne	OPT_ENABLE_LOGGING
 	lea		character_log_table,a0
 	movem.l	d2-d3,-(a7)
@@ -2586,8 +2586,7 @@ update_bg_tile:
 	.endif
 
 
-	bsr		compute_tile_xy
-
+	jbsr		compute_tile_xy
 	lea		character_table,a0
 	
 	* updating bitplanes
@@ -2705,6 +2704,7 @@ standard_tile:
 	jra		41b
 
 flipped_tile:	
+	rts
 4:
 	move.l	(a2)+,d0		| next plane
 	jeq		5f
@@ -2726,7 +2726,7 @@ flipped_tile:
 	jra		41b
 	
 mirror_tile:
-	lea		mirror_bits(pc),a4
+	lea		mirror_bits(pc),a5
 	moveq	#0,d1
 4:
 	move.l	(a2)+,d0		| next plane
@@ -2735,7 +2735,7 @@ mirror_tile:
 	.set	offset,0
 	.rept	8
 	move.b	(a0)+,d1
-	move.b	(a4,d1.w),d0	| mirror
+	move.b	(a5,d1.w),d0	| mirror
 	COPY_TILE_PLANE_ROW
 
 	.set	offset,offset+BG_NB_BYTES_PER_ROW
@@ -2752,7 +2752,7 @@ mirror_tile:
 	jra		41b
 	
 mirror_flipped_tile:
-	lea		mirror_bits(pc),a4
+	lea		mirror_bits(pc),a5
 	moveq	#0,d1
 4:
 	move.l	(a2)+,d0		| next plane
@@ -2762,7 +2762,7 @@ mirror_flipped_tile:
 	.rept	8
 	.set	offset,offset-BG_NB_BYTES_PER_ROW
 	move.b	(a0)+,d1
-	move.b	(a4,d1.w),d0	| mirror
+	move.b	(a5,d1.w),d0	| mirror
 	COPY_TILE_PLANE_ROW
 
 	.endr
@@ -2823,7 +2823,7 @@ store_sprite_pos:
 	.else
     move.l	(a0,d0.w*4),d0
     or.l	(a1,d1.w*4),d0	
-	.endc
+	.endif
     move.l  (a7)+,a0
     rts
 0:
@@ -3470,19 +3470,7 @@ cpu_log_enable:
     .endr
 	.endm
 
-	.macro  DEF_SCROLL_ROWS	nb_rows
-	.rept	\nb_rows
-	.word	0x01+(y_start*256),0xFFFE
-	.word	bplcon1
-	.word	0
-	.ifdef	NONAGA_VERSION
-	DECL_BITPLANES	0,NB_BOB_PLANES
-	.else
-	DECL_EVEN_BITPLANES	4,4
-	.endif
-	.set	y_start,y_start+8
-	.endr
-	.endm 
+
 	
 blank_sprite:
 	.long	0,0
@@ -3513,7 +3501,6 @@ game_copperlist:
 
 	.word	0x01+((COPPER_Y_START)*256),0xFFFE
 	.ifdef	NONAGA_VERSION
-bobs_bitplanes:
 tiles_bitplanes:
 	DECL_BITPLANES	0,NB_BOB_PLANES
 	.else
@@ -3524,9 +3511,7 @@ bobs_bitplanes:
 	DECL_EVEN_BITPLANES	0,4
 	* set 0-scroll value for both plane sets
 	.endif
-	.word	bplcon1
-reset_bplcon1_1:
-	.word 	0
+
 
 	.ifdef	NONAGA_VERSION
 tiles_and_bob_colors:
@@ -3558,7 +3543,6 @@ sprite_control_words:
 sprite_control_words_end:
 	
 
-	.set	y_start,COPPER_Y_START
 intreq_block_game:
 	.word	 intreq,0x8014  | call copper interrupt in the middle of a frame, also flag so copper interrupt knows that we're going to call copper int
 
@@ -3567,23 +3551,11 @@ intreq_block_game:
 	
 	* pal limit
     .word  0xFFCF,0xFFFE       | PAL wait
-	.set	y_start,0
 	.word	0x0801,0xFFFE
 	.word	0x1A01,0xFFFE
 
 	| no bobs from now on, get a LOT of drawing time
 	.word	 intreq,0x8010
-	.ifdef	NONAGA_VERSION
-	.word	color,0
-*status_bitplanes:
-*	DECL_BITPLANES	0,NB_BOB_PLANES
-	.endif
-
-
-	* black color sprites
-	*DECL_COLORS	16,16
-
-
 	
      .long    -2					
 	.ascii	"ENDCPLST"
