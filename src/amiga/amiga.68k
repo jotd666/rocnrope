@@ -1609,7 +1609,7 @@ update_one_bob:
 	jne		101f
 	* mirror (most sprites don't have that, it will just display
 	* the next frame if not generated, which can be off-putting!
-	add.w	#((NB_BOB_PLANES+1)*4+8),a0
+	add.w	#((NB_BOB_PLANES+1)*4+6),a0
 	.ifndef		RELEASE
 	tst.w	(a0)
 	jpl		101f
@@ -1624,7 +1624,6 @@ update_one_bob:
 	move.w	(a0)+,d4		| height
 	move.w	(a0)+,d5		| width
 	move.w	(a0)+,d2		| Y-offset
-	addq	#2,a0
 	btst	#FLIP_Y_BIT,d3
 	jne		101f
 	* flipped: correct Y start

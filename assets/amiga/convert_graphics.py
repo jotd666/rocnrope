@@ -164,12 +164,17 @@ def read_tileset(img_set_list,palette,plane_orientation_flags,cache,is_bob,nb_pl
                                 if i in possible_hw_sprites:
                                     # using original, uncropped bitplane data to create 16x16 or 16x32 hw sprite
                                     bitplane_sprite_data = bitplanelib.palette_image2attached_sprites(orig_wtile,None,palette,with_control_words=True)
+                                    # sprites & bobs are exclusive in this game, this allows to save memory and colors
+                                    bitplane_data = None
                         else:
                             # 4 planes, no mask
                             height = 8
                             width = 1
                             y_start = 0
                             bitplane_data = bitplanelib.palette_image2raw(wtile,None,palette)
+
+                        if bitplane_data or bitplane_sprite_data:
+                            entry[plane_name] = {"width":width,"height":height,"y_start":y_start}
 
                         if bitplane_data:
                             plane_size = len(bitplane_data) // actual_nb_planes
@@ -188,7 +193,8 @@ def read_tileset(img_set_list,palette,plane_orientation_flags,cache,is_bob,nb_pl
                                         next_cache_id += 1
                                     else:
                                         bitplane_plane_ids.append(0)  # blank
-                            entry[plane_name] = {"width":width,"height":height,"y_start":y_start,"bitplanes":bitplane_plane_ids}
+                            entry[plane_name]["bitplanes"] = bitplane_plane_ids
+
                         if bitplane_sprite_data:
                             entry[plane_name]["sprdat"] = bitplane_sprite_data
 
@@ -484,16 +490,13 @@ def doit(mode):
                         else:
                             raise Exception(f"height not found for {name}!!")
 
-                        active_planes = 0
-                        for j,bitplane_id in enumerate(t["standard"]["bitplanes"]):
-                            if bitplane_id:
-                                active_planes |= 1<<j
+
 
                         for orientation in ["standard","mirror"]:
                             if (orientation == "standard" or i in mirror_sprites):
                                 f.write("* orientation={}\n".format(orientation))
-                                f.write(f"\t.word\t{height},{width},{offset},0x{active_planes:x}\n")
-                                bitplanes = t[orientation]["bitplanes"]
+                                f.write(f"\t.word\t{height},{width},{offset}\n")
+                                bitplanes = t[orientation].get("bitplanes") or []
 
                                 for bitplane_id in bitplanes:
                                     f.write("\t.long\t")
