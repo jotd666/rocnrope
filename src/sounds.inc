@@ -19,3 +19,5 @@
 	.equ	SFX_21_SND,  0x14
 	.equ	SFX_22_SND,  0x15
 	.equ	SFX_23_SND,  0x16
+	.equ	GAME_START_SND,  0x1f
+	.equ	LEVEL1_SND,  0x20

@@ -36,17 +36,14 @@ def convert(ocs):
     loop_channel = 2
 
     EMPTY_SND = "EMPTY_SND"
-    dummy_sounds = [0,0x1E,
-    0x1F,
-    0x1D,0x1C,0x1B,0x1A,0x19,  # music indicators
-    0x20,  # level 1
+    dummy_sounds = [0,0x1E,0x1D,0x1C,0x1B,0x1A,0x19,  # music indicators
     0x21,  # level 2
     0x22,  # level 3
     0x23,  # level 4
     0x24,  # superpower
     0x2A,  # dead?
     0x2B, # ???
-    0x27, # end of level?
+    0x27, # end of level
     0x28, # level 4 complete
     0x29, # game over
     ]  # ATM no music
@@ -83,15 +80,15 @@ def convert(ocs):
 
     music_volume = 20
 
-##    sound_dict.update({
-##    "LEVEL_COMPLETED_SND"      :{"index":0x40,"pattern":0x4,"volume":music_volume},
-##    "LEVEL_START_SND"      :{"index":0x44,"pattern":0x1,"volume":music_volume},
+    sound_dict.update({
+    "GAME_START_SND"      :{"index":0x1F,"pattern":0x0,"volume":music_volume},
+    "LEVEL1_SND"      :{"index":0x20,"pattern":0x5,"volume":music_volume},
 ##    "GAME_OVER_SND"      :{"index":0x45,"pattern":0x3,"volume":music_volume},
 ##    "INTRO_SND"      :{"index":0x43,"pattern":0x0,"volume":music_volume},
 ##    "GAME_COMPLETED_SND"      :{"index":0x41,"pattern":0x5,"volume":music_volume},
 ##    "HIGH_SCORE_SND"      :{"index":0x42,"pattern":0x9,"volume":music_volume},
-##
-##})
+
+})
 
 
     with open(os.path.join(src_dir,"..",f"sounds{suffix}.inc"),"w") as f:
@@ -180,7 +177,7 @@ def convert(ocs):
                 wav_file = os.path.join(sound_dir,wav_name+".wav")
 
                 def get_sox_cmd(sr,output):
-                    return [sox,"--volume","2.5",wav_file,"--channels","1","-D","--bits","8","-r",str(sr),"--encoding","signed-integer",output]
+                    return [sox,"--volume","4.0",wav_file,"--channels","1","-D","--bits","8","-r",str(sr),"--encoding","signed-integer",output]
 
                 used_sampling_rate = details["sample_rate"]
                 used_priority = details.get("priority",1)
@@ -245,8 +242,8 @@ def convert(ocs):
 
         contents = bytes()
         # make sure next section will be aligned
-        #with open(os.path.join(sound_dir,f"{gamename}_conv.mod"),"rb") as f:
-        #    contents = f.read()
+        with open(os.path.join(sound_dir,f"{gamename}_conv.mod"),"rb") as f:
+            contents = f.read()
 
         fw.write("{}:".format(music_module_label))
         write_asm(contents,fw)
