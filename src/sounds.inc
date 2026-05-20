@@ -21,3 +21,6 @@
 	.equ	SFX_23_SND,  0x16
 	.equ	GAME_START_SND,  0x1f
 	.equ	LEVEL1_SND,  0x20
+	.equ	LEVEL2_SND,  0x21
+	.equ	LEVEL3_SND,  0x22
+	.equ	LEVEL4_SND,  0x23

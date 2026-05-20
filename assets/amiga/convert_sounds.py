@@ -20,8 +20,8 @@ def convert(ocs):
     sndfile = os.path.join(out_dir,f"sound_entries{suffix}.68k")
 
     if ocs:
-        hq_sample_rate = 8000
-        lq_sample_rate = 6000
+        hq_sample_rate = 10000
+        lq_sample_rate = 8000
     else:
         hq_sample_rate = 16000
         lq_sample_rate = 10000
@@ -37,16 +37,14 @@ def convert(ocs):
 
     EMPTY_SND = "EMPTY_SND"
     dummy_sounds = [0,0x1E,0x1D,0x1C,0x1B,0x1A,0x19,  # music indicators
-    0x21,  # level 2
-    0x22,  # level 3
-    0x23,  # level 4
+
     0x24,  # superpower
     0x2A,  # dead?
     0x2B, # ???
     0x27, # end of level
     0x28, # level 4 complete
     0x29, # game over
-    ]  # ATM no music
+    ]
 
 
 
@@ -83,6 +81,9 @@ def convert(ocs):
     sound_dict.update({
     "GAME_START_SND"      :{"index":0x1F,"pattern":0x0,"volume":music_volume},
     "LEVEL1_SND"      :{"index":0x20,"pattern":0x5,"volume":music_volume},
+    "LEVEL2_SND"      :{"index":0x21,"pattern":0x9,"volume":music_volume},
+    "LEVEL3_SND"      :{"index":0x22,"pattern":0xD,"volume":music_volume},
+    "LEVEL4_SND"      :{"index":0x23,"pattern":0x11,"volume":music_volume},
 ##    "GAME_OVER_SND"      :{"index":0x45,"pattern":0x3,"volume":music_volume},
 ##    "INTRO_SND"      :{"index":0x43,"pattern":0x0,"volume":music_volume},
 ##    "GAME_COMPLETED_SND"      :{"index":0x41,"pattern":0x5,"volume":music_volume},
@@ -258,7 +259,7 @@ def convert(ocs):
 
 
 convert(ocs=False)
-#convert(ocs=True)
+convert(ocs=True)
 
 
 

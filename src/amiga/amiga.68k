@@ -3558,10 +3558,14 @@ intreq_block_game:
 
 	
 	* pal limit
-    .word  0xFFCF,0xFFFE       | PAL wait
+	.ifdef	NONAGA_VERSION
+    .word  0xFFDF,0xFFFE       | PAL wait (OCS fmode=0)
+	.else
+    .word  0xFFCF,0xFFFE       | PAL wait (AGA fmode=3)
+	.endif
 	.word	0x0801,0xFFFE
 	.word	0x1A01,0xFFFE
-
+	
 	| no bobs from now on, get a LOT of drawing time
 	.word	 intreq,0x8010
 	
