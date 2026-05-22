@@ -15,7 +15,7 @@
 	.include "sounds.inc"
 	.include "options.inc"
 	
-SCORE_FILE_SIZE = 3+30*3   | wrong
+SCORE_FILE_SIZE = 0X28
 
 		
 osd_read_high_scores:
@@ -40,12 +40,13 @@ osd_read_high_scores:
 	* first just copy buffer as contiguous 
 
 	lea		high_score_buffer(pc),a0
-	*lea	high_score_88A8(a6),a1
+	lea	highest_score_50a6(a6),a1
 	move.b	(a0)+,(a1)+
 	move.b	(a0)+,(a1)+
 	move.b	(a0)+,(a1)+
-	*lea	high_score_table_8A00(a6),a1
-	move.w	#30-1,d0
+	lea	high_score_table_5160(a6),a1
+	lea		high_score_buffer(pc),a0
+	move.w	#SCORE_FILE_SIZE-1,d0
 0:
 	move.b	(a0)+,(a1)+
 	dbf		d0,0b
@@ -64,12 +65,8 @@ osd_write_high_scores:
 	* first just copy buffer as contiguous 
 
 	lea		high_score_buffer(pc),a1
-	*lea	high_score_88A8(a6),a0
-	move.b	(a0)+,(a1)+
-	move.b	(a0)+,(a1)+
-	move.b	(a0)+,(a1)+
-	*lea	high_score_table_8A00(a6),a0
-	move.w	#30-1,d0
+	lea	high_score_table_5160(a6),a0
+	move.w	#SCORE_FILE_SIZE-1,d0
 0:
 
 1:
@@ -289,6 +286,6 @@ highscore_loaded:
 	.byte	0
 
 normal_hiscorename:
-	.asciz	"jailbreak.high"
+	.asciz	"rocnrope.high"
 
 

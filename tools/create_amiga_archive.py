@@ -13,18 +13,19 @@ subprocess.check_call(cmd_prefix+["clean"],cwd=progdir /"src")
 subprocess.check_call(cmd_prefix+["RELEASE_BUILD=1"],cwd=progdir /"src")
 # create archive
 
-outdir = progdir / f"{gamename}_HD"
+outdir = progdir / "dist" / f"{gamename}_HD"
 
-if os.path.exists(outdir):
-    for x in outdir.glob("*"):
-        x.unlink()
-else:
-    outdir.mkdir()
+if os.path.isdir(outdir):
+    shutil.rmtree(outdir)
+
+outdir.mkdir(exist_ok=True,parents=True)
+
 for file in ["readme.md",f"{gamename}_aga.slave",f"{gamename}_ocs.slave"]:
     shutil.copy(progdir / file,outdir)
 
 assets = progdir /"assets"/"amiga"
-shutil.copy(assets/"RocNRope.info",outdir)
+shutil.copy(assets/"RocNRope_aga.info",outdir)
+shutil.copy(assets/"RocNRope_ocs.info",outdir)
 
 
 
@@ -35,3 +36,10 @@ for ext in ["aga","ocs"]:
     subprocess.run(["cranker_windows.exe","-f",progdir/exename,"-o",progdir/f"{exename}.rnc"],check=True)
 
 subprocess.run(cmd_prefix+["clean"],cwd=progdir/"src",check=True)
+
+arcname = progdir / f"{gamename}_HD.lha"
+arcname.unlink(missing_ok=True)
+cmd = ["lha","-r","a",arcname,"*"]
+
+subprocess.run(cmd,cwd=outdir.parent,check=True)
+

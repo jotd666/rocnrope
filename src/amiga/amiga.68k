@@ -167,8 +167,8 @@ BIT_UP = 2
 BIT_DOWN = 3
 BIT_RIGHT = 1
 BIT_LEFT = 0
-BIT_FIRE = 4
-BIT_FIRE2 = 5
+BIT_HOOK = 4
+BIT_DAZZLE = 5
 
 
 
@@ -530,7 +530,7 @@ _user:
 0:
 	btst	#1,d0
 	beq.b	0f
-	st		infinite_lives_flag
+	move.b	#3,start_lives+3
 	st		cheat_used
 0:
 	btst	#2,d0
@@ -542,18 +542,28 @@ _user:
 	beq.b	0f
 	st		cheat_used
 0:
-	
+	* most important is dsw2. Rest of dsws are left
+	* like that
+	moveq	#0,d0
 	move.l	start_lives(pc),d0
 	and.l	#3,d0
-	lea		start_lives_dip_table,a0
-	move.b	(a0,d0.w),d1
-	lea		difficulty_dip_table,a0
-	move.l	difficulty_level(pc),d0
-	and.b	#3,d0
-	or.b	(a0,d0.w),d1
-	*bset	#5,d1		| 30k-70k for extra lives
+	cmp.b	#3,d0
+	jne		0f
+	st 		cheat_used
+0:
+	bset	#7,d0	| attract sounds
+	bset	#2,d0	| upright
+	move.l	difficulty_level(pc),d1
+	lsl.b	#3,d1
+	or.b	d1,d0
+	not.b	d0
+	move.b	d0,dip_switches_2
 	
-	move.b	d1,dip_switches_2
+	* we're fixing that: grant repeated bonus on
+	* first bonus 20000, repeated bonus 40000
+	move.b	#0xBF,dip_switches_3
+	
+	
 	
 	jsr	 _detect_controller_types 
 
@@ -1176,6 +1186,7 @@ really_update_hw_sprites:
 	move.l	d5,a3		| pointer on sprite positions in copperlist
 	lea		sprite_control_words_end,a2
 1:
+
 	cmp.l	a2,a3
 	jeq		2f
 	clr.w	(6,a3)
@@ -1190,9 +1201,7 @@ really_update_hw_sprites:
 	moveq	#0,d1
 	move.b	(TARGET_SPRITE_Y,a0),d1  | sprite Y
 	move.b	(TARGET_SPRITE_X,a0),d0
-
 	* filter out if Y=0
-	tst.b	d1
 	jeq		2f
 
 	.endm
@@ -1224,6 +1233,7 @@ update_one_hw_sprite:
 	
 	move.l	(a4,d3.w),d3
 	jeq		2f		| not defined or no HW sprite, pass to BOBs
+
 
 	COMPUTE_SPRITE_COORDS
 
@@ -2484,11 +2494,11 @@ video_byte_dirty:
 	lea		tiles_row_flags(pc),a1
 	add.w	d7,a1
 	* now a0 points on the tiles refresh table, mark it dirty
-*	.ifne	OPT_ENABLE_DOUBLE_BUFFERING
-*	moveq	#2,d7
-*	.else
+	.ifne	OPT_ENABLE_DOUBLE_BUFFERING
+	moveq	#2,d7
+	.else
 	moveq	#1,d7		| background tiles aren't double buffered here!
-*	.endif
+	.endif
 	move.b	d7,(a0)
 	move.b	d7,(a1)
 	rts
@@ -2528,9 +2538,6 @@ compute_tile_xy:   | portrait
 	move.b	d0,(offset,a1)  | buffer
 	.ifdef	NONAGA_VERSION
 	move.b	d0,(offset,a3)  | restore buffer
-	.ifne	OPT_ENABLE_DOUBLE_BUFFERING
-	move.b	d0,(offset,a4)	| second buffer
-	.endif
 	.endif
 	.endm
 	
@@ -2541,9 +2548,6 @@ compute_tile_xy:   | portrait
 	clr.b	(offset,a1)
 	.ifdef	NONAGA_VERSION
 	clr.b	(offset,a3)  | restore buffer
-	.ifne	OPT_ENABLE_DOUBLE_BUFFERING
-	clr.b	(offset,a4)	| second buffer
-	.endif
 	.endif
 	.set	offset,offset+\nb_bytes_per_row
 	.endr	
@@ -2555,9 +2559,6 @@ compute_tile_xy:   | portrait
 	add.w	d5,a1
 	.ifdef	NONAGA_VERSION
 	add.w	d5,a3  | restore buffer
-	.ifne	OPT_ENABLE_DOUBLE_BUFFERING
-	add.w	d5,a4	| second buffer
-	.endif
 	.endif
 	.endm
 
@@ -2606,8 +2607,7 @@ update_bg_tile:
 	move.l		background_ptr,a1
 	.else 
 	* OCS with double buffering
-	lea		bg_screen_buffer_1,a1
-	lea		bg_screen_buffer_2,a4
+	move.l	playfield_drawn_screen_ptr,a1
 	.endif
 	.else
 	* AGA: no double buffering on background
@@ -2626,9 +2626,6 @@ update_bg_tile:
 	.ifdef	NONAGA_VERSION
 	lea		background_restore_buffer,a3
 	add.w	d0,a3
-	.ifne	OPT_ENABLE_DOUBLE_BUFFERING
-	add.w	d0,a4
-	.endif
 	.endif
 	
 
@@ -3012,11 +3009,11 @@ osd_read_inputs_1:
 0:
 	tst.b	(0x63,a0)		| "ctrl" key
 	beq.b	0f
-	bclr	#BIT_FIRE,d0
+	bclr	#BIT_HOOK,d0
 0:
 	tst.b	(0x64,a0)		| "ctrl" key
 	beq.b	0f
-	bclr	#BIT_FIRE2,d0
+	bclr	#BIT_DAZZLE,d0
 0:
 
 
@@ -3040,11 +3037,11 @@ osd_read_inputs_1:
 0:
 	btst	#JPB_BTN_RED,d1
 	beq.b	0f
-	bclr	#BIT_FIRE,d0
+	bclr	#BIT_HOOK,d0
 0:
 	btst	#JPB_BTN_BLU,d1
 	beq.b	0f
-	bclr	#BIT_FIRE2,d0
+	bclr	#BIT_DAZZLE,d0
 
 0:
 	movem.l	(a7)+,a0/d1
@@ -3054,21 +3051,17 @@ osd_read_inputs_1:
 
 osd_read_dsw_1:
 	* actual dipswitches
-	move.b	dip_switches_1(pc),d0
-	not.b	d0		| active low
+	*move.b	dip_switches_1(pc),d0
+	* nothing set
+	st.b	d0		| active low
 	rts
 osd_read_dsw_2:
 	* actual dipswitches
 	move.b	dip_switches_2(pc),d0
-	* $78: easy difficulty
-	* $48: very hard 5 lives, $4B very hard 1 life
-
 	rts
 osd_read_dsw_3:
 	* actual dipswitches
-	moveq	#-1,d0
-*	move.b	dip_switches_0(pc),d0
-*	not.b	d0		| active low
+	move.b	dip_switches_3(pc),d0
 	rts
 
 	
@@ -3171,7 +3164,7 @@ handle_keyboard:
 
 	.endif
 
-	cmp.b	_keyexit,d0	| "ESC" key or whdload quitkey
+	cmp.b	_keyexit,d0	| "F10" key or whdload quitkey
 	bne.b	2f
 	BSET	#0x06,0x1E01(A5)
 	moveq	#2,d0
@@ -3288,7 +3281,7 @@ start_lives:
 difficulty_level:
 	.long	0
 	.long	0
-dip_switches_1:
+dip_switches_3:
 	.byte	0
 dip_switches_2:
 	.byte	0
@@ -3364,6 +3357,7 @@ playfield_displayed_screen_ptr:
 
 	.ifdef	NONAGA_VERSION
 	.if     NONAGA_VERSION==1
+	* lower quality so it fits in chipmem
 	.include	"sound_entries_ocs.68k"
 	.else
 	.include	"sound_entries.68k"
@@ -3372,10 +3366,9 @@ playfield_displayed_screen_ptr:
 	.include	"sound_entries.68k"	
 	.endif
 	
-update_tile_function:
-	.long	0
+
 _keyexit:
-	.byte	0x45	| ESC by default unless whdload overwrites it
+	.byte	0x59	| F10 by default unless whdload overwrites it
 
 	
 cheat_used:

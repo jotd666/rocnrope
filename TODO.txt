@@ -1,12 +1,4 @@
-- ECS version: don't update 2 buffers at once, just use a counter with 2,1,0
-  and use current drawn buffer only (works with async refresh mode, which should be a standard
-  in all games where tiles are animated: GnG!)
-- tip of grappling hook missing but only at level 3
-
-- set DSW difficulty lives, etc.
-- highscore load/save
- 
-- demo version left bottom dino doesn't get angry and climbs at once: sequence disrupted
+- demo version: character doesn't use the flash and dies at once
 
  
 converter misses the optimization:

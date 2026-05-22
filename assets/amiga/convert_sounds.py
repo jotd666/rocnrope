@@ -38,12 +38,11 @@ def convert(ocs):
     EMPTY_SND = "EMPTY_SND"
     dummy_sounds = [0,0x1E,0x1D,0x1C,0x1B,0x1A,0x19,  # music indicators
 
-    0x24,  # superpower
-    0x2A,  # dead?
-    0x2B, # ???
-    0x27, # end of level
-    0x28, # level 4 complete
-    0x29, # game over
+
+    #0x2A,  # dead?
+
+
+
     ]
 
 
@@ -84,10 +83,11 @@ def convert(ocs):
     "LEVEL2_SND"      :{"index":0x21,"pattern":0x9,"volume":music_volume},
     "LEVEL3_SND"      :{"index":0x22,"pattern":0xD,"volume":music_volume},
     "LEVEL4_SND"      :{"index":0x23,"pattern":0x11,"volume":music_volume},
-##    "GAME_OVER_SND"      :{"index":0x45,"pattern":0x3,"volume":music_volume},
-##    "INTRO_SND"      :{"index":0x43,"pattern":0x0,"volume":music_volume},
-##    "GAME_COMPLETED_SND"      :{"index":0x41,"pattern":0x5,"volume":music_volume},
-##    "HIGH_SCORE_SND"      :{"index":0x42,"pattern":0x9,"volume":music_volume},
+    "SUPERPOWER_SND"      :{"index":0x24,"pattern":0x15,"volume":music_volume},
+    "LEVEL_COMPLETE_SND"      :{"index":0x27,"pattern":0x17,"volume":music_volume},
+    "GAME_COMPLETED_SND"      :{"index":0x28,"pattern":0x1C,"volume":music_volume},
+    "GAME_OVER_SND"      :{"index":0x29,"pattern":0x1A,"volume":music_volume},
+
 
 })
 

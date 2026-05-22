@@ -39,6 +39,8 @@ timer_4f = $4f
 bird_direction_11 = $11
 player_state_51c0 = $51c0
 bird_y_position_5a10 = $5a10
+high_score_table_5160 = $5160
+highest_score_50a6 = $50a6
 ; player status in $5005:
 ; 0: inactive (during intro)
 ; 1: normal
@@ -261,7 +263,7 @@ start_6000:      ; [global]
 61B6: FD 03 A2       STD    interrupt_vector_818a
 61B9: FD 09 04       STD    interrupt_vector_818c
 61BC: 10 8E E9 72    LDY    #$61FA
-61C0: 8E 73 E2       LDX    #$5160
+61C0: 8E 73 E2       LDX    #high_score_table_5160
 61C3: EC 86          LDD    ,Y
 61C5: EE A0          LDU    $2,Y
 61C7: ED A9          STD    ,X++
@@ -2271,7 +2273,7 @@ start_gameplay_7715:
 798E: CE D8 81       LDU    #$50A3
 7991: 86 87          LDA    #$05
 7993: 97 42          STA    $60
-7995: 8E D3 E2       LDX    #$5160
+7995: 8E D3 E2       LDX    #high_score_table_5160
 7998: EC EC          LDD    ,U
 799A: 10 A3 AC       CMPD   ,X
 799D: 22 9B          BHI    $79B2

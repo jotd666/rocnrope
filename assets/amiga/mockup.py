@@ -98,5 +98,6 @@ def process(the_dump,name_filter=None,hide_named_sprite=None):
     print(f"nb active: {nb_active}")
 
 
-process(r"K:\Emulation\MAME\sprites")
+#process(r"K:\Emulation\MAME\sprites")
+process(r"C:\Users\Public\Documents\Amiga Files\WinUAE\sprites")
 

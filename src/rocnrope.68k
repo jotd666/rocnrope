@@ -394,7 +394,7 @@ l_6164:
 	 |  [$61b6: std    interrupt_vector_818a]
 	 |  [$61b9: std    interrupt_vector_818c]
 	move.w	#0x61fa,d3                      	| [$61bc: ldy    #$61fa]
-	move.w	#0x5160,d2                      	| [$61c0: ldx    #$5160]
+	move.w	#high_score_table_5160,d2                      	| [$61c0: ldx    #$5160]
 l_61c3:
 	GET_REG_ADDRESS	0,d3                   	| [$61c3: ldd    ,y]
 	LOAD_D                                 	| [$61c3: ldd    ,y]
@@ -439,6 +439,7 @@ l_61c3:
 	 |  [$61ee: sta    mainlatch_8081]
 	GET_ADDRESS	mainlatch_8087             	| [$61f1: sta    mainlatch_8087]
 	move.b	d0,(a0)                         	| [...]
+	jbsr	osd_read_high_scores
 	CLR_I_FLAG                             	| [$61f4: andcc  #$ef]
 	jra	l_6065                             	| [$61f6: jmp    $6065,pcr]
 
@@ -521,14 +522,14 @@ l_6447:
 	move.b	#0x00,d1                        	| [$6462: ldb    #$00]
 	move.w	#0x50a0,d4                      	| [$6464: ldu    #$50a0]
 	move.w	#0x4c9f,d2                      	| [$6467: ldx    #$4c9f]
-	jbsr	l_677d                            	| [$646a: jsr    $677d]
+	jbsr	write_score_677d                            	| [$646a: jsr    $677d]
 	move.b	#0x00,d1                        	| [$646d: ldb    #$00]
 	move.w	#0x4d9f,d2                      	| [$646f: ldx    #$4d9f]
 	jbsr	l_64a1                            	| [$6472: bsr    $64a1]
 	move.b	#0x00,d1                        	| [$6474: ldb    #$00]
 	move.w	#end_score_50a6,d4              	| [$6476: ldu    #end_score_50a6]
 	move.w	#0x4ddf,d2                      	| [$6479: ldx    #$4ddf]
-	jbsr	l_677d                            	| [$647c: jsr    $677d]
+	jbsr	write_score_677d                            	| [$647c: jsr    $677d]
 	OP_1_ON_DP_ADDRESS	tst,game_in_play_22  | [$647f: tst    game_in_play_22]
 	jeq	l_6487                             	| [$6481: beq    $6487]
 	OP_R_ON_DP_ADDRESS	move,0x21,d0         | [$6483: lda    $21]
@@ -542,7 +543,7 @@ l_6487:
 	move.b	#0x00,d1                        	| [$6493: ldb    #$00]
 	move.w	#0x50a3,d4                      	| [$6495: ldu    #$50a3]
 	move.w	#0x4f1f,d2                      	| [$6498: ldx    #$4f1f]
-	jbsr	l_677d                            	| [$649b: jsr    $677d]
+	jbsr	write_score_677d                            	| [$649b: jsr    $677d]
 l_649e:
 	OP_1_ON_DP_ADDRESS	clr,0xb6             | [$649e: clr    $b6]
 	rts                                    	| [$64a0: rts]
@@ -725,7 +726,7 @@ l_6751:
 	move.b	#0x10,d1                        	| [$675c: ldb    #$10]
 	move.w	#end_score_50a6,d4              	| [$675e: ldu    #end_score_50a6]
 	move.w	#0x4ddf,d2                      	| [$6761: ldx    #$4ddf]
-	jbsr	l_677d                            	| [$6764: bsr    $677d]
+	jbsr	write_score_677d                            	| [$6764: bsr    $677d]
 l_6766:
 	move.w	#0x4c9f,d2                      	| [$6766: ldx    #$4c9f]
 	move.w	#0x50a0,d4                      	| [$6769: ldu    #$50a0]
@@ -736,10 +737,10 @@ l_6766:
 	addq.w	#0x3,d4                         	| [$6775: leau   $3,u]
 	move.b	#0x10,d1                        	| [$6777: ldb    #$10]
 l_6779:
-	jra	l_677d                             	| [$6779: jmp    $677d]
+	jra	write_score_677d                             	| [$6779: jmp    $677d]
 l_677c:
 	rts                                    	| [$677c: rts]
-l_677d:
+write_score_677d:
 	GET_REG_ADDRESS	0,d4                   	| [$677d: lda    ,u]
 	move.b	(a0),d0                         	| [...]
                                          | [$677f: lsra]
@@ -749,13 +750,13 @@ l_677d:
 	and.b	#0x0f,d0                         	| [$6783: anda   #$0f]
 	jne	l_67ad                             	| [$6785: bne    $67ad]
 	move.b	#0x10,d0                        	| [$6787: lda    #$10]
-	jbsr	l_67cf                            	| [$6789: bsr    $67cf]
+	jbsr	write_char_67cf                            	| [$6789: bsr    $67cf]
 	GET_REG_ADDRESS	0,d4                   	| [$678b: lda    ,u]
 	move.b	(a0),d0                         	| [...]
 	and.b	#0x0f,d0                         	| [$678d: anda   #$0f]
 	jne	l_67b3                             	| [$678f: bne    $67b3]
 	move.b	#0x10,d0                        	| [$6791: lda    #$10]
-	jbsr	l_67cf                            	| [$6793: bsr    $67cf]
+	jbsr	write_char_67cf                            	| [$6793: bsr    $67cf]
 	GET_REG_ADDRESS	0x1,d4                 	| [$6795: lda    $1,u]
 	move.b	(a0),d0                         	| [...]
                                          | [$6797: lsra]
@@ -765,7 +766,7 @@ l_677d:
 	and.b	#0x0f,d0                         	| [$679b: anda   #$0f]
 	jne	l_67bb                             	| [$679d: bne    $67bb]
 	move.b	#0x10,d0                        	| [$679f: lda    #$10]
-	jbsr	l_67cf                            	| [$67a1: bsr    $67cf]
+	jbsr	write_char_67cf                            	| [$67a1: bsr    $67cf]
 	GET_REG_ADDRESS	0x1,d4                 	| [$67a3: lda    $1,u]
 	move.b	(a0),d0                         	| [...]
 	and.b	#0x0f,d0                         	| [$67a5: anda   #$0f]
@@ -773,12 +774,12 @@ l_677d:
 	move.b	#0x10,d0                        	| [$67a9: lda    #$10]
 	jra	l_67c1                             	| [$67ab: bra    $67c1]
 l_67ad:
-	jbsr	l_67cf                            	| [$67ad: bsr    $67cf]
+	jbsr	write_char_67cf                            	| [$67ad: bsr    $67cf]
 	GET_REG_ADDRESS	0,d4                   	| [$67af: lda    ,u]
 	move.b	(a0),d0                         	| [...]
 	and.b	#0x0f,d0                         	| [$67b1: anda   #$0f]
 l_67b3:
-	jbsr	l_67cf                            	| [$67b3: bsr    $67cf]
+	jbsr	write_char_67cf                            	| [$67b3: bsr    $67cf]
 	GET_REG_ADDRESS	0x1,d4                 	| [$67b5: lda    $1,u]
 	move.b	(a0),d0                         	| [...]
                                          | [$67b7: lsra]
@@ -786,23 +787,23 @@ l_67b3:
                                          | [$67b9: lsra]
 	lsr.b	#4,d0                            	| [$67ba: lsra]
 l_67bb:
-	jbsr	l_67cf                            	| [$67bb: bsr    $67cf]
+	jbsr	write_char_67cf                            	| [$67bb: bsr    $67cf]
 	GET_REG_ADDRESS	0x1,d4                 	| [$67bd: lda    $1,u]
 	move.b	(a0),d0                         	| [...]
 	and.b	#0x0f,d0                         	| [$67bf: anda   #$0f]
 l_67c1:
-	jbsr	l_67cf                            	| [$67c1: bsr    $67cf]
+	jbsr	write_char_67cf                            	| [$67c1: bsr    $67cf]
 	GET_REG_ADDRESS	0x2,d4                 	| [$67c3: lda    $2,u]
 	move.b	(a0),d0                         	| [...]
                                          | [$67c5: lsra]
                                          | [$67c6: lsra]
                                          | [$67c7: lsra]
 	lsr.b	#4,d0                            	| [$67c8: lsra]
-	jbsr	l_67cf                            	| [$67c9: bsr    $67cf]
+	jbsr	write_char_67cf                            	| [$67c9: bsr    $67cf]
 	GET_REG_ADDRESS	0x2,d4                 	| [$67cb: lda    $2,u]
 	move.b	(a0),d0                         	| [...]
 	and.b	#0x0f,d0                         	| [$67cd: anda   #$0f]
-l_67cf:
+write_char_67cf:
 	GET_REG_UNCHECKED_ADDRESS	-0x0400,d2             	| [$67cf: stb    -$0400,x] [video_address]
 	move.b	d1,(a0)                         	| [...]
 	VIDEO_BYTE_DIRTY | [...]
@@ -861,27 +862,27 @@ l_6809:
 	move.w	#0x50a0,d4                      	| [$6809: ldu    #$50a0]
 	move.w	#0x4c9f,d2                      	| [$680c: ldx    #$4c9f]
 	OP_R_ON_DP_ADDRESS	move,0xad,d1         | [$680f: ldb    $ad]
-	jbsr	l_677d                            	| [$6811: lbsr   $677d]
+	jbsr	write_score_677d                            	| [$6811: lbsr   $677d]
 	move.w	#0x50a3,d4                      	| [$6814: ldu    #$50a3]
 	move.w	#0x4f1f,d2                      	| [$6817: ldx    #$4f1f]
-	jbsr	l_677d                            	| [$681a: lbsr   $677d]
+	jbsr	write_score_677d                            	| [$681a: lbsr   $677d]
 l_681d:
 	move.w	#end_score_50a6,d4              	| [$681d: ldu    #end_score_50a6]
 	move.w	#0x4ddf,d2                      	| [$6820: ldx    #$4ddf]
 	OP_R_ON_DP_ADDRESS	move,0xad,d1         | [$6823: ldb    $ad]
-	jbsr	l_677d                            	| [$6825: jsr    $677d]
+	jbsr	write_score_677d                            	| [$6825: jsr    $677d]
 	rts                                    	| [$6828: rts]
 l_6829:
 	move.w	#0x50a0,d4                      	| [$6829: ldu    #$50a0]
 	move.w	#0x4c9f,d2                      	| [$682c: ldx    #$4c9f]
 	OP_R_ON_DP_ADDRESS	move,0xad,d1         | [$682f: ldb    $ad]
-	jbsr	l_677d                            	| [$6831: jsr    $677d]
+	jbsr	write_score_677d                            	| [$6831: jsr    $677d]
 	rts                                    	| [$6834: rts]
 l_6835:
 	move.w	#0x50a3,d4                      	| [$6835: ldu    #$50a3]
 	move.w	#0x4f1f,d2                      	| [$6838: ldx    #$4f1f]
 	OP_R_ON_DP_ADDRESS	move,0xad,d1         | [$683b: ldb    $ad]
-	jbsr	l_677d                            	| [$683d: jsr    $677d]
+	jbsr	write_score_677d                            	| [$683d: jsr    $677d]
 	rts                                    	| [$6840: rts]
 
 l_6841:
@@ -1337,7 +1338,7 @@ l_6de5:
 	GET_REG_ADDRESS	0,d3                   	| [$6df5: ldb    ,y]
 	move.b	(a0),d1                         	| [...]
 	movem.l	d1/d2/d4,-(sp)                 	| [$6df7: pshs   u,x,b]
-	jbsr	l_677d                            	| [$6df9: jsr    $677d]
+	jbsr	write_score_677d                            	| [$6df9: jsr    $677d]
 	movem.l	(sp)+,d1/d2/d4                 	| [$6dfc: puls   b,x,u]
 	OP_R_ON_DP_ADDRESS	move,0xad,d0         | [$6dfe: lda    $ad]
 	OP_W_ON_DP_ADDRESS	move,0x72,d0         | [$6e00: sta    $72]
@@ -1359,7 +1360,7 @@ l_6e32:
 	move.w	#0x4ebd,d2                      	| [$6e35: ldx    #$4ebd]
 	GET_ADDRESS	0x446f                     	| [$6e38: ldy    $446f]
 	MOVE_W_TO_REG	a0,d3                         	| [...]
-	jbsr	l_677d                            	| [$6e3c: jsr    $677d]
+	jbsr	write_score_677d                            	| [$6e3c: jsr    $677d]
 	GET_ADDRESS	0x446f                     	| [$6e3f: sty    $446f]
 	MOVE_W_FROM_REG	d3,a0                         	| [...]
 	GET_ADDRESS	0x446e                     	| [$6e43: ldd    $446e]
@@ -1385,7 +1386,7 @@ l_6e4f:
 	MOVE_W_FROM_REG	d1,a0                         	| [...]
 	OP_1_ON_DP_ADDRESS	clr,0x72             | [$6e66: clr    $72]
 	move.b	#0x0e,d1                        	| [$6e68: ldb    #$0e]
-	jbsr	l_677d                            	| [$6e6a: jsr    $677d]
+	jbsr	write_score_677d                            	| [$6e6a: jsr    $677d]
 	rts                                    	| [$6e6d: rts]
 l_6e6e:
 	move.b	#0x06,d1                        	| [$6e6e: ldb    #$06]
@@ -1400,7 +1401,7 @@ l_6e6e:
 	MOVE_W_FROM_REG	d1,a0                         	| [...]
 	OP_1_ON_DP_ADDRESS	clr,0x72             | [$6e81: clr    $72]
 	move.b	#0x0e,d1                        	| [$6e83: ldb    #$0e]
-	jbsr	l_677d                            	| [$6e85: jsr    $677d]
+	jbsr	write_score_677d                            	| [$6e85: jsr    $677d]
 	GET_ADDRESS	0x6eda                     	| [$6e88: ldx    $6eda]
 	move.w	(a0),d2 |  [...]
 	add.w	#0x0200,d2                       	| [$6e8b: leax   $0200,x]
@@ -1411,7 +1412,7 @@ l_6e6e:
 	MOVE_W_FROM_REG	d1,a0                         	| [...]
 	OP_1_ON_DP_ADDRESS	clr,0x72             | [$6e96: clr    $72]
 	move.b	#0x0e,d1                        	| [$6e98: ldb    #$0e]
-	jbsr	l_677d                            	| [$6e9a: jsr    $677d]
+	jbsr	write_score_677d                            	| [$6e9a: jsr    $677d]
 	rts                                    	| [$6e9d: rts]
 
 l_6ef8:
@@ -3059,7 +3060,7 @@ l_7775:
 l_7776:
 	GET_DP_ADDRESS	0xc3                    	| [$7776: ldd    $c3]
 	LOAD_D                                 	| [$7776: ldd    $c3]
-	add.w	#0x0001,d1                       	| [$7778: addd   #$0001]
+	addq	#0x0001,d1                       	| [$7778: addd   #$0001]
 	GET_DP_ADDRESS	0xc3                    	| [$777b: std    $c3]
 	MOVE_W_FROM_REG	d1,a0                         	| [...]
 	jbsr	l_778f                            	| [$777d: jsr    $778f]
@@ -3070,7 +3071,7 @@ l_7776:
 	jra	l_b6c8                             	| [$778c: jmp    $b6c8]
 l_778f:
 	OP_1_ON_DP_ADDRESS	tst,game_in_play_22  | [$778f: tst    game_in_play_22]
-	jeq	l_77a9                             	| [$7791: beq    $77a9]
+	jeq	demo_77a9                             	| [$7791: beq    $77a9]
 	OP_R_ON_DP_ADDRESS	move,0x3a,d0         | [$7793: lda    $3a]
 	OP_W_ON_DP_ADDRESS	move,0x3b,d0         | [$7795: sta    $3b]
 	OP_1_ON_DP_ADDRESS	tst,0x53             | [$7797: tst    $53]
@@ -3085,7 +3086,7 @@ l_77a4:
 	OP_R_ON_DP_ADDRESS	move,0x33,d0         | [$77a4: lda    $33]
 	OP_W_ON_DP_ADDRESS	move,0x3a,d0         | [$77a6: sta    $3a]
 	rts                                    	| [$77a8: rts]
-l_77a9:
+demo_77a9:
 	OP_1_ON_DP_ADDRESS	tst,0x3d             | [$77a9: tst    $3d]
 	jeq	l_77b4                             	| [$77ab: beq    $77b4]
 	cmp.b	#0xff,d0                         	| [$77ad: cmpa   #$ff]
@@ -3153,7 +3154,6 @@ l_7803:
 	move.w	#video_ram_4c00,d1              	| [$7803: ldd    #video_ram_4c00]
 	GET_ADDRESS	0x40c0                     	| [$7806: std    $40c0]
 	move.w	d1,(a0) |  [...]
-	MAKE_D                                 	| [...]
 	GET_ADDRESS	0x40e0                     	| [$7809: std    $40e0]
 	move.w	d1,(a0) |  [...]
 	GET_ADDRESS	0x403f                     	| [$780c: clr    $403f]
@@ -3397,7 +3397,7 @@ l_7983:
 l_7991:
 	move.b	#0x05,d0                        	| [$7991: lda    #$05]
 	OP_W_ON_DP_ADDRESS	move,0x60,d0         | [$7993: sta    $60]
-	move.w	#0x5160,d2                      	| [$7995: ldx    #$5160]
+	move.w	#high_score_table_5160,d2                      	| [$7995: ldx    #$5160]
 l_7998:
 	GET_REG_ADDRESS	0,d4                   	| [$7998: ldd    ,u]
 	LOAD_D                                 	| [$7998: ldd    ,u]
@@ -3458,6 +3458,7 @@ l_79d1:
 	GET_REG_ADDRESS	0x1,d2                 	| [$79db: sta    $1,x]
 	move.b	d0,(a0)                         	| [...]
 	OP_W_ON_DP_ADDRESS	addq,0x0b,#1         | [$79dd: inc    $0b]
+	jbsr	osd_write_high_scores
 	rts                                    	| [$79df: rts]
 l_79e0:
 	move.b	#0x03,d0                        	| [$79e0: ldd    #$0310]
@@ -6687,7 +6688,7 @@ l_8c92:
 	GET_REG_ADDRESS	0x4,d2                 	| [$8c92: dec    $4,x]
 	subq.b	#1,(a0)                         	| [...]
 l_8c94:
-	GET_REG_ADDRESS	0x4,d2                 	| [$8c94: lda    $4,x]
+	                 	| [$8c94: lda    $4,x]
 	move.b	(a0),d0                         	| [...]
 	OP_R_ON_DP_ADDRESS	sub,0x9c,d0          | [$8c96: suba   $9c]
 	add.b	#0x02,d0                         	| [$8c98: adda   #$02]
@@ -10148,10 +10149,7 @@ l_a987:
 	jra	l_aa32                             	| [$a990: lbra   $aa32]
 	MAKE_D                                 	| [...]
 	add.w	#0x4543,d1                       	| [$a993: addd   #$4543]
-	PUSH_SR                                	| [...]
-	MAKE_A                                 	| [...]
-	POP_SR                                 	| [...]
-	BIT	#0x48,d1                           	| [$a996: bitb   #$48]
+	                           	| [$a996: bitb   #$48] useless bit
 l_a998:
 	move.w	#0x51e0,d2                      	| [$a998: ldx    #$51e0]
 	GET_REG_ADDRESS	0,d2                   	| [$a99b: tst    ,x]
@@ -11262,7 +11260,6 @@ l_afc3:
 	move.b	d0,(a0)                         	| [...]
 	moveq	#0,d0                            	| [$b00e: clra]
 	moveq	#0,d1                            	| [$b00f: clrb]
-	MAKE_D                                 	| [...]
 	GET_ADDRESS	0x5564                     	| [$b010: std    $5564]
 	move.w	d1,(a0) |  [...]
 	OP_1_ON_DP_ADDRESS	clr,0xe2             | [$b013: clr    $e2]
@@ -11302,6 +11299,7 @@ l_b02d:
 	MOVE_W_FROM_REG	d1,a0                         	| [...]
 	rts                                    	| [$b045: rts]
 l_b046:
+	move.b	#0,0x110
 	OP_R_ON_DP_ADDRESS	move,player_status_05,d0| [$b046: lda    player_status_05]
 	cmp.b	#0x02,d0                         	| [$b048: cmpa   #$02]
 	jeq	l_b056                             	| [$b04a: beq    $b056]
@@ -11322,6 +11320,7 @@ l_b057:
 	and.b	(a0),d0                          	| [...]
 	BIT	#0x20,d0                           	| [$b060: bita   #$20]
 	jeq	l_b0bd                             	| [$b062: beq    $b0bd]
+	* dazzle flash enabled
 	GET_REG_ADDRESS	-0x1c,d2               	| [$b064: ldd    -$1c,x]
 	LOAD_D                                 	| [$b064: ldd    -$1c,x]
 	add.b	#0x02,d1                         	| [$b067: addb   #$02]
@@ -11373,9 +11372,8 @@ l_b0aa:
 	jne	l_b0bd                             	| [$b0b2: bne    $b0bd]
 	moveq	#0,d0                            	| [$b0b4: clra]
 	GET_REG_ADDRESS	0x4,d2                 	| [$b0b5: sta    $4,x]
-	move.b	d0,(a0)                         	| [...]
-	GET_REG_ADDRESS	0x5,d2                 	| [$b0b7: sta    $5,x]
-	move.b	d0,(a0)                         	| [...]
+	move.b	d0,(a0)+                         	| [...]
+	move.b	d0,(a0)                        | [$b0b7: sta    $5,x]
 	move.b	#0x01,d1                        	| [$b0b9: ldb    #$01]
 	GET_REG_ADDRESS	0x1,d2                 	| [$b0bb: stb    $1,x]
 	move.b	d1,(a0)                         	| [...]

@@ -45,8 +45,8 @@ _config
 	dc.b	"C2:X:25 Hz update:0;"
 	dc.b	"C2:X:skip introduction:1;"
 	dc.b	"C3:L:start level:1,2,3,4;"
-	*dc.b	"C4:L:number of lives:5,3,2;"
-	*dc.b	"C5:L:difficulty level:easy,normal,difficult,very difficult;"
+	dc.b	"C4:L:number of lives:3,4,5,255;"
+	dc.b	"C5:L:difficulty level:1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16;"
 	dc.b	0
 
 	IFD BARFLY
