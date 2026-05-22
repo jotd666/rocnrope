@@ -26,6 +26,7 @@ for file in ["readme.md",f"{gamename}_aga.slave",f"{gamename}_ocs.slave"]:
 assets = progdir /"assets"/"amiga"
 shutil.copy(assets/"RocNRope_aga.info",outdir)
 shutil.copy(assets/"RocNRope_ocs.info",outdir)
+shutil.copy(assets/"boxart.jpg",outdir)
 
 
 
