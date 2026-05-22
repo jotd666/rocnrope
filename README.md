@@ -14,6 +14,7 @@ Credits:
   sound conversion for the Amiga.
 - no9: music
 - PascalDe73: icons
+- NaggyNaggerson: boxart
 - Konami: original game
 
 Instructions:

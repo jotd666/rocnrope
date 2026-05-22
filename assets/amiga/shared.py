@@ -17,6 +17,8 @@ used_graphics_dir = this_dir / "used_graphics"
 NB_SPRITE_CLUTS = 16
 NB_TILE_CLUTS = 16
 
+
+
 def apply_color_replacement(sprite_set_list,quantized):
     """ change colors for list of tilesets (tiles, sprites)
     quantized: RGB => RGB color replacement dictionary
