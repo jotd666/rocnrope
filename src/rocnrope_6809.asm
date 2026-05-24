@@ -2054,6 +2054,7 @@ start_gameplay_7715:
 778C: 7E 9E 40       JMP    $B6C8
 778F: 0D 00          TST    game_in_play_22
 7791: 27 94          BEQ    $77A9
+; game in play
 7793: 96 18          LDA    $3A
 7795: 97 B9          STA    $3B
 7797: 0D 7B          TST    $53
@@ -2066,6 +2067,7 @@ start_gameplay_7715:
 77A4: 96 11          LDA    $33
 77A6: 97 B8          STA    $3A
 77A8: 39             RTS
+; demo
 77A9: 0D B5          TST    $3D
 77AB: 27 2F          BEQ    $77B4
 77AD: 81 77          CMPA   #$FF
@@ -2073,7 +2075,7 @@ start_gameplay_7715:
 77B1: 0A BF          DEC    $3D
 77B3: 39             RTS
 77B4: 9E 1C          LDX    $3E
-77B6: EC 03          LDD    ,X++
+77B6: EC 03          LDD    ,X++		; load new auto controls (demo)
 77B8: DD 12          STD    $3A
 77BA: A6 08          LDA    ,X+
 77BC: 97 15          STA    $3D
@@ -2083,6 +2085,7 @@ start_gameplay_7715:
 77C3: DD 1C          STD    $3E
 77C5: 0F BF          CLR    $3D
 77C7: 39             RTS
+
 77C8: 96 20          LDA    $08
 77CA: 48             ASLA
 77CB: 10 8E 5F 59    LDY    #jump_table_77d1

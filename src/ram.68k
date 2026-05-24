@@ -10,8 +10,8 @@
 	.global log_ptr
 	.global highscore_needs_saving_flag
 	.global vbl_sync_counter
+	.global irq_sync_flag
 	.global vbl_sync_flag
-	.global no_sync_flag
 	.global m6809_direct_page_pointer
 	.global	stack_save
 
@@ -80,12 +80,13 @@ vb_ticks_count:
 	.byte	0
 current_ticks_count:
 	.byte	0
+irq_sync_flag:
+	.byte	0
 vbl_sync_flag:
 	.byte	0
 vbl_sync_counter:
 	.byte	0
-no_sync_flag:
-	.byte 	0
+
 break_at_startup_flag:
 	.byte	0
 

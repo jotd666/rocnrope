@@ -26,3 +26,5 @@ video_ram_4c00 = 0x4c00
 end_score_50a6 = 0x50a6
 high_score_table_5160 = 0x5160
 highest_score_50a6 = 0x50a6
+command_length_3d = 0x3D
+player_controls_3a = 0x3A

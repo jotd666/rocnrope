@@ -30,7 +30,19 @@
 * 2: dead
 * 3: level complete
 
-
+* cwait is needed for the screen transition effect. Doesn't affect game, 
+* but if skipped the demo mode fails because timer doesn't have the proper values
+* and pseudo-random is different. Even like this timer doesn't have proper
+* values, but at least it restores the screen transition effect
+*
+* note that it doesn't affect real gameplay at all because timer is running continuously
+* since game bootup and isn't reset when starting a game
+cwait:
+	clr.b	irq_sync_flag
+0:
+	tst.b 	irq_sync_flag
+	jeq		0b
+	rts
 
 start_6000:                             	| [global]
 	moveq	#0,d0                            	| [$6000: clra]
@@ -375,9 +387,7 @@ l_6164:
                                          | [$6199: rola]
                                          | [$619a: rola]
 	roxl.b	#3,d0                           	| [$619b: rola]
-	PUSH_SR
 	move.b	d0,d1                           	| [$619c: tfr    a,b]
-	POP_SR
 	and.b	#0x01,d0                         	| [$619e: anda   #$01]
 	OP_W_ON_DP_ADDRESS	move,0x56,d0         | [$61a0: sta    $56]
 	and.b	#0x02,d1                         	| [$61a2: andb   #$02]
@@ -512,7 +522,7 @@ l_6447:
 	VIDEO_BYTE_DIRTY | [...]
 	OP_W_ON_DP_ADDRESS	subq,0x71,#1         | [$644d: dec    $71]
 	jne	l_6447                             	| [$644f: bne    $6447]
-	 |  [$6451: cwai   #$ef] sync with irq to clear "H" from screen
+	jbsr	cwait |  [$6451: cwai   #$ef] sync with irq to clear "H" from screen
 	OP_W_ON_DP_ADDRESS	subq,0x70,#1         | [$6453: dec    $70]
 	jne	l_6441                             	| [$6455: bne    $6441]
 	move.b	#0x00,d1                        	| [$6457: ldb    #$00]
@@ -1143,13 +1153,20 @@ l_69ae:
 	OP_R_ON_DP_ADDRESS	move,0x77,d0         | [$69f4: lda    $77]
 	cmp.b	#0x1c,d0                         	| [$69f6: cmpa   #$1c]
 	jne	l_69ae                             	| [$69f8: lbne   $69ae]
-	 |  [$69fc: cwai   #$ef] sync with irq to make background appear
+	jbsr	cwait |  [$69fc: cwai   #$ef] sync with irq to make background appear
 	OP_1_ON_DP_ADDRESS	clr,0x77             | [$69fe: clr    $77]
 	OP_W_ON_DP_ADDRESS	addq,0x76,#1         | [$6a00: inc    $76]
 	OP_R_ON_DP_ADDRESS	move,0x76,d0         | [$6a02: lda    $76]
 	cmp.b	#0x1c,d0                         	| [$6a04: cmpa   #$1c]
 	jne	l_6995                             	| [$6a06: bne    $6995]
 	OP_1_ON_DP_ADDRESS	clr,0xb6             | [$6a08: clr    $b6]
+	
+	OP_1_ON_DP_ADDRESS	tst,game_in_play_22  | [$6ef8: tst    game_in_play_22]
+	jne	0f                             	| [$6efa: bne    $6f00]
+	* set timer so autoplay from demo mode works
+	* it ends up de-syncing for some unknown reason but at start it works
+	OP_W_ON_DP_ADDRESS	move,timer_4f,#0x38             | [$6a08: clr    $b6]
+0:	
 	rts                                    	| [$6a0a: rts]
 l_6a0b:
 	OP_1_ON_DP_ADDRESS	clr,0x7e             | [$6a0b: clr    $7e]
@@ -1418,6 +1435,7 @@ l_6e6e:
 l_6ef8:
 	OP_1_ON_DP_ADDRESS	tst,game_in_play_22  | [$6ef8: tst    game_in_play_22]
 	jne	l_6f00                             	| [$6efa: bne    $6f00]
+	* fix random in demo version
 	OP_1_ON_DP_ADDRESS	clr,timer_4f         | [$6efc: clr    timer_4f]
 	OP_1_ON_DP_ADDRESS	clr,0xc2             | [$6efe: clr    $c2]
 l_6f00:
@@ -1671,15 +1689,14 @@ l_6ff2:
 l_700f:
 	OP_1_ON_DP_ADDRESS	tst,game_in_play_22  | [$700f: tst    game_in_play_22]
 	jne	l_7017                             	| [$7011: bne    $7017]
+	* fix random ? 
 	OP_1_ON_DP_ADDRESS	clr,0xc2             | [$7013: clr    $c2]
 	OP_1_ON_DP_ADDRESS	clr,timer_4f         | [$7015: clr    timer_4f]
 l_7017:
 	OP_R_ON_DP_ADDRESS	move,0xc2,d0         | [$7017: lda    $c2]
 	and.b	#0x1c,d0                         	| [$7019: anda   #$1c]
 	lsr.b	#1,d0                            	| [$701b: lsra]
-	PUSH_SR
 	move.b	d0,d1                           	| [$701c: tfr    a,b]
-	POP_SR
 	add.b	#0x3c,d0                         	| [$701e: adda   #$3c]
 	add.b	#0x28,d1                         	| [$7020: addb   #$28]
 	MAKE_D                                 	| [...]
@@ -3072,7 +3089,8 @@ l_7776:
 l_778f:
 	OP_1_ON_DP_ADDRESS	tst,game_in_play_22  | [$778f: tst    game_in_play_22]
 	jeq	demo_77a9                             	| [$7791: beq    $77a9]
-	OP_R_ON_DP_ADDRESS	move,0x3a,d0         | [$7793: lda    $3a]
+	* game in play, propagate controls to actual commands
+	OP_R_ON_DP_ADDRESS	move,player_controls_3a,d0         | [$7793: lda    $3a]
 	OP_W_ON_DP_ADDRESS	move,0x3b,d0         | [$7795: sta    $3b]
 	OP_1_ON_DP_ADDRESS	tst,0x53             | [$7797: tst    $53]
 	jeq	l_779f                             	| [$7799: beq    $779f]
@@ -3080,40 +3098,41 @@ l_778f:
 	jne	l_77a4                             	| [$779d: bne    $77a4]
 l_779f:
 	OP_R_ON_DP_ADDRESS	move,players_controls_32,d0| [$779f: lda    players_controls_32]
-	OP_W_ON_DP_ADDRESS	move,0x3a,d0         | [$77a1: sta    $3a]
+	OP_W_ON_DP_ADDRESS	move,player_controls_3a,d0         | [$77a1: sta    $3a]
 	rts                                    	| [$77a3: rts]
 l_77a4:
 	OP_R_ON_DP_ADDRESS	move,0x33,d0         | [$77a4: lda    $33]
-	OP_W_ON_DP_ADDRESS	move,0x3a,d0         | [$77a6: sta    $3a]
+	OP_W_ON_DP_ADDRESS	move,player_controls_3a,d0         | [$77a6: sta    $3a]
 	rts                                    	| [$77a8: rts]
 demo_77a9:
-	OP_1_ON_DP_ADDRESS	tst,0x3d             | [$77a9: tst    $3d]
-	jeq	l_77b4                             	| [$77ab: beq    $77b4]
+	* game not in play, propagate pre-recorded controls to actual commands
+	OP_1_ON_DP_ADDRESS	tst,command_length_3d             | [$77a9: tst    $3d]
+	jeq	next_command_77b4                             	| [$77ab: beq    $77b4]
 	cmp.b	#0xff,d0                         	| [$77ad: cmpa   #$ff]
 	jeq	l_77c1                             	| [$77af: beq    $77c1]
-	OP_W_ON_DP_ADDRESS	subq,0x3d,#1         | [$77b1: dec    $3d]
+	OP_W_ON_DP_ADDRESS	subq,command_length_3d,#1         | [$77b1: dec    $3d]
 	rts                                    	| [$77b3: rts]
-l_77b4:
+next_command_77b4:
 	GET_DP_ADDRESS	0x3e                    	| [$77b4: ldx    $3e]
 	MOVE_W_TO_REG	a0,d2                         	| [...]
 	GET_REG_ADDRESS	0,d2                   	| [$77b6: ldd    ,x++]
 	addq.w	#2,d2                           	| [...]
 	LOAD_D                                 	| [$77b6: ldd    ,x++]
-	GET_DP_ADDRESS	0x3a                    	| [$77b8: std    $3a]
+	GET_DP_ADDRESS	player_controls_3a                    	| [$77b8: std    $3a]
 	MOVE_W_FROM_REG	d1,a0                         	| [...]
 	GET_REG_ADDRESS	0,d2                   	| [$77ba: lda    ,x+]
 	addq.w	#1,d2                           	| [...]
 	move.b	(a0),d0                         	| [...]
-	OP_W_ON_DP_ADDRESS	move,0x3d,d0         | [$77bc: sta    $3d]
+	OP_W_ON_DP_ADDRESS	move,command_length_3d,d0         | [$77bc: sta    $3d]
 	GET_DP_ADDRESS	0x3e                    	| [$77be: stx    $3e]
 	MOVE_W_FROM_REG	d2,a0                         	| [...]
 	rts                                    	| [$77c0: rts]
 l_77c1:
-	GET_DP_ADDRESS	0x3a                    	| [$77c1: ldd    $3a]
+	GET_DP_ADDRESS	player_controls_3a                    	| [$77c1: ldd    $3a]
 	LOAD_D                                 	| [$77c1: ldd    $3a]
 	GET_DP_ADDRESS	0x3e                    	| [$77c3: std    $3e]
 	MOVE_W_FROM_REG	d1,a0                         	| [...]
-	OP_1_ON_DP_ADDRESS	clr,0x3d             | [$77c5: clr    $3d]
+	OP_1_ON_DP_ADDRESS	clr,command_length_3d             | [$77c5: clr    $3d]
 	rts                                    	| [$77c7: rts]
 l_77c8:
 	OP_R_ON_DP_ADDRESS	move,0x08,d0         | [$77c8: lda    $08]
@@ -3889,7 +3908,7 @@ l_7c69:
 	tst.b	(a0)                             	| [...]
 	jne	l_7cba                             	| [$7c6f: bne    $7cba]
 	jbsr	l_7f5b                            	| [$7c71: jsr    $7f5b]
-	OP_R_ON_DP_ADDRESS	move,0x3a,d0         | [$7c74: lda    $3a]
+	OP_R_ON_DP_ADDRESS	move,player_controls_3a,d0         | [$7c74: lda    $3a]
 	GET_REG_ADDRESS	0x1c,d2                	| [$7c76: tst    $1c,x]
 	tst.b	(a0)                             	| [...]
 	jeq	l_7c8a                             	| [$7c79: beq    $7c8a]
@@ -4054,12 +4073,8 @@ l_7d78:
 	jcs	l_7d5e                             	| [$7d7e: bcs    $7d5e]
 l_7d80:
 	GET_REG_ADDRESS	0x7,d2                 	| [$7d80: ldb    $7,x]
-	move.b	(a0),d1                         	| [...]
-	add.b	#0x80,d1                         	| [$7d82: addb   #$80]
-	PUSH_SR
+	add.b	#0x80,(a0)						| [$7d82: addb   #$80]
 	| [$7d84: stb    $7,x]
-	move.b	d1,(a0)                         	| [...]
-	POP_SR
 	jcc	l_7dcb                             	| [$7d86: bcc    $7dcb]
 	GET_REG_ADDRESS	0x5,d2                 	| [$7d88: ldb    $5,x]
 	move.b	(a0),d1                         	| [...]
@@ -4159,10 +4174,9 @@ l_7e18:
 	jcc	l_7e75                             	| [$7e20: bcc    $7e75]
 	GET_REG_ADDRESS	0x7,d2                 	| [$7e22: ldb    $7,x]
 	move.b	(a0),d1                         	| [...]
-	GET_REG_ADDRESS	0x9,d2                 	| [$7e24: addb   $9,x]
-	add.b	(a0),d1                          	| [...]
+	add.b	(2,a0),d1                       | [$7e24: addb   $9,x]
 	PUSH_SR
-	GET_REG_ADDRESS	0x7,d2                 	| [$7e26: stb    $7,x]
+											| [$7e26: stb    $7,x]
 	move.b	d1,(a0)                         	| [...]
 	POP_SR
 	jcs	l_7e2b                             	| [$7e28: bcs    $7e2b]
@@ -4576,7 +4590,7 @@ l_806c:
 	tst.b	(a0)                             	| [...]
 	jne	l_80b0                             	| [$806f: bne    $80b0]
 	jbsr	l_82df                            	| [$8071: jsr    $82df]
-	OP_R_ON_DP_ADDRESS	move,0x3a,d0         | [$8074: lda    $3a]
+	OP_R_ON_DP_ADDRESS	move,player_controls_3a,d0         | [$8074: lda    $3a]
 	GET_REG_ADDRESS	0x19,d2                	| [$8076: tst    $19,x]
 	tst.b	(a0)                             	| [...]
 	jeq	l_8089                             	| [$8079: beq    $8089]
@@ -4782,9 +4796,6 @@ l_81a5:
 	POP_SR
 	MAKE_D                                 	| [...]
 	sub.w	#0x5700,d1                       	| [$81aa: subd   #$5700]
-	PUSH_SR                                	| [...]
-	MAKE_A                                 	| [...]
-	POP_SR                                 	| [...]
                                          | [$81ad: lsrb]
 	lsr.b	#2,d1                            	| [$81ae: lsrb]
 	GET_REG_ADDRESS	0x1d,d2                	| [$81af: stb    $1d,x]
@@ -4931,20 +4942,12 @@ l_8272:
 	POP_SR
 	MAKE_D                                 	| [...]
 	sub.w	#0x5700,d1                       	| [$8274: subd   #$5700]
-	PUSH_SR                                	| [...]
-	MAKE_A                                 	| [...]
-	POP_SR                                 	| [...]
                                          | [$8277: lsrb]
 	lsr.b	#2,d1                            	| [$8278: lsrb]
 	GET_REG_ADDRESS	0x1d,d2                	| [$8279: stb    $1d,x]
 	move.b	d1,(a0)                         	| [...]
 	rts                                    	| [$827c: rts]
-	asr.b	#1,d0                            	| [$827d: asra]
-	jcc	l_8288                             	| [$827e: bcc    $8288]
-	GET_REG_ADDRESS	0x4,d2                 	| [$8280: dec    $4,x]
-	subq.b	#1,(a0)                         	| [...]
-	jbsr	l_7b1e                            	| [$8282: jsr    $7b1e]
-	jra	l_6017                             	| [$8285: jmp    $6017]
+
 l_8288:
 	GET_REG_ADDRESS	0x4,d2                 	| [$8288: inc    $4,x]
 	addq.b	#1,(a0)                         	| [...]
@@ -5254,17 +5257,8 @@ l_8421:
 	OP_1_ON_DP_ADDRESS	clr,0x0e             | [$8429: clr    $0e]
 	rts                                    	| [$842b: rts]
 l_842c:
-	PUSH_SR
 	move.w	d3,d1                           	| [$842c: tfr    y,d]
-	ror.w	#8,d3                            	| [...]
-	move.b	d3,d0                           	| [...] set MSB
-	ror.w	#8,d3                            	| [...]
-	POP_SR
-	MAKE_D                                 	| [...]
 	sub.w	#0x5700,d1                       	| [$842e: subd   #$5700]
-	PUSH_SR                                	| [...]
-	MAKE_A                                 	| [...]
-	POP_SR                                 	| [...]
                                          | [$8431: lsrb]
 	lsr.b	#2,d1                            	| [$8432: lsrb]
 	GET_REG_ADDRESS	0x1d,d2                	| [$8433: stb    $1d,x]
@@ -5300,10 +5294,10 @@ l_8455:
 	jhi	l_8471                             	| [$8463: bhi    $8471]
 	cmp.b	#0xaf,d1                         	| [$8465: cmpb   #$af]
 	jhi	l_84f8                             	| [$8467: lbhi   $84f8]
-	cmp.b	#0x3a,d1                         	| [$846b: cmpb   #$3a]
+	cmp.b	#player_controls_3a,d1                         	| [$846b: cmpb   #$3a]
 	jcs	l_84e7                             	| [$846d: lbcs   $84e7]
 l_8471:
-	OP_R_ON_DP_ADDRESS	move,0x3a,d0         | [$8471: lda    $3a]
+	OP_R_ON_DP_ADDRESS	move,player_controls_3a,d0         | [$8471: lda    $3a]
 	jeq	l_84c6                             	| [$8473: beq    $84c6]
 	BIT	#0x0c,d0                           	| [$8475: bita   #$0c]
 	jne	l_84c6                             	| [$8477: bne    $84c6]
@@ -5483,10 +5477,7 @@ l_855d:
 l_856a:
 	moveq	#0,d0                            	| [$856a: clra]
 	moveq	#0,d1                            	| [$856b: clrb]
-	PUSH_SR
-	MAKE_D                                 	| [...]
 	move.w	d1,d4                           	| [$856c: tfr    d,u]
-	POP_SR
 l_856e:
 	move.b	#0x01,d1                        	| [$856e: ldb    #$01]
 	GET_REG_ADDRESS	0x1,d2                 	| [$8570: stb    $1,x]
@@ -5610,9 +5601,7 @@ l_8601:
 	subq.b	#1,(a0)                         	| [...]
 	jne	l_85f3                             	| [$8606: bne    $85f3]
 	addq	#3,d5  | [$8608: puls a,pc] [target_stack_pull]
-	PUSH_SR                                	| [...]
 	MAKE_D                                 	| [...]
-	POP_SR                                 	| [...]
 	rts                                    	| [...]
 
 l_8610:
@@ -5671,9 +5660,7 @@ l_8670:
 	GET_DP_ADDRESS	0xd3                    	| [$86d7: lsr    $d3]
 	move.b	(a0),d6	| [$86d7: lsr    $d3]
 	lsr.b	#1,d6                          	| [$86d7: lsr    $d3]
-	PUSH_SR
 	move.b	d6,(a0)	| [$86d7: lsr    $d3]
-	POP_SR
 l_86d9:
 	move.w	#0x51e0,d2                      	| [$86d9: ldx    #$51e0]
 	move.w	#player_state_51c0,d3           	| [$86dc: ldy    #player_state_51c0]
@@ -5698,7 +5685,7 @@ l_86e8:
 	jeq	l_870c                             	| [$86f6: beq    $870c]
 	cmp.b	#0x02,d1                         	| [$86f8: cmpb   #$02]
 	jeq	l_8708                             	| [$86fa: beq    $8708]
-	OP_R_ON_DP_ADDRESS	move,0x3a,d1         | [$86fc: ldb    $3a]
+	OP_R_ON_DP_ADDRESS	move,player_controls_3a,d1         | [$86fc: ldb    $3a]
 	BIT	#0x01,d1                           	| [$86fe: bitb   #$01]
 	jne	l_8708                             	| [$8700: bne    $8708]
 	BIT	#0x02,d1                           	| [$8702: bitb   #$02]
@@ -9696,7 +9683,7 @@ l_a6e4:
 	move.b	(a0),d0                         	| [...]
 	BIT	#0x01,d0                           	| [$a6ff: bita   #$01]
 	jne	l_a75e                             	| [$a701: bne    $a75e]
-	OP_R_ON_DP_ADDRESS	move,0x3a,d1         | [$a703: ldb    $3a]
+	OP_R_ON_DP_ADDRESS	move,player_controls_3a,d1         | [$a703: ldb    $3a]
 	BIT	#0x04,d1                           	| [$a705: bitb   #$04]
 	jeq	l_a75e                             	| [$a707: beq    $a75e]
 	OP_R_ON_DP_ADDRESS	move,0x9d,d1         | [$a709: ldb    $9d]
@@ -9934,7 +9921,7 @@ l_a851:
 	jeq	l_a82a                             	| [$a860: beq    $a82a]
 	rts                                    	| [$a862: rts]
 l_a863:
-	OP_R_ON_DP_ADDRESS	move,0x3a,d1         | [$a863: ldb    $3a]
+	OP_R_ON_DP_ADDRESS	move,player_controls_3a,d1         | [$a863: ldb    $3a]
 	BIT	#0x07,d1                           	| [$a865: bitb   #$07]
 	jne	l_a888                             	| [$a867: bne    $a888]
 	GET_DP_ADDRESS	0x3b                    	| [$a869: andb   $3b]
@@ -10038,7 +10025,7 @@ l_a8f1:
 	move.b	(a0),d0                         	| [...]
 	cmp.b	#0x02,d0                         	| [$a8fd: cmpa   #$02]
 	jne	l_a92f                             	| [$a8ff: bne    $a92f]
-	OP_R_ON_DP_ADDRESS	move,0x3a,d1         | [$a901: ldb    $3a]
+	OP_R_ON_DP_ADDRESS	move,player_controls_3a,d1         | [$a901: ldb    $3a]
 	and.b	#0x03,d1                         	| [$a903: andb   #$03]
 	jne	l_a925                             	| [$a905: bne    $a925]
 	GET_REG_ADDRESS	0x11,d2                	| [$a907: tst    $11,x]
@@ -11145,7 +11132,7 @@ l_af3b:
 	jne	l_b015                             	| [$af3f: lbne   $b015]
 	OP_R_ON_DP_ADDRESS	move,0x3b,d0         | [$af43: lda    $3b]
 	COM	d0                                 	| [$af45: coma]
-	GET_DP_ADDRESS	0x3a                    	| [$af46: anda   $3a]
+	GET_DP_ADDRESS	player_controls_3a                    	| [$af46: anda   $3a]
 	and.b	(a0),d0                          	| [...]
 	BIT	#0x10,d0                           	| [$af48: bita   #$10]
 	jeq	l_b015                             	| [$af4a: lbeq   $b015]
@@ -11266,7 +11253,7 @@ l_afc3:
 l_b015:
 	rts                                    	| [$b015: rts]
 l_b016:
-	OP_R_ON_DP_ADDRESS	move,0x3a,d0         | [$b016: lda    $3a]
+	OP_R_ON_DP_ADDRESS	move,player_controls_3a,d0         | [$b016: lda    $3a]
 	BIT	#0x03,d0                           	| [$b018: bita   #$03]
 	jeq	l_b015                             	| [$b01a: beq    $b015]
 	BIT	#0x04,d0                           	| [$b01c: bita   #$04]
@@ -11316,7 +11303,7 @@ l_b057:
 	jne	l_b0aa                             	| [$b059: bne    $b0aa]
 	OP_R_ON_DP_ADDRESS	move,0x3b,d0         | [$b05b: lda    $3b]
 	COM	d0                                 	| [$b05d: coma]
-	GET_DP_ADDRESS	0x3a                    	| [$b05e: anda   $3a]
+	GET_DP_ADDRESS	player_controls_3a                    	| [$b05e: anda   $3a]
 	and.b	(a0),d0                          	| [...]
 	BIT	#0x20,d0                           	| [$b060: bita   #$20]
 	jeq	l_b0bd                             	| [$b062: beq    $b0bd]
@@ -11331,7 +11318,7 @@ l_b057:
 	jeq	l_b07e                             	| [$b06e: beq    $b07e]
 	cmp.b	#0x02,d1                         	| [$b070: cmpb   #$02]
 	jeq	l_b083                             	| [$b072: beq    $b083]
-	OP_R_ON_DP_ADDRESS	move,0x3a,d1         | [$b074: ldb    $3a]
+	OP_R_ON_DP_ADDRESS	move,player_controls_3a,d1         | [$b074: ldb    $3a]
 	BIT	#0x01,d1                           	| [$b076: bitb   #$01]
 	jne	l_b083                             	| [$b078: bne    $b083]
 	BIT	#0x02,d1                           	| [$b07a: bitb   #$02]
@@ -12223,7 +12210,7 @@ l_d4d2:
 	move.w	#0x0303,d1                      	| [$d501: ldd    #$0303]
 	jbsr	l_6008                            	| [$d504: jsr    $6008]
 	jbsr	l_6f2b                            	| [$d507: jsr    $6f2b]
-	OP_1_ON_DP_ADDRESS	clr,0x3d             | [$d50a: clr    $3d]
+	OP_1_ON_DP_ADDRESS	clr,command_length_3d             | [$d50a: clr    $3d]
 	move.w	#0xda61,d2                      	| [$d50c: ldx    #$da61]
 	GET_DP_ADDRESS	0x3e                    	| [$d50f: stx    $3e]
 	MOVE_W_FROM_REG	d2,a0                         	| [...]
@@ -12975,7 +12962,7 @@ l_dc82:
 	move.w	#0xd9f9,d2                      	| [$dc82: ldx    #$d9f9]
 	jbsr	l_d6da                            	| [$dc85: jsr    $d6da]
 	move.w	#player_state_51c0,d2           	| [$dc88: ldx    #player_state_51c0]
-	move.b	#0x3a,d0                        	| [$dc8b: ldd    #$3ab1]
+	move.b	#player_controls_3a,d0                        	| [$dc8b: ldd    #$3ab1]
 	move.w	#0x3ab1,d1                      	| [$dc8b: ldd    #$3ab1]
 	GET_REG_ADDRESS	0x4,d2                 	| [$dc8e: std    $4,x]
 	MOVE_W_FROM_REG	d1,a0                         	| [...]

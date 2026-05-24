@@ -808,6 +808,7 @@ demo_game:
 
 
 do_irq:
+	st.b	irq_sync_flag
 	* set base for RAM
 	jbsr	cpu_init
 	GET_MEMORY_START_AND_DP

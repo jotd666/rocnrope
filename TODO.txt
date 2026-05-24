@@ -1,4 +1,6 @@
-- demo version: character doesn't use the flash and dies at once
+- demo version: character doesn't use the flash and dies when trying
+  to kill caveman on the rope with flashlight. Timing is not right/random is
+  not right for the demo mode. Okay who cares?
 
  
 converter misses the optimization:
