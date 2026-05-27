@@ -1,6 +1,9 @@
-import subprocess,os,glob,shutil,pathlib
+import subprocess,os,glob,shutil,pathlib,zipfile
 
 progdir = pathlib.Path(__file__).parent.parent.absolute()
+
+# paraj lha from https://github.com/mras0/plha.git
+# gadf from https://github.com/sphair/gadf
 
 gamename = "rocnrope"
 # JOTD path for cranker, adapt to whatever your path is :)
@@ -44,3 +47,18 @@ cmd = ["lha","-r","a",arcname,"*"]
 
 subprocess.run(cmd,cwd=outdir.parent,check=True)
 
+# create floppy
+for ext in ["aga","ocs"]:
+    exename = f"{gamename}_{ext}"
+    shutil.move(progdir/f"{exename}.rnc",progdir/exename)
+
+shutil.copy(assets/"disk.info",progdir)
+adf_name = "RocNRope.adf"
+cmd = ["gadf","-i","rocnrope","-a",adf_name,"-l","RocNRope","rocnrope_aga","rocnrope_ocs","readme.md","disk.info"]
+subprocess.run(cmd,cwd=progdir)
+
+# create a .zip for the floppy
+
+with zipfile.ZipFile(progdir / "RocNRope_adf.zip",mode="w",compression=zipfile.ZIP_DEFLATED) as zf:
+    zf.write(progdir/adf_name,arcname=adf_name)
+os.remove(progdir/adf_name)
