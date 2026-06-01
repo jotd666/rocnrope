@@ -3094,6 +3094,13 @@ handle_keyboard:
     jbsr	toggle_pause
 0:
 
+	* last life, if killed, direct game over
+	cmp.b	#0x45,d0	| ESC key: lose all lives & die
+	bne.b	0f
+	* last life, if killed, direct game over
+	jbsr		lose_all_lives
+0:
+
 	btst	#4,cheat_flags+3
 	jeq		10f
 	* cheat keys
@@ -3130,12 +3137,6 @@ handle_keyboard:
 *	move.w	#0x0FF,_custom+color
 *0:
 *
-	* last life, if killed, direct game over
-	cmp.b	#0x45,d0	| ESC key: lose all lives & die
-	bne.b	0f
-	* last life, if killed, direct game over
-	jbsr		lose_all_lives
-0:
 
 10:
 	.ifndef	RELEASE
