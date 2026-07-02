@@ -51,7 +51,7 @@ $(AMIGASRC)/aga/graphics.68k $(AMIGASRC)/ocs/graphics.68k $(AMIGASRC)/aga/palett
 	cmd /c $(ASSETS)\convert_graphics.py
 
 
-$(AMIGASRC)/sounds.68k $(AMIGASRC)/sounds_ocs.68k: $(ASSETS)/convert_sounds.py 
+$(AMIGASRC)/sound_entries.68k $(AMIGASRC)/sounds.68k $(AMIGASRC)/sounds_ocs.68k: $(ASSETS)/convert_sounds.py 
 	cmd /c $(ASSETS)\convert_sounds.py
 	del sounds.o sounds_ocs.o
 	
