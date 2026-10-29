@@ -54,7 +54,7 @@ _config
 	ENDC
 
 DECL_VERSION:MACRO
-	dc.b	"1.0"
+	dc.b	"1.1"
 	IFD BARFLY
 		dc.b	" "
 		INCBIN	"T:date"
@@ -80,6 +80,11 @@ start:
 	LEA	_resload(PC),A1
 	MOVE.L	A0,(A1)
 	move.l	a0,a2
+
+	move.l	#WCPUF_Base_NC|WCPUF_Exp_CB|WCPUF_Slave_CB|WCPUF_IC|WCPUF_DC|WCPUF_BC|WCPUF_SS|WCPUF_SB,d0
+	move.l	#WCPUF_All,d1
+	move.l	(_resload,pc),a2
+	jsr		(resload_SetCPU,a2)
     
     IFD CHIP_ONLY
     lea  _expmem(pc),a0
